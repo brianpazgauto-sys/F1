@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<title>F1 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--red:#E10600;--red-dark:#9B0400;--bg:#0A0A0A;--surface:#141414;--surface2:#1E1E1E;--border:#2A2A2A;--text:#F0F0F0;--muted:#888;--gold:#FFD700;--silver:#C0C0C0;--bronze:#CD7F32;}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;overflow:hidden}
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px;background:var(--bg);border-bottom:1px solid var(--border);z-index:10}
+.logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;letter-spacing:2px;color:var(--red);text-transform:uppercase}
+.logo span{color:var(--text)}
+.round-badge{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:5px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--red);display:inline-block;animation:pulse 1.2s ease-in-out infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.ticker{background:var(--red);padding:5px 0;overflow:hidden;white-space:nowrap}
+.ticker-inner{display:inline-block;animation:ticker 35s linear infinite;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;color:#fff;text-transform:uppercase}
+@keyframes ticker{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
+.app{display:flex;flex-direction:column;height:calc(100vh - 90px)}
+
+/* GLOBE */
+.globe-container{position:relative;flex:0 0 240px;overflow:hidden;background:radial-gradient(ellipse at 50% 40%, #0d1b3e 0%, #04080f 100%);touch-action:none}
+#globe-canvas{width:100%;height:100%;display:block}
+.globe-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,var(--bg) 90%);height:50px;pointer-events:none;z-index:3}
+#globe-reset{position:absolute;top:8px;right:8px;z-index:20;background:rgba(10,10,10,0.92);border:1px solid var(--border);color:var(--muted);font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;display:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;-webkit-tap-highlight-color:transparent}
+#globe-reset.vis{display:block}
+
+/* POPUP */
+.cpopup{position:absolute;bottom:10px;left:10px;right:10px;background:rgba(16,16,16,0.97);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:none;z-index:20;align-items:center;gap:10px}
+.cpopup.show{display:flex}
+.pflag{font-size:22px}.pname{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1px}
+.pmeta{font-size:11px;color:var(--muted);margin-top:2px}
+.pclose{font-size:16px;color:var(--muted);cursor:pointer;padding:2px 6px;background:none;border:none;-webkit-tap-highlight-color:transparent}
+.pstatus{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;padding:2px 6px;border-radius:3px;text-transform:uppercase}
+.st-done{background:var(--border);color:var(--muted)}.st-current{background:var(--gold);color:#000}.st-upcoming{background:var(--surface2);color:var(--muted)}
+
+/* TABS */
+.tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border)}
+.tab-btn{flex:1;padding:10px 4px;border:none;background:none;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;color:var(--muted);cursor:pointer;text-transform:uppercase;border-bottom:2px solid transparent;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.tab-btn.active{color:var(--red);border-bottom-color:var(--red)}
+.panels{flex:1;overflow:hidden;position:relative}
+.panel{position:absolute;inset:0;overflow-y:auto;padding:12px;display:none;-webkit-overflow-scrolling:touch}
+.panel.active{display:block}
+.panel::-webkit-scrollbar{width:3px}.panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.stitle{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;margin-top:4px;display:flex;align-items:center;gap:8px}
+.stitle::after{content:'';flex:1;height:1px;background:var(--border)}
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:120px;gap:10px;color:var(--muted);font-size:13px}
+.spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-msg{background:rgba(225,6,0,0.1);border:1px solid var(--red-dark);border-radius:6px;padding:10px;font-size:12px;color:#ff6b6b;text-align:center;margin:8px 0}
+/* CALENDAR */
+.rcard{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:6px;background:var(--surface);margin-bottom:6px;border-left:3px solid var(--border);cursor:pointer}
+.rcard.done{opacity:0.65}.rcard.current{border-left-color:var(--gold);background:rgba(255,215,0,0.04)}
+.rcard.current .rname{color:var(--gold)}
+.rdate{min-width:36px;text-align:center;font-family:'Barlow Condensed',sans-serif}
+.rday{font-size:22px;font-weight:900;line-height:1}.rmonth{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+.rinfo{flex:1}.rround{font-size:10px;font-weight:600;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.rname{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;margin:1px 0}
+.rcircuit{font-size:11px;color:var(--muted)}.rflag{font-size:18px}
+.sbadge{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;background:rgba(225,6,0,0.15);color:var(--red);border:1px solid var(--red-dark);border-radius:3px;padding:1px 5px;text-transform:uppercase;margin-left:6px}
+.rresult{font-size:11px;margin-top:3px}.winner{color:var(--gold);font-weight:600}
+/* DRIVERS */
+.drow{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:6px;margin-bottom:4px;background:var(--surface);border-left:3px solid transparent;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.drow:active{background:var(--surface2)}
+.pos{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:var(--muted);min-width:22px;text-align:center}
+.pos.p1{color:var(--gold)}.pos.p2{color:var(--silver)}.pos.p3{color:var(--bronze)}
+.dname{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+.dteam{font-size:11px;color:var(--muted);margin-top:1px}
+.dpts{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900}
+.ptslbl{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:600;color:var(--muted);letter-spacing:1px;text-align:right;margin-top:1px}
+.ptsbar{height:3px;border-radius:2px;margin-top:4px;background:var(--border);width:60px}
+.ptsbarfill{height:100%;border-radius:2px}
+/* DRIVER MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100;display:none;align-items:flex-end}
+.modal-bg.show{display:flex}
+.modal{background:var(--surface);border-radius:16px 16px 0 0;width:100%;max-height:88vh;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch}
+.modal-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.modal-flag{font-size:38px}
+.modal-dname{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:1px}
+.modal-team{font-size:12px;margin-top:2px}
+.modal-close{margin-left:auto;font-size:20px;color:var(--muted);background:none;border:none;cursor:pointer;padding:4px 8px;-webkit-tap-highlight-color:transparent}
+.modal-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.mstat{background:var(--surface2);border-radius:8px;padding:10px;text-align:center}
+.mstat-val{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900}
+.mstat-lbl{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.season-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.race-hist{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:6px;margin-bottom:4px}
+.rh-round{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:var(--muted);min-width:28px}
+.rh-name{flex:1;font-size:12px}
+.rh-pos{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;min-width:32px;text-align:right}
+.rh-pts{font-size:10px;color:var(--muted);min-width:36px;text-align:right}
+/* TEAMS */
+.team-card{background:var(--surface);border-radius:8px;margin-bottom:8px;overflow:hidden;border-left:3px solid transparent}
+.team-header{display:flex;align-items:center;gap:10px;padding:12px 12px 8px}
+.team-pos{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--muted);min-width:26px}
+.team-pos.p1{color:var(--gold)}.team-pos.p2{color:var(--silver)}.team-pos.p3{color:var(--bronze)}
+.team-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.team-name{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;text-transform:uppercase;flex:1}
+.team-pts-big{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900}
+.team-pts-lbl{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.ptsbar2{height:3px;background:var(--border);margin:0 12px 10px}
+.ptsbar2fill{height:100%;border-radius:2px}
+.team-drivers-row{display:flex;gap:6px;padding:0 12px 12px}
+.driver-chip{flex:1;background:var(--surface2);border-radius:6px;padding:8px 10px}
+.dc-flag{font-size:15px}.dc-name{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;margin-top:2px;line-height:1.2}
+.dc-pts{font-size:11px;color:var(--muted);margin-top:2px}
+/* CIRCUITS */
+.csel{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;appearance:none;margin-bottom:12px}
+.cdetail{background:var(--surface);border-radius:8px;padding:14px;margin-bottom:8px}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sbox{background:var(--surface2);border-radius:6px;padding:8px 10px}
+.slabel{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.sval{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:900;margin-top:2px}
+.api-badge{font-size:10px;color:var(--muted);text-align:right;margin-bottom:6px;font-style:italic}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">F1 <span>2026</span></div>
+  <div class="round-badge"><span class="live-dot"></span><span id="header-round">Cargando...</span></div>
+</div>
+<div class="ticker"><span class="ticker-inner" id="ticker-text">⏳ Cargando datos en tiempo real...</span></div>
+
+<div class="app">
+  <div class="globe-container" id="globe-container">
+    <canvas id="globe-canvas"></canvas>
+    <div class="globe-overlay"></div>
+    <button id="globe-reset" onclick="resetGlobe()">✕ RESET</button>
+    <div class="cpopup" id="cpopup">
+      <div class="pflag" id="pflag">🏁</div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="pname" id="pname"></div>
+          <div class="pstatus" id="pstatus"></div>
+        </div>
+        <div class="pmeta" id="pmeta"></div>
+      </div>
+      <button class="pclose" onclick="closePopup()">✕</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="cal" onclick="switchTab(this,'cal')">📅 Cal</button>
+    <button class="tab-btn" data-tab="drv" onclick="switchTab(this,'drv')">🏆 Drivers</button>
+    <button class="tab-btn" data-tab="con" onclick="switchTab(this,'con')">🔧 Teams</button>
+    <button class="tab-btn" data-tab="cir" onclick="switchTab(this,'cir')">🏎 Circuits</button>
+  </div>
+  <div class="panels">
+    <div class="panel active" id="panel-cal"><div class="loading"><div class="spinner"></div>Cargando calendario...</div></div>
+    <div class="panel" id="panel-drv"><div class="loading"><div class="spinner"></div>Cargando standings...</div></div>
+    <div class="panel" id="panel-con"><div class="loading"><div class="spinner"></div>Cargando constructores...</div></div>
+    <div class="panel" id="panel-cir"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="dmodal" onclick="closeModal(event)">
+  <div class="modal" id="dmodal-inner"></div>
+</div>
+
+<!-- Three.js desde cdnjs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ============================================================
+// GLOBE 3D
+// ============================================================
+let scene, camera, renderer, globe, atmosfera, pinGroup;
+let isDragging = false, prevMouse = {x:0,y:0};
+let rotVel = {x:0, y:0};   // velocidad de rotación por inercia
+let targetQuat = null;       // cuaternión destino para animación
+let isAnimating = false;
+let globeZoomed = false;
+const GLOBE_R = 1.0;
+const BASE_CAM_Z = 2.6;
+const ZOOM_CAM_Z = 1.65;
+
+function initGlobe() {
+  const container = document.getElementById('globe-container');
+  const W = container.clientWidth, H = container.clientHeight;
+
+  // Scene
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(45, W/H, 0.1, 100);
+  camera.position.z = BASE_CAM_Z;
+
+  renderer = new THREE.WebGLRenderer({canvas: document.getElementById('globe-canvas'), antialias: true, alpha: true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(W, H);
+  renderer.setClearColor(0x000000, 0);
+
+  // Estrellas
+  const starGeo = new THREE.BufferGeometry();
+  const starPts = [];
+  for (let i = 0; i < 1800; i++) {
+    const v = new THREE.Vector3().randomDirection().multiplyScalar(30 + Math.random()*20);
+    starPts.push(v.x, v.y, v.z);
+  }
+  starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPts, 3));
+  scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({color:0xffffff, size:0.08, transparent:true, opacity:0.6})));
+
+  // Iluminación
+  scene.add(new THREE.AmbientLight(0x334466, 0.8));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.1);
+  sun.position.set(5, 3, 5);
+  scene.add(sun);
+  const fill = new THREE.DirectionalLight(0x2244aa, 0.3);
+  fill.position.set(-5, -2, -3);
+  scene.add(fill);
+
+  // Globo base (océano oscuro)
+  const geo = new THREE.SphereGeometry(GLOBE_R, 64, 64);
+  const oceanMat = new THREE.MeshPhongMaterial({color:0x0a1a3a, shininess:60, specular:0x223366});
+  globe = new THREE.Mesh(geo, oceanMat);
+  scene.add(globe);
+
+  // Países dibujados sobre la esfera como líneas
+  drawCountriesOnGlobe();
+
+  // Atmósfera glow
+  const atmGeo = new THREE.SphereGeometry(GLOBE_R * 1.04, 32, 32);
+  const atmMat = new THREE.MeshPhongMaterial({
+    color: 0x4488ff, transparent: true, opacity: 0.07,
+    side: THREE.FrontSide, depthWrite: false
+  });
+  atmosfera = new THREE.Mesh(atmGeo, atmMat);
+  scene.add(atmosfera);
+
+  // Grupo de pines
+  pinGroup = new THREE.Group();
+  globe.add(pinGroup);
+
+  // Posición inicial: centrada en Europa/Atlántico
+  globe.rotation.y = -0.3;
+  globe.rotation.x = 0.15;
+
+  // Interacción
+  setupGlobeInteraction();
+
+  // Loop
+  animate();
+}
+
+// ── Convertir lat/lng a XYZ en la esfera
+function latLngToVec3(lat, lng, r) {
+  const phi   = (90 - lat) * Math.PI / 180;
+  const theta = (lng + 180) * Math.PI / 180;
+  return new THREE.Vector3(
+    -r * Math.sin(phi) * Math.cos(theta),
+     r * Math.cos(phi),
+     r * Math.sin(phi) * Math.sin(theta)
+  );
+}
+
+// ── Dibujar países como líneas sobre la esfera
+function drawCountriesOnGlobe() {
+  // Usamos los paths SVG pre-generados + proyección inversa Mercator → lat/lng → 3D
+  // Pero más eficiente: dibujar graticule + continentes con canvas texture
+  buildGlobeTexture();
+}
+
+function buildGlobeTexture() {
+  // Crear textura del globo con canvas 2D
+  const TW = 2048, TH = 1024;
+  const cv = document.createElement('canvas');
+  cv.width = TW; cv.height = TH;
+  const ctx = cv.getContext('2d');
+
+  // Océano
+  const oceanGrad = ctx.createLinearGradient(0, 0, 0, TH);
+  oceanGrad.addColorStop(0, '#0d1f40');
+  oceanGrad.addColorStop(0.5, '#091628');
+  oceanGrad.addColorStop(1, '#060e1a');
+  ctx.fillStyle = oceanGrad;
+  ctx.fillRect(0, 0, TW, TH);
+
+  // Graticule
+  ctx.strokeStyle = 'rgba(80,120,200,0.12)';
+  ctx.lineWidth = 0.8;
+  for (let lat = -80; lat <= 80; lat += 30) {
+    const y = (90 - lat) / 180 * TH;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(TW, y); ctx.stroke();
+  }
+  for (let lng = -180; lng <= 180; lng += 30) {
+    const x = (lng + 180) / 360 * TW;
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, TH); ctx.stroke();
+  }
+  // Ecuador más visible
+  ctx.strokeStyle = 'rgba(80,120,200,0.25)';
+  ctx.lineWidth = 1.2;
+  const eqY = TH / 2;
+  ctx.beginPath(); ctx.moveTo(0, eqY); ctx.lineTo(TW, eqY); ctx.stroke();
+
+  // Países desde SVG paths (proyección Mercator → equirectangular en canvas)
+  // Parsear los SVG paths y dibujarlos re-proyectados
+  drawCountriesOnCanvas(ctx, TW, TH);
+
+  // Aplicar como textura al globo
+  const texture = new THREE.CanvasTexture(cv);
+  globe.material = new THREE.MeshPhongMaterial({
+    map: texture,
+    shininess: 35,
+    specular: new THREE.Color(0x1a2244),
+  });
+}
+
+function drawCountriesOnCanvas(ctx, TW, TH) {
+  // Los SVG paths están en proyección Mercator con MAP_W=800, MAP_H=370
+  // Necesitamos convertir a coordenadas equirectangulares (lat/lng lineales)
+  const SVG_W = 800, SVG_H = 370;
+
+  // Función inversa: SVG xy → lat/lng
+  function svgToLatLng(sx, sy) {
+    const lng = (sx / SVG_W) * 360 - 180;
+    // Mercator Y: y = H/2 - (ln(tan(π/4 + φ/2))/π) * H*0.82
+    const yNorm = (SVG_H/2 - sy) / (SVG_H * 0.82);
+    const lat = (Math.atan(Math.sinh(yNorm * Math.PI)) * 180) / Math.PI;
+    return [lat, lng];
+  }
+
+  // Convertir lat/lng → canvas equirectangular
+  function latLngToCanvas(lat, lng) {
+    const x = (lng + 180) / 360 * TW;
+    const y = (90 - lat) / 180 * TH;
+    return [x, y];
+  }
+
+  // Parsear el SVG path string y dibujar en canvas
+  const pathStr = COUNTRY_SVG_PATHS;
+
+  // Extraer cada path
+  const pathRegex = /d="([^"]+)"/g;
+  let match;
+  ctx.fillStyle = 'rgba(22, 45, 80, 0.95)';
+  ctx.strokeStyle = 'rgba(40, 80, 140, 0.7)';
+  ctx.lineWidth = 0.5;
+
+  while ((match = pathRegex.exec(pathStr)) !== null) {
+    const d = match[1];
+    const cmds = d.match(/[ML][^ML]*/g);
+    if (!cmds) continue;
+    ctx.beginPath();
+    let firstPoint = true;
+    for (const cmd of cmds) {
+      if (cmd === 'Z' || cmd === 'z') { ctx.closePath(); continue; }
+      const type = cmd[0];
+      // Parsear pares de coordenadas
+      const nums = cmd.slice(1).trim().split(/[, ]+/).map(Number);
+      for (let i = 0; i < nums.length - 1; i += 2) {
+        const [lat, lng] = svgToLatLng(nums[i], nums[i+1]);
+        const [cx, cy] = latLngToCanvas(lat, lng);
+        if (i === 0) {
+          if (type === 'M') ctx.moveTo(cx, cy);
+          else ctx.lineTo(cx, cy);
+        } else {
+          ctx.lineTo(cx, cy);
+        }
+      }
+    }
+    ctx.fill();
+    ctx.stroke();
+  }
+}
+
+// ── Pines 3D
+function addPins(races) {
+  pinGroup.clear();
+  races.forEach((race, idx) => {
+    if (!race.lat && !race.lng) return;
+    const pos = latLngToVec3(race.lat, race.lng, GLOBE_R + 0.015);
+
+    // Esfera del pin
+    const r = race.status === 'current' ? 0.028 : 0.020;
+    const color = race.status === 'done' ? 0x555555
+                : race.status === 'current' ? 0xFFD700
+                : 0xE10600;
+    const pinGeo = new THREE.SphereGeometry(r, 8, 8);
+    const pinMat = new THREE.MeshPhongMaterial({color, emissive: color, emissiveIntensity: race.status==='current' ? 0.6 : 0.2});
+    const pin = new THREE.Mesh(pinGeo, pinMat);
+    pin.position.copy(pos);
+    pin.userData = {raceIdx: idx, race};
+
+    // Halo para el pin actual
+    if (race.status === 'current') {
+      const haloGeo = new THREE.SphereGeometry(0.048, 8, 8);
+      const haloMat = new THREE.MeshPhongMaterial({color:0xFFD700, transparent:true, opacity:0.25, emissive:0xFFD700, emissiveIntensity:0.3});
+      const halo = new THREE.Mesh(haloGeo, haloMat);
+      halo.position.copy(pos);
+      halo.userData = {isHalo: true};
+      pinGroup.add(halo);
+    }
+
+    pinGroup.add(pin);
+  });
+}
+
+// ── Animación
+let haloPhase = 0;
+function animate() {
+  requestAnimationFrame(animate);
+  haloPhase += 0.04;
+
+  // Inercia de rotación
+  if (!isDragging && !isAnimating && (Math.abs(rotVel.x) > 0.0001 || Math.abs(rotVel.y) > 0.0001)) {
+    globe.rotation.x += rotVel.x;
+    globe.rotation.y += rotVel.y;
+    rotVel.x *= 0.92;
+    rotVel.y *= 0.92;
+  }
+
+  // Animación hacia destino
+  if (isAnimating && targetQuat) {
+    globe.quaternion.slerp(targetQuat, 0.06);
+    if (globe.quaternion.angleTo(targetQuat) < 0.005) {
+      globe.quaternion.copy(targetQuat);
+      isAnimating = false;
+    }
+    // Zoom cámara
+    const targetZ = globeZoomed ? ZOOM_CAM_Z : BASE_CAM_Z;
+    camera.position.z += (targetZ - camera.position.z) * 0.06;
+  }
+
+  // Pulso del halo
+  pinGroup.children.forEach(m => {
+    if (m.userData.isHalo) {
+      m.scale.setScalar(1 + 0.25 * Math.sin(haloPhase));
+      m.material.opacity = 0.15 + 0.15 * Math.sin(haloPhase);
+    }
+  });
+
+  // Atmósfera
+  if (atmosfera) {
+    atmosfera.quaternion.copy(globe.quaternion).invert();
+  }
+
+  renderer.render(scene, camera);
+}
+
+// ── Girar globo para centrar lat/lng
+function rotateGlobeTo(lat, lng) {
+  // Queremos que el punto (lat,lng) quede mirando hacia la cámara (eje +Z)
+  // Calculamos la rotación necesaria
+  const phi   = (90 - lat) * Math.PI / 180;
+  const theta = (lng + 180) * Math.PI / 180;
+
+  // Eje Y: rotación para centrar longitud
+  const rotY = -theta + Math.PI;
+  // Eje X: rotación para centrar latitud
+  const rotX = phi - Math.PI / 2;
+
+  const q = new THREE.Quaternion();
+  const ex = new THREE.Euler(rotX, rotY, 0, 'YXZ');
+  q.setFromEuler(ex);
+  targetQuat = q;
+  isAnimating = true;
+  globeZoomed = true;
+  document.getElementById('globe-reset').classList.add('vis');
+}
+
+function resetGlobe() {
+  targetQuat = new THREE.Quaternion(); // identidad
+  const ex = new THREE.Euler(0.15, -0.3, 0, 'YXZ');
+  targetQuat.setFromEuler(ex);
+  isAnimating = true;
+  globeZoomed = false;
+  document.getElementById('globe-reset').classList.remove('vis');
+  closePopup();
+}
+
+// ── Raycasting para clicks en pines
+const raycaster = new THREE.Raycaster();
+const mouse2D = new THREE.Vector2();
+
+function getCanvasPos(e, canvas) {
+  const rect = canvas.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  return {
+    x: ((clientX - rect.left) / rect.width) * 2 - 1,
+    y: -((clientY - rect.top) / rect.height) * 2 + 1
+  };
+}
+
+function checkPinClick(e) {
+  const cv = renderer.domElement;
+  const pos = getCanvasPos(e, cv);
+  mouse2D.set(pos.x, pos.y);
+  raycaster.setFromCamera(mouse2D, camera);
+  const meshes = pinGroup.children.filter(m => !m.userData.isHalo);
+  const hits = raycaster.intersectObjects(meshes);
+  if (hits.length > 0) {
+    const race = hits[0].object.userData.race;
+    if (race) {
+      showPopup(race);
+      rotateGlobeTo(race.lat, race.lng);
+      return true;
+    }
+  }
+  return false;
+}
+
+function setupGlobeInteraction() {
+  const cv = renderer.domElement;
+  let startPos = null;
+  let moved = false;
+
+  cv.addEventListener('mousedown', e => {
+    isDragging = true; moved = false;
+    prevMouse = {x: e.clientX, y: e.clientY};
+    startPos = {x: e.clientX, y: e.clientY};
+    rotVel = {x:0, y:0};
+    isAnimating = false;
+  });
+  cv.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const dx = e.clientX - prevMouse.x;
+    const dy = e.clientY - prevMouse.y;
+    if (Math.abs(dx) + Math.abs(dy) > 2) moved = true;
+    rotVel.y = dx * 0.004;
+    rotVel.x = dy * 0.004;
+    globe.rotation.y += rotVel.y;
+    globe.rotation.x += rotVel.x;
+    globe.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, globe.rotation.x));
+    prevMouse = {x: e.clientX, y: e.clientY};
+  });
+  cv.addEventListener('mouseup', e => {
+    isDragging = false;
+    if (!moved) checkPinClick(e);
+  });
+
+  // Touch
+  let touchStart = null;
+  cv.addEventListener('touchstart', e => {
+    if (e.touches.length === 1) {
+      isDragging = true; moved = false;
+      prevMouse = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+      touchStart = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+      rotVel = {x:0, y:0}; isAnimating = false;
+    }
+  }, {passive:true});
+  cv.addEventListener('touchmove', e => {
+    if (!isDragging || e.touches.length !== 1) return;
+    const dx = e.touches[0].clientX - prevMouse.x;
+    const dy = e.touches[0].clientY - prevMouse.y;
+    if (Math.abs(dx)+Math.abs(dy) > 3) moved = true;
+    rotVel.y = dx * 0.005;
+    rotVel.x = dy * 0.005;
+    globe.rotation.y += rotVel.y;
+    globe.rotation.x += rotVel.x;
+    globe.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, globe.rotation.x));
+    prevMouse = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+  }, {passive:true});
+  cv.addEventListener('touchend', e => {
+    isDragging = false;
+    if (!moved && touchStart) {
+      const fakeEv = {clientX: touchStart.x, clientY: touchStart.y};
+      checkPinClick(fakeEv);
+    }
+  });
+}
+
+// ── Resize
+window.addEventListener('resize', () => {
+  const c = document.getElementById('globe-container');
+  camera.aspect = c.clientWidth / c.clientHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(c.clientWidth, c.clientHeight);
+});
+
+// ============================================================
+// API DATA
+// ============================================================
+const API = 'https://api.jolpi.ca/ergast/f1';
+const YEAR = 2026;
+
+const TEAM_COLORS = {
+  'mercedes':'#00D2BE','ferrari':'#DC143C','mclaren':'#FF8700',
+  'red_bull':'#3671C6','alpine':'#FF87BC','racing_bulls':'#6692FF',
+  'haas':'#B6BABD','williams':'#64C4FF','aston_martin':'#358C75',
+  'cadillac':'#5a5a5a','audi':'#BB0000','kick_sauber':'#52E252',
+};
+const NAT_FLAGS = {
+  'Italian':'🇮🇹','British':'🇬🇧','Monegasque':'🇲🇨','Australian':'🇦🇺',
+  'Dutch':'🇳🇱','French':'🇫🇷','New Zealander':'🇳🇿','Spanish':'🇪🇸',
+  'German':'🇩🇪','Finnish':'🇫🇮','Thai':'🇹🇭','Mexican':'🇲🇽',
+  'Canadian':'🇨🇦','Brazilian':'🇧🇷','Argentine':'🇦🇷','American':'🇺🇸',
+  'Chinese':'🇨🇳','Japanese':'🇯🇵','Danish':'🇩🇰','Swedish':'🇸🇪',
+  'Austrian':'🇦🇹','Belgian':'🇧🇪',
+};
+const RACE_EXTRA = {
+  1:{flag:'🇦🇺',lat:-37.84,lng:144.97},2:{flag:'🇨🇳',lat:31.34,lng:121.22},
+  3:{flag:'🇯🇵',lat:34.84,lng:136.54},4:{flag:'🇧🇭',lat:26.03,lng:50.51},
+  5:{flag:'🇸🇦',lat:21.63,lng:39.10},6:{flag:'🇲🇨',lat:43.73,lng:7.42},
+  7:{flag:'🇪🇸',lat:41.57,lng:2.26},8:{flag:'🇦🇹',lat:47.22,lng:14.76},
+  9:{flag:'🇬🇧',lat:52.07,lng:-1.02},10:{flag:'🇧🇪',lat:50.44,lng:5.97},
+  11:{flag:'🇭🇺',lat:47.58,lng:19.25},12:{flag:'🇳🇱',lat:52.39,lng:4.54},
+  13:{flag:'🇮🇹',lat:45.62,lng:9.28},14:{flag:'🇪🇸',lat:40.42,lng:-3.68},
+  15:{flag:'🇦🇿',lat:40.37,lng:49.85},16:{flag:'🇸🇬',lat:1.29,lng:103.86},
+  17:{flag:'🇺🇸',lat:30.13,lng:-97.64},18:{flag:'🇲🇽',lat:19.40,lng:-99.09},
+  19:{flag:'🇧🇷',lat:-23.70,lng:-46.70},20:{flag:'🇺🇸',lat:36.10,lng:-115.17},
+  21:{flag:'🇶🇦',lat:25.49,lng:51.45},22:{flag:'🇦🇪',lat:24.47,lng:54.60},
+};
+const CIRCUITS = {
+  'albert_park':{name:'Albert Park',flag:'🇦🇺',city:'Melbourne · Australia',laps:58,len:'5.278 km',record:'1:19.813 (Russell, 2026)',tipo:'Semi-urbano',curvas:14,nota:'Apertura de temporada desde 1996'},
+  'shanghai':{name:'Shanghai International Circuit',flag:'🇨🇳',city:'Shanghai · China',laps:56,len:'5.451 km',record:'1:32.238 (Antonelli, 2026)',tipo:'Permanente',curvas:16,nota:'Regresó al calendario en 2024 tras 5 años'},
+  'suzuka':{name:'Suzuka Circuit',flag:'🇯🇵',city:'Suzuka · Japón',laps:53,len:'5.807 km',record:'1:30.983 (Hamilton, 2019)',tipo:'Permanente',curvas:18,nota:'Único circuito con forma de 8 en el calendario'},
+  'bahrain':{name:'Bahrain International Circuit',flag:'🇧🇭',city:'Sakhir · Bahrain',laps:57,len:'5.412 km',record:'1:31.447 (De la Rosa, 2005)',tipo:'Permanente',curvas:15,nota:'Primera carrera nocturna de F1 (2014)'},
+  'jeddah':{name:'Jeddah Corniche Circuit',flag:'🇸🇦',city:'Jeddah · Arabia Saudita',laps:50,len:'6.174 km',record:'1:27.511 (Leclerc, 2022)',tipo:'Urbano',curvas:27,nota:'Uno de los circuitos más rápidos del calendario'},
+  'monaco':{name:'Circuit de Monaco',flag:'🇲🇨',city:'Monte Carlo · Mónaco',laps:78,len:'3.337 km',record:'1:12.909 (Leclerc, 2021)',tipo:'Urbano',curvas:19,nota:'La joya de la corona del calendario'},
+  'catalunya':{name:'Circuit de Barcelona-Catalunya',flag:'🇪🇸',city:'Barcelona · España',laps:66,len:'4.675 km',record:'1:18.149 (Verstappen, 2021)',tipo:'Permanente',curvas:14,nota:'Circuito de test favorito de los equipos'},
+  'red_bull_ring':{name:'Red Bull Ring',flag:'🇦🇹',city:'Spielberg · Austria',laps:71,len:'4.318 km',record:'1:05.619 (Sainz, 2020)',tipo:'Permanente',curvas:10,nota:'Uno de los más cortos del calendario'},
+  'silverstone':{name:'Silverstone Circuit',flag:'🇬🇧',city:'Silverstone · Reino Unido',laps:52,len:'5.891 km',record:'1:27.097 (Hamilton, 2020)',tipo:'Permanente',curvas:18,nota:'Sede del primer GP de la historia (1950)'},
+  'spa':{name:'Circuit de Spa-Francorchamps',flag:'🇧🇪',city:'Spa · Bélgica',laps:44,len:'7.004 km',record:'1:41.252 (Bottas, 2018)',tipo:'Permanente',curvas:20,nota:'El circuito clásico favorito de los pilotos'},
+  'hungaroring':{name:'Hungaroring',flag:'🇭🇺',city:'Budapest · Hungría',laps:70,len:'4.381 km',record:'1:16.627 (Hamilton, 2020)',tipo:'Permanente',curvas:14,nota:"'Monaco sin muros': pocas escapatorias"},
+  'zandvoort':{name:'Circuit Zandvoort',flag:'🇳🇱',city:'Zandvoort · Países Bajos',laps:72,len:'4.259 km',record:'1:11.097 (Verstappen, 2021)',tipo:'Permanente',curvas:14,nota:'Home race de Verstappen, curvas peraltadas únicas'},
+  'monza':{name:'Autodromo Nazionale di Monza',flag:'🇮🇹',city:'Monza · Italia',laps:53,len:'5.793 km',record:'1:21.046 (Barrichello, 2004)',tipo:'Permanente',curvas:11,nota:'El templo de la velocidad, el más rápido del calendario'},
+  'madrid':{name:'Circuito de Madrid',flag:'🇪🇸',city:'Madrid · España',laps:55,len:'5.476 km',record:'—',tipo:'Permanente',curvas:20,nota:'Nueva incorporación al calendario en 2026'},
+  'baku':{name:'Baku City Circuit',flag:'🇦🇿',city:'Bakú · Azerbaiyán',laps:51,len:'6.003 km',record:'1:41.218 (Leclerc, 2019)',tipo:'Urbano',curvas:20,nota:'La recta más larga: 2.2 km a orillas del Caspio'},
+  'marina_bay':{name:'Marina Bay Street Circuit',flag:'🇸🇬',city:'Marina Bay · Singapur',laps:62,len:'4.940 km',record:'1:35.867 (Hamilton, 2023)',tipo:'Urbano',curvas:19,nota:'Primera carrera nocturna de F1 (2008)'},
+  'americas':{name:'Circuit of the Americas',flag:'🇺🇸',city:'Austin · EE.UU.',laps:56,len:'5.513 km',record:'1:36.169 (Hamilton, 2019)',tipo:'Permanente',curvas:20,nota:'Diseñado por Hermann Tilke'},
+  'rodriguez':{name:'Autódromo Hermanos Rodríguez',flag:'🇲🇽',city:'Cd. de México · México',laps:71,len:'4.304 km',record:'1:17.774 (Verstappen, 2021)',tipo:'Permanente',curvas:17,nota:'A 2200m de altitud, el motor rinde menos'},
+  'interlagos':{name:'Autódromo José Carlos Pace',flag:'🇧🇷',city:'São Paulo · Brasil',laps:71,len:'4.309 km',record:'1:10.540 (Räikkönen, 2004)',tipo:'Permanente',curvas:15,nota:'Clásico de la F1, sede de duelos históricos'},
+  'las_vegas':{name:'Las Vegas Strip Circuit',flag:'🇺🇸',city:'Las Vegas · EE.UU.',laps:50,len:'6.201 km',record:'1:35.490 (Leclerc, 2023)',tipo:'Urbano',curvas:17,nota:'El espectáculo nocturno del Strip de Vegas'},
+  'losail':{name:'Losail International Circuit',flag:'🇶🇦',city:'Losail · Qatar',laps:57,len:'5.380 km',record:'1:24.319 (Russell, 2023)',tipo:'Permanente',curvas:16,nota:'El calor extremo es el mayor desafío'},
+  'yas_marina':{name:'Yas Marina Circuit',flag:'🇦🇪',city:'Yas Marina · Abu Dhabi',laps:55,len:'5.554 km',record:'1:26.103 (Sainz, 2021)',tipo:'Permanente',curvas:16,nota:'Final de temporada desde 2009'},
+};
+const CIRCUIT_KEYS = [
+  'albert_park','shanghai','suzuka','bahrain','jeddah','monaco','catalunya',
+  'red_bull_ring','silverstone','spa','hungaroring','zandvoort','monza',
+  'madrid','baku','marina_bay','americas','rodriguez','interlagos',
+  'las_vegas','losail','yas_marina'
+];
+
+let allRaces=[], driverStandings=[], constructorStandings=[], driverResults={}, currentRound=0;
+
+function getTeamColor(id){return TEAM_COLORS[id]||'#666';}
+function getFlag(nat){return NAT_FLAGS[nat]||'🏁';}
+
+async function fetchJSON(url){
+  const r=await fetch(url); if(!r.ok) throw new Error('HTTP '+r.status); return r.json();
+}
+
+async function loadAll(){
+  try {
+    const [schedData, drvData, conData, resData] = await Promise.all([
+      fetchJSON(`${API}/${YEAR}/races.json?limit=30`),
+      fetchJSON(`${API}/${YEAR}/driverStandings.json`),
+      fetchJSON(`${API}/${YEAR}/constructorStandings.json`),
+      fetchJSON(`${API}/${YEAR}/results.json?limit=500`),
+    ]);
+
+    driverStandings = drvData.MRData.StandingsTable.StandingsLists[0]?.DriverStandings || [];
+    constructorStandings = conData.MRData.StandingsTable.StandingsLists[0]?.ConstructorStandings || [];
+
+    const allResults = resData.MRData.RaceTable.Races;
+    driverResults = {};
+    allResults.forEach(race => {
+      const rnd = parseInt(race.round);
+      const ex = RACE_EXTRA[rnd] || {};
+      race.Results.forEach(r => {
+        const did = r.Driver.driverId;
+        if (!driverResults[did]) driverResults[did] = [];
+        const pos = (r.status==='Finished'||r.status.startsWith('+')) ? parseInt(r.position) : null;
+        driverResults[did].push({round:rnd, raceName:race.raceName.replace('Grand Prix','GP'),
+          raceFlag:ex.flag||'🏁', pos, status:r.status, pts:parseFloat(r.points)});
+      });
+    });
+
+    const today = new Date();
+    allRaces = schedData.MRData.RaceTable.Races.map(r => {
+      const rnd = parseInt(r.round);
+      const ex = RACE_EXTRA[rnd] || {};
+      const cKey = CIRCUIT_KEYS[rnd-1] || '';
+      const cInfo = CIRCUITS[cKey] || {};
+      const hasResult = allResults.find(x=>x.round===r.round);
+      let status = hasResult ? 'done' : 'upcoming';
+      const raceDate = new Date(r.date+'T'+(r.time||'12:00:00'));
+      if (!hasResult && raceDate <= new Date(today.getTime()+3*24*60*60*1000)) status='current';
+      if (status==='done'||status==='current') currentRound=rnd;
+      const top = hasResult ? hasResult.Results.slice(0,3) : null;
+      return {round:rnd, raceName:r.raceName, circuit:r.Circuit.circuitName,
+        city:r.Circuit.Location.locality, country:r.Circuit.Location.country,
+        date:r.date, sprint:!!r.Sprint, status, flag:ex.flag||'🏁',
+        lat:ex.lat||0, lng:ex.lng||0,
+        p1:top?top[0]?.Driver.familyName:null,
+        p2:top?top[1]?.Driver.familyName:null,
+        p3:top?top[2]?.Driver.familyName:null,
+        circuitInfo:cInfo};
+    });
+
+    const next = allRaces.find(r=>r.status==='upcoming'||r.status==='current');
+    if (next) {
+      const s=next.raceName.replace('Formula 1 ','').replace(' Grand Prix','').replace('Grand Prix','').trim();
+      document.getElementById('header-round').textContent=`R${next.round} · ${s}`;
+    }
+
+    updateTicker();
+    addPins(allRaces);
+    renderRaces();
+    renderDrivers();
+    renderTeams();
+
+  } catch(e) {
+    console.error(e);
+    ['panel-cal','panel-drv','panel-con'].forEach(id=>{
+      document.getElementById(id).innerHTML='<div class="error-msg">⚠️ No se pudo cargar la API de F1.<br>Verificá tu conexión a internet.</div>';
+    });
+  }
+}
+
+function updateTicker(){
+  const l=driverStandings[0], p2=driverStandings[1], p3=driverStandings[2];
+  const next=allRaces.find(r=>r.status==='upcoming'||r.status==='current');
+  let t='';
+  if(l) t+=`🏆 ${l.Driver.familyName} LIDERA · ${l.points} PTS &nbsp;·&nbsp; `;
+  if(p2) t+=`${p2.Driver.familyName} P2 (${p2.points} PTS) &nbsp;·&nbsp; `;
+  if(p3) t+=`${p3.Driver.familyName} P3 (${p3.points} PTS) &nbsp;·&nbsp; `;
+  if(next){const d=new Date(next.date);const mo=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];t+=`📅 PRÓXIMA: ${next.flag} ${next.raceName.replace('Formula 1 ','').replace(' Grand Prix','').trim()} · ${d.getDate()} ${mo[d.getMonth()]} &nbsp;·&nbsp; `;}
+  const col=driverStandings.find(d=>d.Driver.driverId==='colapinto');
+  if(col) t+=`🇦🇷 COLAPINTO P${col.position} · ${col.points} PTS &nbsp;·&nbsp; `;
+  t+='NUEVA ERA: HÍBRIDOS 50/50 &nbsp;·&nbsp;';
+  document.getElementById('ticker-text').innerHTML=t;
+}
+
+function showPopup(race){
+  document.getElementById('pflag').textContent=race.flag||'🏁';
+  document.getElementById('pname').textContent=race.circuit||race.raceName;
+  const sm={done:'Finalizado',current:'EN CURSO',upcoming:'Próximo'};
+  const sc={done:'st-done',current:'st-current',upcoming:'st-upcoming'};
+  const ps=document.getElementById('pstatus');
+  ps.textContent=sm[race.status]; ps.className='pstatus '+sc[race.status];
+  const d=new Date(race.date);
+  const mo=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  let meta=`R${race.round} · ${d.getDate()} ${mo[d.getMonth()]} · ${race.city}`;
+  if(race.p1) meta+=` · 🏆 ${race.p1}`;
+  document.getElementById('pmeta').textContent=meta;
+  document.getElementById('cpopup').classList.add('show');
+}
+function closePopup(){document.getElementById('cpopup').classList.remove('show');}
+
+function switchTab(btn,tab){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active'); document.getElementById('panel-'+tab).classList.add('active');
+}
+
+function renderRaces(){
+  const c=document.getElementById('panel-cal');
+  c.innerHTML=`<div class="stitle">Temporada ${YEAR} · ${allRaces.length} GPs</div><div class="api-badge">Datos: Jolpica F1 API</div>`;
+  const MO=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  allRaces.forEach(r=>{
+    const d=new Date(r.date);
+    const res=r.p1?`<div class="rresult"><span class="winner">🏆 ${r.p1}</span> · P2: ${r.p2||'—'} · P3: ${r.p3||'—'}</div>`:'';
+    const sp=r.sprint?'<span class="sbadge">SPRINT</span>':'';
+    const dc=r.status==='current'?'var(--gold)':r.status==='done'?'var(--muted)':'var(--text)';
+    const sn=r.raceName.replace('Formula 1 ','').replace(' Grand Prix','').replace('Grand Prix','').trim();
+    const div=document.createElement('div');
+    div.className=`rcard ${r.status}`;
+    div.innerHTML=`<div class="rdate"><div class="rday" style="color:${dc}">${d.getDate()}</div><div class="rmonth">${MO[d.getMonth()]}</div></div><div class="rinfo"><div class="rround">R${r.round}${sp}</div><div class="rname">${sn}</div><div class="rcircuit">${r.circuit} · ${r.city}</div>${res}</div><div class="rflag">${r.flag}</div>`;
+    div.addEventListener('click',()=>{showPopup(r);rotateGlobeTo(r.lat,r.lng);});
+    c.appendChild(div);
+  });
+}
+
+function renderDrivers(){
+  const c=document.getElementById('panel-drv');
+  c.innerHTML=`<div class="stitle">Pilotos · R${currentRound}</div><div class="api-badge">Jolpica F1 API · En vivo</div>`;
+  const max=parseFloat(driverStandings[0]?.points||1);
+  driverStandings.forEach(s=>{
+    const d=s.Driver, con=s.Constructors[0];
+    const color=getTeamColor(con?.constructorId||'');
+    const flag=getFlag(d.nationality);
+    const pts=parseFloat(s.points), pct=Math.round(pts/max*100);
+    const pos=parseInt(s.position), pc=pos===1?'p1':pos===2?'p2':pos===3?'p3':'';
+    const div=document.createElement('div');
+    div.className='drow'; div.style.borderLeftColor=color;
+    div.innerHTML=`<div class="pos ${pc}">${pos}</div><div style="font-size:16px">${flag}</div><div style="flex:1"><div class="dname">${d.givenName.split(' ')[0]} ${d.familyName}${d.nationality==='Argentine'?' ⭐':''}</div><div class="dteam" style="color:${color}">${con?.name||''}</div></div><div style="text-align:right"><div class="dpts" style="color:${pos<=3?'var(--gold)':'var(--text)'}">${pts}</div><div class="ptslbl">PTS</div><div class="ptsbar"><div class="ptsbarfill" style="width:${pct}%;background:${color}"></div></div></div>`;
+    div.addEventListener('click',()=>openDriver(s,color,flag));
+    c.appendChild(div);
+  });
+}
+
+function openDriver(s,color,flag){
+  const d=s.Driver, con=s.Constructors[0];
+  const results=driverResults[d.driverId]||[];
+  const wins=results.filter(r=>r.pos===1).length;
+  const podiums=results.filter(r=>r.pos!==null&&r.pos<=3).length;
+  let histHTML='';
+  if(!results.length){histHTML='<div style="color:var(--muted);font-size:12px;padding:8px">Sin carreras disputadas.</div>';}
+  else{results.sort((a,b)=>a.round-b.round).forEach(r=>{
+    let posStr,posColor;
+    if(r.pos===null){posStr=r.status||'DNF';posColor='var(--muted)';}
+    else if(r.pos===1){posStr='P1 🏆';posColor='var(--gold)';}
+    else if(r.pos===2){posStr='P2';posColor='var(--silver)';}
+    else if(r.pos===3){posStr='P3';posColor='var(--bronze)';}
+    else{posStr='P'+r.pos;posColor='var(--text)';}
+    histHTML+=`<div class="race-hist"><div class="rh-round">R${r.round}</div><div style="font-size:15px">${r.raceFlag}</div><div class="rh-name">${r.raceName}</div><div class="rh-pos" style="color:${posColor}">${posStr}</div><div class="rh-pts">${r.pts>0?'+'+r.pts+' pts':'—'}</div></div>`;
+  });}
+  document.getElementById('dmodal-inner').innerHTML=`
+    <div class="modal-header"><div class="modal-flag">${flag}</div><div style="flex:1">
+    <div class="modal-dname" style="color:${color}">${d.givenName} ${d.familyName}</div>
+    <div class="modal-team" style="color:${color}">${con?.name||''} · #${d.permanentNumber||'?'} · ${d.nationality}</div>
+    </div><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-stats">
+      <div class="mstat"><div class="mstat-val" style="color:var(--gold)">${s.points}</div><div class="mstat-lbl">Puntos</div></div>
+      <div class="mstat"><div class="mstat-val" style="color:var(--red)">${wins}</div><div class="mstat-lbl">Victorias</div></div>
+      <div class="mstat"><div class="mstat-val">${podiums}</div><div class="mstat-lbl">Podios</div></div>
+    </div>
+    <div class="season-title">Historial ${YEAR} · R1–R${currentRound}</div>${histHTML}`;
+  document.getElementById('dmodal').classList.add('show');
+}
+function closeModal(e){if(!e||e.target===document.getElementById('dmodal'))document.getElementById('dmodal').classList.remove('show');}
+
+function renderTeams(){
+  const c=document.getElementById('panel-con');
+  c.innerHTML=`<div class="stitle">Constructores · R${currentRound}</div><div class="api-badge">Jolpica F1 API · En vivo</div>`;
+  const max=parseFloat(constructorStandings[0]?.points||1);
+  constructorStandings.forEach(s=>{
+    const con=s.Constructor, color=getTeamColor(con.constructorId);
+    const pts=parseFloat(s.points), pct=Math.round(pts/max*100);
+    const pos=parseInt(s.position), pc=pos===1?'p1':pos===2?'p2':pos===3?'p3':'';
+    const chips=driverStandings.filter(ds=>ds.Constructors[0]?.constructorId===con.constructorId)
+      .map(ds=>`<div class="driver-chip"><div class="dc-flag">${getFlag(ds.Driver.nationality)}</div><div class="dc-name">${ds.Driver.familyName}</div><div class="dc-pts">${ds.points} pts</div></div>`).join('');
+    const div=document.createElement('div');
+    div.className='team-card'; div.style.borderLeftColor=color;
+    div.innerHTML=`<div class="team-header"><div class="team-pos ${pc}">${pos}</div><div class="team-dot" style="background:${color}"></div><div style="flex:1"><div class="team-name">${con.name}</div></div><div style="text-align:right"><div class="team-pts-big" style="color:${pos<=3?'var(--gold)':'var(--text)'}">${pts}</div><div class="team-pts-lbl">PTS</div></div></div><div class="ptsbar2"><div class="ptsbar2fill" style="width:${pct}%;background:${color}"></div></div><div class="team-drivers-row">${chips}</div>`;
+    c.appendChild(div);
+  });
+}
+
+function renderCircuits(){
+  const c=document.getElementById('panel-cir');
+  c.innerHTML='<div class="stitle">Circuitos</div>';
+  const sel=document.createElement('select'); sel.className='csel';
+  sel.innerHTML='<option value="">— Seleccionar circuito —</option>';
+  Object.entries(CIRCUITS).forEach(([k,v])=>{const o=document.createElement('option');o.value=k;o.textContent=v.name;sel.appendChild(o);});
+  const detail=document.createElement('div');
+  sel.addEventListener('change',()=>{
+    const ci=CIRCUITS[sel.value]; if(!ci){detail.innerHTML='';return;}
+    detail.innerHTML=`<div class="cdetail"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div style="font-size:28px">${ci.flag}</div><div><div style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;text-transform:uppercase">${ci.name}</div><div style="font-size:12px;color:var(--muted)">${ci.city}</div></div></div><div class="sgrid"><div class="sbox"><div class="slabel">Vueltas</div><div class="sval">${ci.laps}</div></div><div class="sbox"><div class="slabel">Longitud</div><div class="sval" style="font-size:13px">${ci.len}</div></div><div class="sbox"><div class="slabel">Curvas</div><div class="sval">${ci.curvas}</div></div><div class="sbox"><div class="slabel">Tipo</div><div class="sval" style="font-size:12px">${ci.tipo}</div></div></div><div class="sbox" style="margin-top:8px"><div class="slabel">Vuelta récord</div><div class="sval" style="font-size:12px">${ci.record}</div></div><div style="margin-top:8px;padding:8px 10px;background:var(--surface2);border-radius:6px;font-size:11px;color:var(--muted)">💡 ${ci.nota}</div></div>`;
+  });
+  c.appendChild(sel); c.appendChild(detail);
+}
+
+// ── INIT
+// Inyectar los SVG paths como variable JS (para buildGlobeTexture)
+window.COUNTRY_SVG_PATHS = `<path d="M536.0,120.5L538.2,121.3L540.0,121.1L540.4,120.1L542.2,119.9L543.3,119.3L543.8,117.6L545.8,117.2L546.0,116.3L547.1,116.9L547.8,116.9L549.1,116.9L550.7,117.6L551.3,117.8L553.1,117.2L553.8,117.4L554.4,116.5L555.8,116.5L556.2,116.3L556.4,115.4L557.3,114.6L558.4,115.0L558.2,115.7L558.9,115.9L558.7,117.6L559.6,118.4L560.4,118.0L561.3,117.8L562.9,116.7L564.2,116.9L566.7,116.9L567.1,117.6L565.8,117.8L564.7,118.2L562.0,118.4L559.6,118.8L558.4,119.7L558.9,120.5L559.1,121.5L558.0,122.6L558.2,123.4L557.6,124.0L555.3,124.0L556.2,125.2L554.9,125.8L554.0,127.0L554.0,128.2L553.1,128.8L552.4,128.6L550.7,128.8L550.4,129.4L548.7,129.4L547.6,130.6L547.3,132.1L544.4,132.9L543.1,132.7L542.4,133.3L541.3,132.9L538.9,133.3L535.3,132.3L537.3,130.6L537.1,129.2L535.3,129.0L535.3,127.6L534.4,126.0L535.6,125.0L534.4,124.6L535.1,123.2L536.0,120.5Z" data-name="Afghanistan"/>
+<path d="M436.2,195.0L436.9,196.1L437.6,197.2L438.0,197.7L438.9,198.7L440.2,198.5L441.1,198.2L442.2,198.5L442.7,198.0L443.1,197.2L444.4,197.0L444.7,196.7L445.8,196.7L445.6,197.3L448.2,197.3L448.2,198.4L448.7,199.0L448.4,200.1L448.7,201.1L449.3,201.8L449.3,203.8L449.8,203.7L450.7,203.7L452.2,203.5L453.1,203.5L453.3,204.0L453.1,204.9L453.6,205.7L453.1,206.4L453.3,206.9L448.7,206.9L448.7,212.5L450.2,213.9L451.6,215.0L447.6,215.7L442.2,215.5L440.7,214.6L431.6,214.8L431.3,214.8L430.0,214.1L428.4,213.9L427.1,214.3L426.0,214.6L425.8,213.6L426.2,212.0L426.9,210.4L427.1,209.5L427.8,208.0L428.2,207.3L429.6,206.2L430.2,205.4L430.4,204.2L430.4,203.1L429.8,202.6L429.1,201.6L428.7,200.6L428.7,200.2L429.3,199.6L428.7,197.8L428.2,196.7L427.1,195.6L427.3,195.3L428.2,195.1L428.9,195.1L429.8,195.0L436.2,195.0ZM427.6,194.6L427.1,194.8L426.4,193.4L427.3,192.8L428.0,192.4L428.9,193.1L428.0,193.4L427.8,193.8L427.6,194.6Z" data-name="Angola"/>
+<path d="M445.8,107.1L445.6,108.0L445.8,108.9L446.7,109.6L446.7,110.0L446.0,110.4L445.8,111.1L444.9,112.2L444.4,112.0L444.4,111.5L443.1,110.7L442.9,109.8L443.1,108.2L443.3,107.5L443.1,107.1L442.9,106.4L443.8,105.3L444.0,105.7L444.7,105.5L445.1,106.2L445.6,106.4L445.8,107.1Z" data-name="Albania"/>
+<path d="M514.7,142.9L515.1,142.8L515.1,143.3L516.9,142.9L518.7,142.9L520.0,143.1L521.6,141.8L523.1,140.7L524.7,139.4L525.1,140.2L525.3,141.6L524.2,141.6L524.0,142.8L524.4,143.1L523.3,143.5L523.3,144.2L522.7,145.0L522.7,145.7L522.2,146.1L515.6,145.1L514.7,143.3L514.7,142.9Z" data-name="United Arab Emirates"/>
+<path d="M254.4,297.1L252.2,297.1L251.1,296.2L249.8,296.2L247.6,296.2L247.6,289.6L248.4,291.0L249.3,293.3L252.2,295.0L255.6,295.6L254.4,297.1ZM255.6,223.2L256.9,224.5L257.8,223.0L260.4,223.0L260.7,223.4L264.9,226.5L266.7,226.7L269.3,228.2L271.6,228.9L272.0,229.7L269.8,232.5L272.0,233.1L274.4,233.2L276.2,233.1L278.2,231.5L278.7,229.8L279.8,229.5L280.9,230.6L280.9,232.1L278.9,233.2L277.3,234.0L274.9,235.9L272.0,238.4L271.3,240.0L270.9,242.0L270.9,244.0L270.4,244.6L270.2,245.8L270.0,246.8L272.9,248.7L272.4,250.1L274.0,251.0L273.8,252.0L271.8,254.8L268.4,255.8L264.0,256.3L261.6,256.1L262.0,257.4L261.6,259.1L262.0,260.2L260.7,260.9L258.2,261.3L256.2,260.4L255.3,261.1L255.6,263.4L257.1,264.1L258.2,263.1L258.9,264.5L256.9,265.2L255.1,266.6L254.9,268.9L254.2,270.1L252.2,270.1L250.4,271.6L249.8,273.3L252.0,275.0L254.2,275.5L253.3,277.7L250.7,279.2L249.3,282.3L247.3,283.4L246.4,284.5L247.1,287.4L248.7,288.8L247.6,288.8L245.6,288.2L240.2,288.0L239.3,286.3L239.3,284.5L237.8,284.5L237.1,283.7L236.9,280.8L238.7,279.8L239.3,278.0L239.1,276.7L240.2,274.7L240.9,271.6L240.7,270.1L241.8,269.6L241.6,268.7L240.4,268.2L241.1,267.3L240.2,266.4L239.8,263.8L240.7,263.4L240.2,260.4L240.7,258.2L241.3,256.3L242.7,255.6L242.0,253.5L242.0,251.6L243.6,250.1L243.6,248.5L244.9,246.4L244.9,244.6L244.2,244.2L243.3,240.8L244.7,238.6L244.4,236.9L245.1,235.2L246.7,233.2L248.2,232.1L247.6,231.4L248.0,230.8L248.0,227.6L250.4,226.7L251.1,224.9L250.9,224.3L252.7,222.7L255.6,223.2Z" data-name="Argentina"/>
+<path d="M496.9,108.9L500.0,108.7L500.4,109.1L501.3,109.6L500.9,110.0L502.0,110.9L501.3,111.5L502.2,112.2L503.3,112.4L503.3,113.9L502.4,114.2L501.6,112.9L501.6,112.4L500.7,112.4L500.0,112.0L499.6,112.0L498.7,111.3L497.1,110.7L497.3,109.8L496.9,108.9Z" data-name="Armenia"/>
+<path d="M267.6,420.3L266.9,425.3L266.2,430.5L261.6,429.4L256.7,429.4L254.0,426.3L254.0,425.3L252.7,423.2L257.8,423.2L262.4,424.2L264.2,420.3L265.3,416.5L267.6,420.3ZM46.2,415.5L42.0,416.5L39.1,413.7L37.8,410.1L37.6,410.1L36.2,407.6L36.2,407.6L37.6,404.2L41.8,405.9L44.0,408.4L45.6,411.0L46.2,415.5ZM299.6,402.6L302.4,406.7L303.3,411.9L303.6,415.5L303.8,420.3L300.2,423.2L296.7,426.3L292.4,428.4L287.8,430.5L282.4,430.5L279.6,426.3L280.0,422.2L284.7,419.3L286.7,416.5L288.0,412.8L289.1,409.3L290.4,406.7L291.8,402.6L291.8,402.6L292.9,402.6L296.2,401.0L299.6,402.6ZM130.7,371.5L133.6,372.7L136.2,371.5L134.9,373.3L132.9,375.1L129.8,374.5L127.6,372.7L127.6,372.7L128.0,370.3L130.7,371.5ZM120.9,371.5L124.4,373.9L123.1,373.3L120.2,372.7L117.1,371.5L117.1,371.5L118.7,369.7L120.9,371.5ZM180.0,362.4L182.4,363.5L184.9,363.0L186.2,365.7L184.4,365.2L181.8,365.7L179.1,365.2L176.0,365.7L173.8,364.6L172.7,362.4L172.7,362.4L174.0,361.3L176.9,362.4L180.0,362.4ZM247.8,357.6L248.2,359.7L247.8,361.9L247.1,364.1L244.4,364.6L242.0,365.7L239.1,365.7L240.2,363.5L237.6,364.1L235.1,365.2L233.3,363.5L233.3,361.3L235.8,359.2L235.8,359.2L237.3,358.7L239.8,358.7L240.4,356.1L240.7,354.1L240.7,350.2L241.8,347.8L243.8,347.3L245.1,349.2L245.6,350.6L246.4,353.1L247.3,355.1L247.8,357.6ZM269.8,327.3L268.9,328.1L267.1,327.3L265.3,327.7L263.8,328.5L262.2,329.7L261.1,330.9L260.9,332.5L260.9,334.1L262.0,335.4L260.4,336.2L258.4,336.6L257.1,337.9L255.8,339.6L254.4,341.4L254.0,343.2L254.9,345.0L256.0,346.4L257.8,347.3L259.6,348.7L260.4,350.6L260.9,352.6L261.6,354.6L262.7,356.1L263.3,358.2L263.6,363.0L264.2,365.2L264.4,367.4L265.1,369.7L264.9,372.7L263.6,375.1L262.2,377.0L259.3,378.2L258.4,380.2L256.9,382.8L253.6,384.8L250.7,386.2L248.0,387.5L244.9,389.0L243.1,391.8L239.6,392.6L235.6,391.8L232.0,392.6L228.4,392.6L229.1,395.5L232.4,397.0L234.9,399.4L236.2,401.8L233.8,404.2L230.0,403.4L226.9,405.9L226.7,409.3L226.7,412.8L229.3,415.5L229.8,419.3L232.4,423.2L237.3,424.2L241.3,427.3L244.4,430.5L248.4,433.8L254.0,436.0L259.3,438.4L263.1,441.9L267.3,446.9L269.6,452.1L270.7,457.7L273.3,453.5L276.9,449.5L280.9,445.6L285.6,441.9L289.3,438.4L294.9,438.4L300.4,439.5L304.9,443.1L306.2,438.4L309.3,434.9L315.1,433.8L319.3,431.6L323.6,429.4L328.2,428.4L333.1,426.3L336.7,423.2L334.9,420.3L334.0,416.5L334.0,413.7L329.8,413.7L325.1,415.5L320.9,415.5L320.2,411.9L320.4,405.0L321.6,403.4L324.7,401.8L328.4,400.2L331.1,397.8L333.8,395.5L335.8,392.6L338.9,391.1L341.8,390.4L343.3,389.7L346.9,389.0L350.0,388.2L352.9,386.9L355.6,385.5L358.0,383.5L361.1,381.5L363.1,379.5L365.1,377.6L365.8,375.1L363.3,373.9L364.2,371.5L365.8,369.1L368.0,368.6L370.4,366.9L372.7,365.2L374.4,363.0L375.6,360.3L377.1,359.2L379.8,359.2L380.9,361.3L383.6,361.3L383.6,359.2L384.7,357.1L387.1,357.6L387.8,359.7L390.4,360.3L393.3,359.2L396.0,358.7L398.4,358.7L399.6,360.8L402.0,359.2L404.2,358.2L406.7,357.6L409.1,357.1L411.6,355.6L414.0,355.1L415.8,353.6L417.1,352.1L418.9,353.1L421.1,352.6L422.7,355.1L424.0,356.6L426.7,355.6L427.6,353.6L429.8,352.6L432.7,352.6L433.6,354.6L435.3,352.6L437.8,352.1L440.4,352.1L442.9,352.1L445.3,352.6L447.8,353.1L448.7,354.6L450.2,356.1L452.7,355.1L455.1,355.1L457.8,355.1L460.2,355.1L462.4,354.1L464.9,353.6L466.7,352.1L468.9,351.6L471.1,351.1L472.9,349.7L474.0,346.8L475.3,345.5L477.6,346.4L478.4,347.8L480.4,348.7L482.7,348.7L484.2,350.2L485.8,351.6L488.2,350.2L488.9,348.3L490.9,347.3L493.3,345.9L495.3,345.5L498.0,344.5L499.8,343.6L501.6,342.3L503.3,341.4L505.3,341.8L507.3,340.5L508.9,339.2L510.9,339.2L512.9,338.3L513.1,336.6L515.1,335.4L516.9,335.0L519.1,334.1L521.1,333.7L523.1,334.1L525.3,334.6L527.1,335.4L527.3,337.5L529.1,338.8L530.4,340.1L533.1,340.5L534.7,341.8L536.4,343.2L538.7,343.2L540.4,342.3L542.4,340.5L544.4,341.4L546.7,341.8L548.7,342.7L550.9,342.7L553.1,342.7L554.9,347.8L554.9,348.7L554.7,351.1L552.4,352.1L550.7,354.1L550.9,356.1L553.6,356.1L553.1,358.2L552.0,359.7L550.9,362.4L552.7,364.1L555.3,364.6L557.8,363.5L559.1,361.3L559.8,359.2L561.1,357.6L562.4,356.1L562.9,354.6L564.2,352.1L565.6,351.6L568.0,351.1L570.2,350.6L572.4,350.2L573.6,348.3L574.2,346.4L575.8,344.5L578.0,343.6L579.8,342.7L581.1,341.0L582.4,340.5L584.0,339.6L586.2,340.1L588.2,339.6L590.4,339.2L592.9,339.6L594.4,338.3L595.6,335.4L596.4,336.6L597.3,338.8L599.3,339.6L601.3,339.6L603.6,339.2L605.8,339.6L607.8,339.6L609.3,339.2L611.1,339.6L612.9,340.5L614.9,339.6L617.3,339.6L619.3,339.2L621.6,339.6L623.1,338.3L624.2,337.1L625.8,335.8L628.4,332.9L630.0,333.3L631.6,334.6L633.1,335.8L636.0,338.3L638.2,338.8L640.2,338.8L642.7,337.9L644.9,337.5L646.9,336.2L648.2,335.0L650.9,335.0L652.4,334.1L654.2,335.0L655.3,336.2L656.9,337.5L659.3,337.5L660.9,338.3L663.6,339.6L666.2,340.1L668.7,339.6L670.4,338.3L671.8,337.1L673.8,336.6L675.8,337.1L678.2,337.5L680.2,337.1L682.2,337.1L684.2,337.5L686.2,337.9L688.2,337.1L690.7,336.2L692.9,336.2L695.3,336.2L697.6,335.8L699.6,335.4L700.0,333.3L700.2,331.7L701.6,332.9L702.0,334.6L702.7,336.2L703.6,337.9L705.6,338.8L708.0,338.3L710.9,338.3L712.9,337.9L715.8,337.9L718.0,337.9L720.9,337.9L723.3,338.3L724.9,339.6L724.4,341.4L725.8,342.7L728.2,343.6L730.7,345.0L733.6,345.9L736.7,346.4L738.9,347.3L741.3,347.3L742.9,345.9L744.9,346.8L746.4,348.3L748.4,349.7L751.1,350.2L753.8,350.6L754.9,352.6L757.3,353.6L759.1,355.6L761.6,356.1L764.0,356.1L766.4,356.6L769.1,356.6L771.8,356.6L774.2,357.6L776.7,358.7L778.9,359.7L780.4,361.3L780.2,363.5L779.1,365.2L778.0,368.0L777.3,369.7L776.2,372.7L773.3,373.3L772.0,375.7L769.1,377.0L768.0,379.5L766.7,381.5L764.9,384.1L764.0,386.9L763.6,389.0L763.3,392.6L763.3,395.5L764.7,398.6L765.1,401.0L766.0,404.2L770.2,405.0L771.1,409.3L767.1,410.1L763.8,411.9L759.6,412.8L757.6,417.4L757.1,422.2L756.2,426.3L755.1,429.4L758.0,433.8L759.1,438.4L761.1,443.1L763.8,446.9L766.9,450.8L770.2,454.9L775.3,459.1L776.4,466.6L782.9,469.8L783.3,471.4L784.9,476.4L791.1,473.1L796.2,478.2L800.0,481.8L0.2,481.8L2.0,471.4L6.0,478.2L6.4,476.4L8.7,471.4L9.1,471.4L9.3,471.4L12.4,478.2L15.3,471.4L15.8,471.4L22.2,468.2L24.4,471.4L25.6,473.1L28.9,480.0L35.1,483.6L40.2,489.4L48.7,495.5L55.1,489.4L64.7,493.4L70.0,499.8L75.8,493.4L82.0,487.4L82.4,480.0L73.8,478.2L66.4,474.7L64.7,468.2L58.7,465.1L59.1,457.7L60.0,452.1L60.7,448.2L60.2,441.9L56.7,439.5L54.9,434.9L51.6,431.6L56.9,432.7L62.0,430.5L65.3,433.8L69.1,430.5L72.9,427.3L74.7,423.2L73.8,419.3L70.9,417.4L67.8,414.6L63.1,413.7L59.1,412.8L54.9,411.9L53.3,408.4L50.4,405.9L48.7,402.6L48.0,394.0L49.1,394.8L51.1,397.0L54.9,396.3L58.4,395.5L60.2,398.6L63.8,397.8L66.7,396.3L69.6,394.0L72.0,391.8L75.3,391.1L75.3,388.2L74.4,385.5L75.1,383.5L78.0,382.1L79.3,384.1L82.7,382.8L85.3,381.5L88.4,381.5L91.3,380.8L94.4,378.9L96.9,377.6L99.6,376.4L101.3,377.0L102.9,377.0L106.0,376.4L109.1,377.6L112.0,377.6L115.1,376.4L118.0,377.0L121.3,377.6L124.4,377.6L127.6,377.6L130.9,377.6L134.0,377.6L136.2,375.7L138.9,374.5L141.8,375.7L144.4,375.1L146.9,372.7L148.2,374.5L149.1,377.0L150.4,378.9L152.7,377.0L155.3,379.5L158.4,380.2L160.9,382.1L164.2,381.5L166.9,380.2L170.2,380.8L173.3,381.5L176.4,382.8L177.6,380.2L176.0,377.6L174.9,375.7L172.2,375.1L170.9,372.7L170.4,370.9L169.6,366.3L171.3,367.4L174.2,367.4L177.1,367.4L179.8,368.0L182.0,369.7L182.9,372.1L186.0,372.1L188.9,371.5L191.8,370.3L194.7,369.7L196.9,370.9L199.8,370.3L201.8,366.3L203.6,368.6L206.0,369.7L208.9,369.1L210.7,371.5L213.6,371.5L216.2,372.1L218.9,373.9L220.7,371.5L221.6,369.1L223.8,371.5L226.9,370.9L229.1,372.1L230.7,374.5L233.6,373.9L235.8,372.7L238.2,370.9L240.9,370.3L244.0,369.1L246.9,368.6L248.9,367.4L250.2,365.7L250.9,363.0L250.4,360.8L249.8,358.7L249.1,357.1L248.4,355.1L247.8,353.1L247.8,351.1L248.0,349.2L248.9,347.8L249.8,345.5L250.2,343.6L249.8,341.8L249.6,340.1L250.4,338.3L251.8,337.1L253.1,335.4L254.7,334.1L256.4,332.9L257.3,331.3L258.7,330.1L260.0,328.9L262.2,328.9L263.6,327.7L265.1,327.0L266.9,326.6L268.4,325.4L269.8,324.3L271.6,323.9L272.9,324.7L272.0,326.2L269.8,327.3Z" data-name="Antarctica"/>
+<path d="M553.1,279.0L554.7,279.8L556.7,280.3L556.9,280.8L556.2,281.8L552.7,282.1L552.7,280.5L553.1,279.5L553.1,279.0Z" data-name="French Southern and Antarctic Lands"/>
+<path d="M723.1,260.4L725.3,261.1L726.4,260.9L728.2,260.4L729.6,260.7L729.8,263.4L728.9,264.1L728.7,265.9L728.0,265.2L726.4,266.8L726.0,266.8L724.4,266.6L723.1,264.7L722.9,263.1L721.6,261.3L721.6,260.2L723.1,260.4ZM719.1,208.5L719.8,209.7L721.3,209.2L722.0,209.9L723.1,210.6L722.9,211.3L723.3,212.9L723.6,213.7L724.2,213.9L724.9,215.5L724.7,216.4L725.3,217.6L727.8,218.5L729.3,219.4L730.7,220.1L730.4,220.5L731.8,221.8L732.7,223.6L733.6,223.2L734.4,224.1L734.9,223.8L735.3,225.8L736.9,226.9L738.0,227.6L739.8,229.1L740.2,230.6L740.4,231.5L740.2,232.9L741.3,234.4L741.1,236.1L740.7,237.1L740.2,238.8L740.2,239.8L739.8,241.2L738.9,243.2L737.1,244.0L736.2,245.6L735.6,246.6L734.9,248.5L734.0,249.5L733.6,251.0L733.1,252.4L733.3,253.1L732.0,253.9L729.6,253.9L727.6,254.8L726.4,255.6L725.1,256.5L723.3,255.6L722.0,255.2L722.2,254.1L721.1,254.6L719.1,256.1L717.1,255.4L716.0,255.2L714.7,255.0L712.4,254.3L711.1,253.1L710.7,251.4L710.2,250.3L709.1,249.5L706.9,249.3L707.6,248.3L707.1,246.8L706.0,248.3L704.0,248.7L705.3,247.4L705.6,246.2L706.4,245.2L706.2,243.8L704.4,245.6L703.1,246.2L702.2,247.8L700.4,247.0L700.4,245.8L699.1,244.4L698.0,243.6L698.4,243.2L695.6,242.0L694.0,242.0L691.8,241.0L687.8,241.2L684.9,241.8L682.4,242.6L680.2,242.4L678.0,243.4L676.0,244.0L675.6,245.0L674.9,245.8L672.9,245.8L671.6,246.0L669.6,245.6L668.0,245.8L666.4,246.0L665.1,247.0L664.4,247.0L663.3,247.4L662.2,248.3L660.7,248.0L659.1,248.0L656.9,246.8L655.6,246.4L655.6,245.2L656.7,245.0L657.1,244.6L657.1,243.8L657.3,242.4L657.1,241.2L656.0,239.2L655.6,238.0L655.6,237.1L654.7,235.7L654.7,235.2L653.8,234.4L653.3,232.9L652.2,231.4L651.8,230.6L652.9,231.4L652.0,229.7L653.1,230.2L653.8,231.0L653.8,230.0L652.7,228.5L652.4,228.0L652.0,227.4L652.2,226.3L652.7,226.0L652.9,225.0L652.7,223.9L653.6,222.7L653.8,223.9L654.7,222.7L656.7,222.1L657.6,221.4L659.3,220.7L660.4,220.5L660.9,220.7L662.7,220.1L664.0,220.0L664.4,219.4L665.1,219.4L666.2,219.4L668.7,218.9L669.8,218.0L670.4,217.1L671.6,216.2L671.8,215.5L671.8,214.6L673.3,213.0L674.2,214.6L675.3,214.3L674.4,213.4L675.1,212.5L676.2,212.9L676.4,211.6L677.6,210.8L678.2,210.1L679.3,209.7L679.3,209.2L680.2,209.4L680.2,209.0L681.3,208.8L682.4,208.5L684.0,209.4L685.3,210.4L686.7,210.4L688.0,210.6L687.6,209.5L688.7,208.1L689.6,207.8L689.3,207.3L690.2,206.2L691.6,205.7L692.7,205.9L694.7,205.5L694.7,204.7L692.9,204.2L694.2,203.8L695.6,204.3L696.9,205.0L698.7,205.4L699.3,205.2L700.7,205.7L702.0,205.4L702.9,205.4L703.3,205.2L704.4,206.1L703.8,206.9L702.9,207.6L702.2,207.6L702.4,208.3L701.8,209.2L700.9,210.1L701.1,210.6L702.9,211.6L704.7,212.2L705.8,212.7L707.3,213.7L708.0,213.7L709.1,214.3L709.6,214.8L711.6,215.3L713.1,214.8L713.6,213.7L714.0,213.0L714.2,212.0L714.9,210.6L714.7,209.9L714.7,209.4L714.4,208.3L714.9,206.9L715.1,206.6L714.9,206.1L715.3,205.2L715.8,204.2L715.8,203.7L716.7,203.1L717.3,204.0L717.6,205.0L718.0,205.2L718.2,205.9L718.9,206.8L719.1,207.8L719.1,208.5Z" data-name="Australia"/>
+<path d="M437.8,92.3L437.6,93.3L436.2,93.3L436.7,93.8L436.0,95.3L435.6,95.8L433.6,95.8L432.4,96.5L430.7,96.3L427.6,95.5L427.1,94.8L424.9,95.3L424.4,95.5L423.1,95.3L422.0,95.3L421.1,94.8L421.3,94.3L421.3,93.8L422.0,93.5L423.1,94.3L423.3,93.5L425.3,93.8L426.9,93.3L428.0,93.3L428.7,93.8L428.9,93.5L428.7,91.8L429.3,91.5L430.2,90.2L431.8,91.0L433.1,90.0L434.0,90.0L435.6,90.8L436.7,90.5L437.8,91.0L437.6,91.3L437.8,92.3Z" data-name="Austria"/>
+<path d="M500.0,112.0L500.7,112.4L501.6,112.4L501.6,112.9L502.4,114.2L501.1,113.7L500.0,112.9L499.6,112.0L500.0,112.0ZM505.3,108.7L506.2,108.7L506.7,108.2L508.0,107.3L509.1,108.4L510.2,110.0L511.3,110.2L512.0,110.7L510.2,110.9L509.8,112.6L509.3,113.5L508.7,113.9L508.7,115.0L508.0,115.0L506.7,113.9L507.6,112.9L506.9,112.2L506.0,112.4L503.3,113.9L503.3,112.4L502.2,112.2L501.3,111.5L502.0,110.9L500.9,110.0L501.3,109.6L500.4,109.1L500.0,108.7L500.4,108.2L502.2,108.9L503.3,108.9L503.6,108.7L502.4,107.5L503.1,107.1L503.8,107.3L505.3,108.7Z" data-name="Azerbaijan"/>
+<path d="M465.1,192.6L465.1,190.6L464.4,189.7L465.8,189.9L466.4,188.9L467.8,189.0L467.8,189.7L468.2,190.1L468.4,190.7L467.8,191.1L466.9,191.9L466.2,192.6L465.1,192.6Z" data-name="Burundi"/>
+<path d="M407.3,83.9L408.9,83.9L411.1,83.4L412.4,84.7L413.8,85.3L413.3,87.1L412.9,87.1L412.7,88.7L410.7,87.4L409.6,87.7L408.0,86.3L406.9,85.3L406.0,85.3L405.6,84.5L407.3,83.9Z" data-name="Belgium"/>
+<path d="M406.0,174.4L404.2,174.7L403.6,173.5L403.8,169.6L403.3,169.3L403.1,168.4L402.4,167.7L401.8,167.2L402.0,166.3L402.7,166.2L403.1,165.5L404.2,165.3L404.9,164.8L405.6,164.3L406.2,164.3L408.0,165.1L408.0,165.8L408.4,166.9L408.0,167.5L408.2,167.9L407.1,169.1L406.4,169.6L406.0,170.6L406.0,171.6L406.0,174.4Z" data-name="Benin"/>
+<path d="M393.8,168.7L392.2,168.2L391.1,168.2L390.4,168.7L389.3,168.4L388.9,167.7L388.0,167.4L387.8,166.3L388.4,165.7L388.4,165.1L390.2,163.8L390.4,162.6L391.1,162.0L392.2,162.4L393.1,162.0L393.3,161.5L395.1,160.8L395.6,160.1L397.6,159.4L398.9,159.2L399.3,159.6L400.9,159.6L400.7,160.5L400.9,161.2L402.2,162.4L402.2,163.1L404.9,163.6L404.9,164.8L404.2,165.3L403.1,165.5L402.7,166.2L402.0,166.3L400.0,166.3L399.1,166.2L398.2,166.5L397.3,166.3L393.6,166.3L393.3,167.4L393.8,168.7Z" data-name="Burkina Faso"/>
+<path d="M606.0,147.0L606.0,148.2L605.1,147.9L605.3,149.3L604.7,148.4L604.4,147.5L604.0,146.6L603.1,145.5L601.1,145.5L601.3,146.2L600.7,147.3L599.6,147.0L599.3,147.2L598.7,147.0L597.8,146.8L597.6,145.3L596.7,144.0L597.1,142.9L595.8,142.4L596.2,141.6L597.6,141.1L596.0,140.0L596.9,138.8L598.7,139.6L599.6,139.6L599.8,140.9L602.0,141.3L604.0,141.3L605.3,141.5L604.2,143.1L603.3,143.1L602.7,144.2L603.8,145.1L604.2,144.0L604.7,144.0L606.0,147.0Z" data-name="Bangladesh"/>
+<path d="M450.4,101.8L450.9,102.7L451.8,102.5L453.6,102.9L456.9,102.9L458.0,102.5L460.4,101.8L462.2,102.7L463.6,102.9L462.2,103.9L461.6,105.5L462.2,106.9L460.2,106.6L458.0,107.3L458.0,108.4L456.0,108.7L454.4,107.8L452.7,108.4L451.1,108.4L450.9,106.9L449.8,106.2L450.0,105.7L449.8,105.5L450.2,104.8L451.1,104.1L450.0,103.2L449.8,102.2L450.4,101.8Z" data-name="Bulgaria"/>
+<path d="M227.8,143.7L227.1,143.9L226.7,142.8L225.8,142.2L226.2,141.1L226.9,141.1L227.8,142.8L227.8,143.7ZM227.1,138.5L224.7,138.8L224.4,138.1L225.6,137.9L227.1,138.1L227.1,138.5ZM228.9,138.5L228.4,139.8L228.0,139.6L228.2,138.6L227.1,137.9L227.1,137.7L228.9,138.5Z" data-name="The Bahamas"/>
+<path d="M442.2,100.1L443.1,100.1L442.4,101.3L443.6,102.2L443.3,103.2L442.7,103.4L442.2,103.6L441.6,104.1L441.3,105.5L439.3,104.6L438.4,103.6L437.6,102.9L436.7,102.2L436.0,101.3L435.1,100.4L435.6,99.4L436.2,99.9L436.7,99.4L437.8,99.4L439.8,99.6L441.3,99.6L442.2,100.1Z" data-name="Bosnia and Herzegovina"/>
+<path d="M452.2,76.7L454.4,76.7L456.7,75.6L457.3,74.1L459.1,72.9L458.9,71.8L460.2,71.2L462.7,69.9L464.9,70.9L465.3,71.5L466.4,71.2L468.7,71.8L468.9,73.2L468.4,74.1L469.8,75.9L470.7,76.4L470.4,77.0L472.0,77.6L472.7,78.1L471.8,79.0L470.0,78.7L469.6,79.0L470.0,80.1L470.7,81.8L468.7,82.0L468.0,82.6L468.0,83.9L467.1,83.7L465.1,83.7L464.4,83.1L463.6,83.7L462.7,83.1L461.1,83.1L458.4,82.6L456.2,82.3L454.7,82.3L453.3,83.1L452.2,83.1L452.2,82.0L451.6,80.7L452.9,80.1L452.9,79.0L452.2,77.9L452.2,76.7Z" data-name="Belarus"/>
+<path d="M202.0,154.5L201.8,154.1L202.2,154.1L202.7,154.3L203.3,153.3L203.8,153.3L203.8,153.4L204.2,153.6L204.2,154.0L203.8,154.9L204.0,155.0L203.8,155.7L204.0,155.9L203.6,156.8L203.1,157.1L202.9,157.3L202.4,157.8L201.8,157.8L201.8,155.9L202.0,154.5Z" data-name="Belize"/>
+<path d="M260.4,223.0L257.8,223.0L256.9,224.5L255.6,223.2L252.7,222.7L250.9,224.3L249.3,224.7L248.4,222.1L247.1,220.1L248.0,218.3L246.7,217.6L246.4,216.4L245.3,215.1L246.7,213.2L245.8,211.8L246.2,211.1L246.0,210.6L246.9,209.7L246.9,208.1L246.9,206.9L247.3,206.4L245.6,203.7L247.1,203.7L248.2,203.7L248.9,203.1L250.7,202.5L252.0,201.8L254.9,201.6L254.7,202.8L254.9,203.5L254.7,204.7L257.1,206.2L259.6,206.4L260.4,207.1L262.0,207.4L262.9,208.0L264.2,208.0L265.6,208.5L265.6,209.5L266.0,209.9L266.0,210.8L265.6,210.8L266.2,212.9L270.7,212.9L270.2,213.9L270.4,214.6L271.8,215.1L272.2,216.2L271.8,217.6L271.3,218.3L271.3,219.4L270.7,219.8L270.7,219.2L268.7,218.3L266.7,218.2L262.7,218.7L261.6,220.3L261.6,221.4L260.7,223.4L260.4,223.0Z" data-name="Bolivia"/>
+<path d="M272.0,238.4L274.9,235.9L277.3,234.0L278.9,233.2L280.9,232.1L280.9,230.6L279.8,229.5L278.7,229.8L279.1,228.9L279.3,227.8L279.3,226.7L278.4,226.3L277.8,226.7L276.9,226.7L276.7,226.0L276.4,224.3L276.0,223.8L274.4,223.2L273.6,223.6L271.3,223.2L271.3,220.7L270.7,219.8L271.3,219.4L271.3,218.3L271.8,217.6L272.2,216.2L271.8,215.1L270.4,214.6L270.2,213.9L270.7,212.9L266.2,212.9L265.6,210.8L266.0,210.8L266.0,209.9L265.6,209.5L265.6,208.5L264.2,208.0L262.9,208.0L262.0,207.4L260.4,207.1L259.6,206.4L257.1,206.2L254.7,204.7L254.9,203.5L254.7,202.8L254.9,201.6L252.0,201.8L250.7,202.5L248.9,203.1L248.2,203.7L247.1,203.7L245.6,203.7L244.2,203.8L243.3,203.7L243.3,201.1L241.6,202.1L239.6,202.1L238.7,201.1L237.3,201.1L237.8,200.2L236.4,199.2L235.6,197.7L236.2,197.3L236.2,196.7L237.6,196.1L237.3,195.3L237.8,194.6L238.0,193.9L240.7,192.8L242.4,192.4L242.7,192.3L244.7,192.3L245.8,187.7L245.8,186.9L245.3,185.8L244.4,185.3L244.4,184.2L245.6,183.8L246.0,184.0L246.2,183.3L244.9,183.1L244.9,182.1L249.1,182.1L250.0,181.6L250.4,182.1L250.9,183.1L251.3,182.8L252.7,183.8L254.4,183.7L254.7,183.1L256.4,182.8L257.3,182.5L257.6,181.8L259.1,181.3L259.1,181.0L257.1,180.8L256.9,179.8L256.9,178.6L256.0,178.1L256.4,178.1L258.0,178.3L259.8,178.6L260.4,178.3L262.0,177.9L264.4,177.4L265.3,176.7L265.1,176.2L266.2,176.2L266.7,176.6L266.4,177.2L267.1,177.6L267.8,178.3L267.1,178.9L266.7,180.3L267.3,181.3L267.6,182.0L268.9,182.8L270.0,182.8L270.2,182.5L270.9,182.5L271.8,182.1L272.7,181.8L273.8,181.8L274.4,181.8L275.6,182.0L275.8,181.6L275.3,181.3L275.6,180.8L276.4,181.0L277.6,180.8L278.9,181.1L279.8,181.5L280.4,181.0L280.9,181.1L281.3,181.5L282.4,181.5L283.1,180.8L284.0,179.6L285.1,177.9L286.0,177.9L286.4,178.8L287.8,181.8L288.9,182.1L289.1,183.3L287.3,184.7L288.0,185.2L292.0,185.3L292.0,187.0L293.8,186.0L296.4,186.5L300.2,187.7L301.3,188.5L300.9,189.6L303.6,189.0L307.8,189.9L311.1,189.9L314.4,191.2L317.3,193.1L318.9,193.6L320.9,193.6L321.8,194.3L322.4,196.3L322.9,197.3L322.0,200.2L320.9,201.3L317.8,203.7L316.2,205.7L314.7,207.1L314.0,207.3L313.3,208.5L313.6,211.8L312.9,214.4L312.7,215.7L312.0,216.4L311.6,218.7L309.3,221.0L309.1,222.8L307.1,223.8L306.7,224.9L304.2,224.9L300.9,225.6L299.1,226.3L296.7,226.9L294.2,228.4L292.2,230.2L292.0,231.5L292.2,232.7L291.8,234.6L291.3,235.5L289.8,236.5L287.3,240.0L285.3,241.6L283.8,242.4L282.9,244.4L281.3,245.6L280.7,244.4L281.8,243.4L280.4,242.0L278.7,241.0L276.4,239.8L275.6,239.8L273.3,238.2L272.0,238.4Z" data-name="Brazil"/>
+<path d="M653.8,177.4L654.7,176.7L656.7,175.9L656.4,176.6L656.2,177.7L655.3,177.7L654.9,178.3L653.8,177.4Z" data-name="Brunei"/>
+<path d="M603.8,136.2L604.7,136.8L604.4,138.1L602.7,138.1L600.9,137.9L599.3,138.3L597.3,137.5L597.3,137.1L598.9,135.8L600.0,135.2L601.6,135.6L602.9,135.8L603.8,136.2Z" data-name="Bhutan"/>
+<path d="M456.9,216.7L457.6,217.1L458.2,218.2L460.7,220.1L461.6,220.3L461.6,221.0L462.2,222.1L464.0,222.3L465.3,223.2L462.2,224.5L460.2,226.0L459.6,227.1L458.9,227.8L457.6,228.0L457.3,228.9L457.1,229.5L455.6,229.8L453.8,229.8L452.7,229.3L451.8,229.1L450.7,229.5L450.2,230.4L449.1,231.0L448.0,231.7L446.4,231.9L446.0,231.4L446.2,230.2L444.9,228.4L444.2,228.2L444.2,222.7L446.4,222.7L446.4,216.4L448.2,216.2L451.6,215.7L452.4,216.4L453.8,215.7L454.4,215.7L455.8,215.3L456.2,215.3L456.9,216.7Z" data-name="Botswana"/>
+<path d="M434.0,172.5L435.8,172.3L436.2,171.8L436.7,172.0L437.1,172.3L440.0,171.6L440.9,171.0L442.0,170.4L441.8,169.8L442.4,169.6L444.7,169.8L446.7,168.9L448.2,167.0L449.3,166.3L450.9,166.2L451.1,166.9L452.4,167.9L452.4,168.6L452.0,169.3L452.2,169.8L452.9,170.3L454.7,171.1L455.8,171.8L455.8,172.3L457.3,173.2L458.2,174.0L458.9,175.0L460.4,175.5L460.9,176.2L460.0,176.4L458.7,176.2L457.1,176.1L456.2,176.2L455.8,176.7L455.1,176.7L454.2,176.4L451.8,177.2L450.7,177.1L450.4,177.2L449.8,178.3L448.2,177.9L446.4,177.7L445.1,177.1L443.3,176.6L442.0,177.1L441.1,177.9L441.1,179.1L439.6,178.9L438.0,178.8L436.7,179.6L435.6,181.1L435.3,180.6L435.3,179.9L434.2,179.4L433.3,178.4L433.3,177.9L432.2,177.1L432.4,176.6L432.2,175.7L432.2,174.5L432.9,174.2L434.0,172.5Z" data-name="Central African Republic"/>
+<path d="M258.4,96.0L260.2,96.5L262.2,96.5L261.1,97.5L260.2,97.5L257.6,96.5L256.9,95.8L257.8,95.0L258.4,96.0ZM262.7,89.7L261.6,89.7L258.7,89.0L256.7,87.7L257.3,87.4L260.2,88.2L262.7,89.2L262.7,89.7ZM125.6,91.3L124.4,91.5L120.7,90.5L120.0,89.5L118.0,88.7L117.8,87.9L115.3,87.4L114.7,86.1L114.7,85.3L117.1,85.8L118.4,86.3L120.4,86.6L121.3,87.4L122.4,88.7L124.7,89.7L125.6,91.3ZM275.3,85.5L273.8,87.9L275.3,86.9L276.7,87.7L276.0,88.4L278.0,89.2L278.9,88.4L281.1,89.5L280.4,91.3L282.0,90.8L282.2,92.0L283.1,93.8L282.0,95.8L281.1,96.0L279.6,95.5L280.0,93.5L279.6,93.0L276.9,95.3L275.6,95.3L277.1,94.0L274.9,93.5L272.7,93.5L268.2,93.5L268.0,92.8L269.3,91.8L268.4,91.3L270.2,89.7L272.4,85.5L274.0,83.9L275.8,83.1L276.9,83.1L276.4,83.9L275.3,85.5ZM105.1,76.4L105.1,76.4L105.1,76.4L105.1,76.4L107.3,76.1L106.7,79.3L108.4,81.5L107.6,81.5L106.2,80.4L105.6,79.0L104.2,78.1L104.0,76.7L104.0,75.9L105.1,76.4ZM223.8,50.1L222.9,52.3L222.0,51.9L221.3,50.9L221.6,50.5L222.4,49.4L223.3,49.4L223.8,50.1ZM218.0,48.3L215.3,50.1L213.8,50.1L213.3,49.0L214.9,47.6L218.0,47.6L218.0,48.3ZM210.7,36.7L211.1,38.7L212.2,37.9L213.6,39.1L216.0,40.3L218.7,41.5L218.7,43.4L220.4,43.0L222.0,44.6L220.0,45.7L216.7,44.6L215.3,43.0L213.1,45.0L210.0,46.8L209.1,45.0L206.2,45.3L208.0,43.4L208.4,40.3L209.1,36.7L210.7,36.7ZM231.3,30.8L228.9,30.8L228.4,28.6L229.3,26.4L231.3,25.5L233.1,26.8L233.1,28.6L232.9,29.5L231.3,30.8ZM187.6,21.7L186.0,23.2L183.1,21.7L181.3,22.2L178.2,20.3L180.2,18.9L181.8,16.9L184.0,17.9L185.3,18.9L186.0,19.8L187.6,21.7ZM198.9,19.8L198.7,24.5L201.8,20.8L204.4,24.1L203.8,27.3L205.8,30.4L208.2,27.3L209.8,23.2L210.0,17.9L213.1,18.4L216.4,18.9L219.3,21.3L219.6,23.6L217.8,26.4L219.3,28.6L219.1,30.8L214.9,33.8L211.8,34.2L209.3,32.9L208.7,35.0L206.7,38.7L206.0,40.3L203.3,43.0L200.2,43.4L198.4,45.0L198.2,47.2L195.8,47.9L192.9,50.9L190.7,54.7L189.8,57.5L189.6,61.5L192.9,61.8L193.8,65.0L194.9,67.2L198.0,66.6L202.2,67.8L204.4,69.0L206.0,70.6L208.7,71.5L211.1,72.6L214.7,72.9L217.1,73.2L216.9,75.6L217.6,78.4L219.1,81.5L222.4,84.2L224.2,83.4L225.3,80.4L224.2,76.1L222.7,74.4L226.2,73.2L228.7,71.2L230.0,69.0L229.8,66.9L228.2,64.0L225.6,61.8L228.2,58.2L227.1,55.1L226.4,49.8L228.0,48.7L231.8,49.8L234.0,50.1L236.0,49.4L238.0,50.5L240.7,52.6L241.3,54.0L245.3,54.0L245.3,57.1L246.0,61.1L248.0,61.8L249.8,63.7L252.9,61.8L255.1,58.2L256.4,56.8L258.2,59.8L261.1,63.7L263.6,67.5L262.7,69.6L265.6,71.2L267.6,72.9L271.1,73.8L272.7,74.7L273.6,77.0L275.1,77.6L276.0,78.4L276.2,81.8L274.7,82.6L273.1,83.7L269.3,84.5L266.7,86.9L262.9,87.1L258.0,86.6L254.7,86.6L252.4,86.9L250.7,88.7L247.8,89.7L244.4,93.3L242.0,95.5L243.8,95.0L247.3,91.8L252.0,89.7L255.3,89.5L257.3,90.8L255.3,92.3L256.0,95.0L256.7,97.0L259.6,98.2L263.3,97.7L265.6,95.0L265.8,96.7L267.1,97.7L264.4,99.2L259.3,100.6L257.3,101.5L254.7,103.4L253.1,103.2L252.9,101.1L256.9,99.2L253.3,99.2L250.9,99.6L249.3,98.2L249.3,94.8L248.4,94.0L246.9,94.5L246.2,94.0L244.4,95.8L243.8,97.7L242.9,98.7L242.0,99.2L241.3,99.2L241.1,99.9L237.1,99.9L233.6,99.9L232.7,100.4L230.2,102.0L230.0,102.2L229.3,103.2L227.3,103.2L225.1,103.2L224.0,103.4L224.4,103.9L224.7,104.6L224.7,104.8L221.8,105.9L219.3,106.4L216.9,107.5L216.2,107.5L215.6,107.3L215.3,106.9L215.3,106.6L215.8,105.9L216.9,104.6L217.6,103.2L217.1,101.3L216.4,99.2L214.2,98.0L214.4,97.5L214.2,97.2L213.6,97.2L213.1,96.7L213.1,96.3L212.7,96.5L212.0,96.5L212.2,96.3L211.6,96.0L211.3,95.3L209.6,94.5L207.8,93.5L205.8,92.8L203.6,91.8L201.6,92.5L200.9,92.5L198.2,91.8L196.4,92.3L194.2,91.3L192.0,91.0L190.4,90.8L189.8,90.5L189.3,89.0L188.4,89.0L188.4,90.0L184.0,90.0L176.2,90.0L168.9,90.0L162.2,90.0L155.6,90.0L148.9,90.0L142.2,90.0L140.0,90.0L133.3,90.0L127.1,90.0L126.7,90.0L122.4,87.4L120.9,86.3L116.9,85.3L115.6,82.9L115.8,81.2L113.1,79.8L112.7,77.6L110.0,75.6L110.0,74.1L111.1,72.6L111.1,70.9L107.3,68.7L105.1,65.3L103.6,63.1L101.6,61.5L100.2,60.1L98.9,58.5L96.7,59.5L94.4,61.5L92.7,59.2L91.1,57.8L88.9,56.8L86.7,56.8L86.7,35.4L86.7,18.9L90.9,19.8L94.4,22.2L96.7,22.7L98.7,20.8L101.3,19.4L104.7,19.8L108.0,17.9L111.6,16.4L113.1,18.4L114.7,17.4L115.3,14.9L116.9,15.4L120.4,19.8L123.6,16.4L123.8,20.3L126.4,19.4L127.3,17.9L130.0,18.4L133.6,20.3L138.7,22.2L141.8,23.2L144.0,22.7L146.9,25.0L143.8,27.3L147.8,28.2L153.8,27.7L155.8,26.8L158.0,29.5L160.4,27.3L158.2,25.5L159.6,23.6L162.2,23.6L164.0,23.2L166.0,24.1L168.2,26.8L170.7,26.4L174.4,28.6L178.0,27.7L181.3,27.7L180.9,25.0L182.9,24.1L186.4,25.9L186.4,29.9L187.8,26.4L189.6,26.4L190.7,21.7L188.2,18.9L185.6,16.9L185.8,11.3L188.4,7.6L191.3,8.1L193.6,10.8L196.7,16.4L194.7,18.9L198.9,19.8ZM146.2,0.9L145.1,3.1L150.2,1.4L153.1,4.3L155.8,1.4L157.8,3.7L159.6,8.7L160.7,6.5L159.1,0.9L161.1,0.3L163.3,0.9L165.8,3.1L167.1,8.7L167.8,12.4L171.6,14.9L175.6,17.4L175.3,19.4L171.8,19.8L173.1,21.7L172.4,23.2L168.4,22.7L164.4,21.3L162.0,21.7L157.8,23.2L152.2,24.1L148.2,24.5L146.9,22.2L144.0,20.8L142.0,21.3L139.3,17.4L140.7,16.9L144.2,16.4L147.3,16.4L150.2,15.4L146.0,14.4L141.1,14.9L138.0,14.9L136.9,12.9L142.0,10.8L138.4,10.8L134.7,9.2L136.4,5.4L138.0,3.1L144.0,-0.3L146.2,0.9ZM167.8,-0.9L165.8,2.6L162.4,-1.5L163.1,-2.1L166.0,-2.1L167.8,-0.9ZM230.4,0.9L230.4,2.6L228.2,2.0L225.8,2.0L223.3,3.1L222.7,2.6L220.2,-0.3L220.4,-2.7L221.3,-3.3L226.4,-2.7L230.4,0.9ZM207.6,0.3L209.3,4.3L211.3,-0.3L217.1,-3.3L220.9,3.1L220.7,6.5L224.9,4.8L227.1,3.1L232.0,5.9L235.1,8.1L235.3,10.8L239.6,9.2L241.8,12.9L247.1,14.9L249.1,16.9L251.1,21.3L247.1,23.6L252.4,26.4L255.8,27.7L259.1,31.7L262.4,31.7L261.8,34.6L258.0,39.5L255.3,37.9L251.8,33.8L248.9,34.2L248.7,36.7L250.9,39.1L254.0,41.1L254.9,41.9L256.2,45.7L255.6,48.3L252.7,47.6L247.1,44.6L250.2,47.6L252.7,49.8L252.9,51.2L246.9,49.8L242.2,47.6L239.6,45.7L240.2,44.6L236.9,42.7L233.8,40.7L233.8,41.9L227.3,42.7L225.3,41.1L226.9,38.3L231.1,38.3L235.6,37.5L234.9,36.3L235.8,34.2L238.4,29.9L238.0,28.2L237.1,26.4L233.8,24.1L229.1,22.7L230.7,21.7L228.2,18.4L226.2,18.4L224.4,16.4L223.3,17.9L219.3,18.9L211.3,17.4L206.4,15.9L202.9,15.4L201.1,13.4L203.3,11.3L200.2,11.3L199.6,5.9L201.3,0.9L203.6,-1.5L209.3,-3.3L207.6,0.3ZM176.9,-3.3L179.6,-2.1L183.6,-3.3L184.2,-1.5L182.0,1.4L185.6,3.7L185.1,8.7L181.3,10.8L179.3,10.3L177.8,8.7L172.2,4.3L172.2,2.6L176.9,3.1L174.4,-0.9L176.9,-3.3ZM192.9,2.6L190.4,7.0L188.0,6.5L186.7,2.0L186.7,-0.9L187.8,-3.9L190.0,-5.1L194.7,-5.1L198.9,-3.9L195.6,1.4L192.9,2.6ZM132.2,10.3L126.4,12.9L125.3,10.8L120.2,7.6L121.1,5.4L122.7,1.4L124.7,-2.7L122.4,-6.4L130.0,-7.0L133.1,-5.7L138.7,-5.7L140.9,-3.9L143.3,-1.5L140.4,0.3L135.1,4.3L132.2,8.1L132.2,10.3ZM192.0,-10.8L190.7,-8.2L187.6,-8.9L184.9,-10.2L186.0,-13.5L189.1,-14.8L191.1,-12.8L192.0,-10.8ZM181.1,-22.6L182.9,-19.7L182.9,-15.5L181.8,-10.8L178.2,-10.2L175.8,-11.5L175.8,-14.8L172.2,-14.8L172.0,-19.7L174.4,-19.7L177.8,-21.8L180.9,-21.8L181.1,-22.6ZM159.6,-19.0L160.4,-16.2L162.4,-17.5L164.7,-17.5L165.1,-14.1L163.8,-10.8L156.2,-9.5L150.7,-7.0L147.3,-7.0L146.9,-8.9L151.6,-12.1L141.6,-10.8L138.4,-12.1L141.6,-19.0L143.6,-21.1L149.8,-18.2L153.8,-14.1L157.6,-14.1L154.4,-20.4L156.4,-23.3L158.9,-22.6L159.6,-19.0ZM189.6,-25.5L192.0,-23.3L196.4,-23.3L198.4,-20.4L197.8,-18.2L200.4,-16.2L201.8,-14.8L204.9,-14.8L208.0,-14.1L211.6,-15.5L216.0,-16.2L219.8,-15.5L222.0,-12.8L222.7,-10.2L221.1,-8.9L218.0,-7.0L215.1,-8.2L208.7,-7.0L204.0,-7.0L200.4,-7.6L194.7,-9.5L193.8,-13.5L193.6,-16.9L191.3,-19.7L186.7,-20.4L184.2,-23.3L185.1,-26.3L189.6,-25.5ZM141.8,-29.4L141.6,-24.0L139.8,-21.1L137.8,-21.1L133.6,-18.2L130.0,-16.9L126.9,-18.2L126.9,-18.2L130.7,-24.0L135.3,-28.6L138.7,-28.6L141.8,-29.4ZM191.6,-28.6L190.4,-28.6L186.2,-29.4L185.8,-31.0L190.2,-31.0L191.8,-29.4L191.6,-28.6ZM155.1,-30.2L150.9,-27.8L147.8,-30.2L149.6,-33.4L152.7,-34.2L155.8,-32.6L155.1,-30.2ZM156.2,-37.6L153.6,-35.9L150.0,-35.9L150.0,-37.6L152.2,-39.3L153.3,-39.3L156.2,-37.6ZM187.1,-33.4L183.8,-31.8L182.0,-33.4L180.9,-36.7L180.9,-40.1L183.8,-39.3L184.9,-39.3L187.6,-35.9L187.1,-33.4ZM177.6,-35.0L178.4,-31.8L174.9,-32.6L171.3,-35.0L166.2,-35.9L168.4,-38.4L165.8,-40.1L165.6,-43.7L170.0,-42.8L176.0,-39.3L177.6,-35.0ZM206.7,-47.4L209.3,-43.7L206.2,-41.0L202.2,-35.0L198.2,-34.2L193.6,-35.0L191.1,-39.3L191.3,-41.9L193.1,-44.6L188.9,-44.6L186.4,-47.4L185.1,-52.2L186.7,-56.3L188.2,-59.4L190.4,-60.5L189.6,-62.7L194.7,-63.8L197.6,-57.3L201.1,-55.3L204.9,-53.2L206.7,-47.4ZM247.8,-86.2L253.8,-84.9L258.4,-83.5L262.4,-79.5L262.4,-76.9L257.1,-70.7L251.6,-68.4L249.6,-66.0L254.4,-66.0L249.3,-59.4L245.6,-56.3L241.8,-48.4L237.3,-46.5L235.8,-44.6L229.1,-43.7L232.2,-42.8L230.7,-41.0L232.4,-36.7L230.4,-34.2L226.9,-31.8L225.8,-28.6L222.7,-26.3L223.1,-24.8L226.9,-24.8L226.9,-23.3L220.9,-19.0L215.1,-21.1L208.7,-19.7L205.3,-20.4L201.1,-21.1L200.9,-24.8L204.9,-26.3L203.8,-31.8L205.1,-32.6L211.1,-28.6L208.2,-34.2L204.4,-35.9L206.2,-39.3L210.2,-41.0L210.9,-43.7L207.8,-47.4L206.9,-53.2L212.9,-52.2L214.7,-51.3L218.2,-55.3L213.1,-56.3L205.3,-55.3L201.3,-59.4L199.6,-63.8L196.9,-67.2L196.4,-70.7L199.8,-73.1L202.4,-73.1L206.7,-75.6L210.0,-80.8L212.7,-79.5L215.1,-75.6L216.9,-83.5L219.8,-84.9L223.8,-86.2L230.7,-87.7L231.8,-86.2L238.2,-87.7L242.9,-87.7L247.8,-86.2Z" data-name="Canada"/>
+<path d="M421.3,93.8L421.3,94.3L421.1,94.8L422.0,95.3L423.1,95.3L423.1,96.3L422.0,96.7L420.4,96.5L420.0,97.5L418.9,97.5L418.4,97.0L417.3,98.0L416.2,98.0L415.1,97.5L414.4,96.5L413.3,96.7L413.3,95.8L415.1,94.3L414.9,93.8L416.0,94.0L416.7,93.5L418.4,93.5L418.9,93.0L421.3,93.8Z" data-name="Switzerland"/>
+<path d="M247.6,289.6L247.6,296.2L249.8,296.2L251.1,296.2L250.4,297.4L248.7,298.2L247.6,298.2L246.2,297.9L244.4,297.1L242.2,296.8L239.3,295.0L237.1,293.6L234.0,290.2L236.0,290.7L239.1,292.7L242.0,293.9L243.1,292.4L243.8,290.5L246.0,289.3L247.6,289.6ZM248.4,222.1L249.3,224.7L250.9,224.3L251.1,224.9L250.4,226.7L248.0,227.6L248.0,230.8L247.6,231.4L248.2,232.1L246.7,233.2L245.1,235.2L244.4,236.9L244.7,238.6L243.3,240.8L244.2,244.2L244.9,244.6L244.9,246.4L243.6,248.5L243.6,250.1L242.0,251.6L242.0,253.5L242.7,255.6L241.3,256.3L240.7,258.2L240.2,260.4L240.7,263.4L239.8,263.8L240.2,266.4L241.1,267.3L240.4,268.2L241.6,268.7L241.8,269.6L240.7,270.1L240.9,271.6L240.2,274.7L239.1,276.7L239.3,278.0L238.7,279.8L236.9,280.8L237.1,283.7L237.8,284.5L239.3,284.5L239.3,286.3L240.2,288.0L245.6,288.2L247.6,288.8L245.6,288.8L244.7,289.3L242.7,290.5L242.2,293.0L241.3,293.3L238.7,292.1L236.2,290.2L236.2,290.2L233.6,288.8L232.7,286.9L233.3,285.3L232.2,283.7L232.0,279.2L232.9,276.7L235.3,274.7L232.0,274.0L234.0,272.0L234.7,268.0L237.3,268.9L238.4,264.1L236.9,263.4L236.2,266.4L234.9,265.9L235.6,262.7L236.2,258.5L237.3,257.1L236.7,255.0L236.4,252.6L237.3,252.4L238.7,249.1L240.2,245.8L241.3,242.8L240.7,239.8L241.3,238.2L241.1,235.9L242.4,233.4L242.9,229.8L243.6,226.0L244.2,221.9L244.0,219.1L243.6,216.4L244.7,216.0L245.3,215.1L246.4,216.4L246.7,217.6L248.0,218.3L247.1,220.1L248.4,222.1Z" data-name="Chile"/>
+<path d="M645.1,152.9L643.3,153.8L641.6,153.3L641.3,151.7L642.4,150.9L644.9,150.4L646.2,150.4L646.7,151.1L645.8,151.8L645.1,152.9ZM683.8,87.9L687.6,89.0L690.2,90.8L691.1,93.0L694.4,93.0L696.4,92.0L700.0,91.3L698.9,93.5L698.0,94.5L697.3,97.2L695.8,99.6L693.1,99.2L691.1,99.9L691.8,102.0L691.3,104.8L690.2,104.8L690.2,105.9L688.9,104.6L688.0,105.9L684.7,106.9L684.9,108.0L682.9,108.0L682.0,107.3L680.4,108.9L678.0,110.0L676.2,111.5L673.1,112.2L671.3,113.1L669.1,113.7L670.2,112.6L669.8,111.8L671.6,110.4L670.2,109.3L668.4,110.0L665.8,111.5L664.4,112.9L662.2,113.1L661.1,114.2L662.4,115.4L664.2,115.9L664.2,116.9L666.0,117.4L668.4,115.9L670.4,116.7L672.0,116.7L672.2,118.0L669.1,118.4L668.0,119.7L666.0,120.7L664.9,122.2L667.1,123.2L668.0,125.2L669.3,127.0L670.9,128.6L670.9,130.2L669.6,130.6L670.0,131.8L671.3,132.3L670.9,133.9L670.4,135.4L669.1,135.6L667.6,137.5L665.8,140.2L663.8,142.4L660.7,144.0L657.6,145.5L655.1,145.7L653.8,146.6L652.9,146.1L651.6,146.8L648.4,147.7L646.2,148.1L645.3,150.0L644.2,150.0L643.6,148.8L644.2,148.1L641.1,147.5L640.2,147.7L637.8,147.3L636.9,146.6L637.1,145.5L635.1,145.1L634.0,144.4L632.2,145.5L630.0,145.7L628.2,145.7L627.1,146.1L626.0,146.4L626.2,148.4L625.1,148.4L624.9,148.1L624.9,147.3L623.1,147.7L622.2,147.5L620.4,146.8L621.1,145.3L619.8,145.0L619.3,143.1L616.9,143.5L617.1,141.3L619.3,139.8L619.3,138.3L619.3,136.8L618.2,136.4L617.6,135.2L616.2,135.2L613.8,135.0L614.7,134.3L613.6,132.9L612.0,133.9L610.2,133.3L607.6,134.7L605.6,136.0L603.8,136.2L602.9,135.8L601.6,135.6L600.0,135.2L598.9,135.8L597.3,137.1L597.1,135.6L595.8,136.0L593.3,135.8L590.7,135.4L588.9,134.7L587.1,134.3L586.4,133.3L585.1,132.9L582.9,131.8L581.1,131.2L580.2,131.6L577.1,130.2L574.9,129.0L574.4,126.8L576.0,127.0L576.0,126.0L575.1,125.0L575.3,123.4L572.9,120.9L569.3,120.1L568.7,118.4L567.1,117.6L566.7,116.9L566.2,115.7L566.4,114.8L565.1,114.4L564.2,114.6L563.8,112.6L564.4,112.0L564.0,111.5L566.2,110.4L567.8,110.0L570.0,110.4L570.9,108.9L573.8,108.7L574.4,107.8L578.0,106.6L578.4,106.2L578.2,104.8L579.8,104.1L577.8,100.1L582.0,99.2L583.3,98.7L584.9,94.3L589.3,95.0L590.4,93.8L590.7,91.3L592.4,91.3L594.2,89.5L595.1,89.2L595.6,91.0L597.6,92.3L600.7,93.3L602.2,95.3L601.3,98.2L602.0,99.2L604.7,99.6L607.8,99.9L610.4,101.3L611.8,101.8L612.9,103.9L614.0,105.3L616.7,105.3L621.1,105.7L624.0,105.3L626.2,105.7L629.6,107.1L632.2,107.1L633.3,107.8L635.8,106.6L639.3,105.7L642.7,105.7L645.3,104.8L646.9,103.6L648.4,102.9L648.2,102.0L647.3,101.1L648.7,99.6L649.8,99.9L652.2,100.4L654.4,99.2L657.8,98.2L659.3,96.5L660.9,95.8L664.2,95.5L666.0,95.8L666.2,95.0L664.2,93.3L662.4,92.3L660.7,93.3L658.4,92.8L657.1,93.3L656.7,92.3L658.2,89.7L659.3,87.7L662.0,88.7L665.1,87.1L665.1,85.8L667.1,83.1L668.2,82.0L668.2,80.7L667.1,79.8L668.9,78.4L671.6,78.1L674.7,77.9L678.0,78.7L679.8,79.8L681.3,82.6L682.0,83.7L682.9,85.5L683.8,87.9Z" data-name="China"/>
+<path d="M393.6,176.6L392.7,176.6L391.1,176.2L389.8,176.2L387.1,176.6L385.6,177.1L383.3,177.7L382.9,177.6L383.1,176.2L383.3,176.1L383.1,175.4L382.2,174.7L381.6,174.5L380.9,174.0L381.3,173.3L381.1,172.5L381.3,172.0L381.6,172.0L381.8,171.3L381.6,171.0L381.8,170.6L382.7,170.4L382.0,169.1L381.6,168.4L381.8,167.9L382.2,167.7L382.4,167.5L383.1,167.9L384.7,167.9L385.1,167.4L385.6,167.4L386.2,167.2L386.4,167.9L387.1,167.7L388.0,167.4L388.9,167.7L389.3,168.4L390.4,168.7L391.1,168.2L392.2,168.2L393.8,168.7L394.2,171.1L393.3,172.5L392.9,174.4L393.8,175.9L393.6,176.6Z" data-name="Ivory Coast"/>
+<path d="M429.1,181.1L428.9,181.1L427.6,181.3L426.2,181.1L425.1,181.1L421.3,181.1L421.8,179.8L420.9,178.8L419.8,178.4L419.3,177.6L418.9,177.4L418.9,176.9L419.6,175.7L420.4,174.2L421.1,174.0L422.4,173.2L423.3,173.0L424.7,173.9L426.0,173.2L426.2,172.5L426.9,171.8L427.1,171.0L428.4,170.3L428.9,169.1L429.3,168.7L429.6,167.7L430.2,166.7L432.0,165.3L432.2,164.8L432.4,164.5L431.6,163.8L431.6,163.2L432.2,163.1L433.1,164.3L433.3,165.3L433.1,166.5L434.4,168.1L433.1,168.1L432.4,168.2L431.6,168.1L431.1,168.9L432.2,169.8L433.3,170.1L433.6,170.8L434.2,172.0L434.0,172.5L432.9,174.2L432.2,174.5L432.2,175.7L432.4,176.6L432.2,177.1L433.3,177.9L433.3,178.4L434.2,179.4L435.3,179.9L435.3,180.6L435.6,181.1L435.3,182.1L433.6,181.6L431.8,181.3L429.1,181.1Z" data-name="Cameroon"/>
+<path d="M468.4,179.1L468.4,181.1L469.3,181.3L468.7,182.0L467.8,182.3L466.9,183.1L466.4,184.0L466.2,185.3L465.8,186.0L465.8,187.2L465.1,187.7L465.1,188.7L464.7,188.9L464.4,189.7L465.1,190.6L465.1,192.6L465.6,194.1L465.3,195.0L465.8,196.0L467.1,197.0L468.2,199.0L467.3,198.9L464.4,199.2L463.8,199.4L463.1,200.6L463.8,201.3L463.3,203.3L463.1,205.0L463.6,205.4L465.1,206.1L465.8,205.7L466.0,207.6L464.2,207.4L463.3,206.6L462.7,205.9L460.9,205.5L460.4,204.7L459.1,205.2L457.3,205.0L456.4,204.2L455.1,204.0L454.0,204.2L454.0,203.7L453.1,203.5L452.2,203.5L450.7,203.7L449.8,203.7L449.3,203.8L449.3,201.8L448.7,201.1L448.4,200.1L448.7,199.0L448.2,198.4L448.2,197.3L445.6,197.3L445.8,196.7L444.7,196.7L444.4,197.0L443.1,197.2L442.7,198.0L442.2,198.5L441.1,198.2L440.2,198.5L438.9,198.7L438.0,197.7L437.6,197.2L436.9,196.1L436.2,195.0L429.8,195.0L428.9,195.1L428.2,195.1L427.3,195.3L427.1,194.8L427.6,194.6L427.8,193.8L428.0,193.4L428.9,193.1L429.6,193.3L430.2,192.6L431.3,192.6L431.6,193.1L432.4,193.4L433.8,192.3L435.1,191.6L435.6,190.9L435.6,189.6L436.4,187.9L437.6,187.0L438.9,186.2L439.1,185.7L439.3,185.2L439.6,184.5L439.6,183.5L439.8,182.1L440.2,181.0L440.9,180.1L441.1,179.1L441.1,177.9L442.0,177.1L443.3,176.6L445.1,177.1L446.4,177.7L448.2,177.9L449.8,178.3L450.4,177.2L450.7,177.1L451.8,177.2L454.2,176.4L455.1,176.7L455.8,176.7L456.2,176.2L457.1,176.1L458.7,176.2L460.0,176.4L460.9,176.2L462.2,177.6L463.1,177.7L463.8,177.4L464.9,177.6L466.0,177.2L466.7,177.9L468.4,179.1Z" data-name="Democratic Republic of the Congo"/>
+<path d="M428.9,193.1L428.0,192.4L427.3,192.8L426.4,193.4L424.7,191.7L426.4,190.7L425.6,189.7L426.2,189.2L427.8,189.0L428.0,188.2L429.1,189.0L431.1,189.2L431.8,188.4L432.0,187.2L431.8,186.0L430.7,185.0L431.8,183.0L431.1,182.6L429.6,182.8L428.9,182.0L429.1,181.1L431.8,181.3L433.6,181.6L435.3,182.1L435.6,181.1L436.7,179.6L438.0,178.8L439.6,178.9L441.1,179.1L440.9,180.1L440.2,181.0L439.8,182.1L439.6,183.5L439.6,184.5L439.3,185.2L439.1,185.7L438.9,186.2L437.6,187.0L436.4,187.9L435.6,189.6L435.6,190.9L435.1,191.6L433.8,192.3L432.4,193.4L431.6,193.1L431.3,192.6L430.2,192.6L429.6,193.3L428.9,193.1Z" data-name="Republic of the Congo"/>
+<path d="M232.4,185.3L231.6,184.8L230.4,184.3L229.8,184.5L228.0,184.3L227.3,183.7L226.9,183.7L224.7,182.6L224.4,182.1L225.3,182.0L225.1,181.1L225.8,180.6L226.9,180.4L227.8,179.4L228.7,178.6L227.8,178.1L228.2,177.1L227.8,175.5L228.2,175.2L227.8,173.7L226.9,172.8L227.1,172.0L228.0,172.2L228.4,171.6L227.8,170.6L228.0,170.3L229.3,170.4L230.9,169.3L231.8,169.1L231.8,168.4L232.2,167.0L233.6,166.2L234.9,166.2L235.1,165.8L236.9,166.0L238.7,165.1L239.6,164.6L240.4,163.9L241.3,163.9L242.0,164.5L241.6,165.0L240.0,165.3L239.6,166.2L238.7,166.7L238.0,167.2L237.8,168.6L237.1,169.4L238.2,169.6L238.4,170.4L239.1,170.8L239.1,171.5L238.9,172.2L239.1,172.5L239.6,172.7L240.0,173.2L242.9,173.0L244.2,173.2L245.8,174.7L246.7,174.5L248.2,174.5L249.6,174.4L250.4,174.7L250.0,175.5L249.6,176.2L249.3,177.4L249.8,178.6L250.4,179.1L250.4,179.4L249.3,180.3L250.2,180.6L250.7,181.1L251.3,182.8L250.9,183.1L250.4,182.1L250.0,181.6L249.1,182.1L244.9,182.1L244.9,183.1L246.2,183.3L246.0,184.0L245.6,183.8L244.4,184.2L244.4,185.3L245.3,185.8L245.8,186.9L245.8,187.7L244.7,192.3L243.6,191.4L242.9,191.2L244.4,189.6L242.7,188.9L241.3,188.9L240.4,188.7L239.3,189.0L237.6,188.9L236.2,187.2L235.3,186.7L234.7,185.8L233.1,185.2L232.4,185.3Z" data-name="Colombia"/>
+<path d="M215.6,171.1L214.4,170.8L214.0,170.3L214.2,170.1L214.2,169.6L213.6,169.3L212.7,168.9L212.0,168.7L211.8,168.2L211.1,167.9L211.3,168.4L210.9,168.7L210.4,168.4L209.6,168.2L209.3,167.9L209.3,167.4L209.6,166.7L209.1,166.5L209.6,166.2L209.8,166.0L211.3,166.3L211.8,166.2L212.4,166.3L212.9,166.7L213.6,166.9L214.0,166.5L214.7,167.4L215.6,168.1L216.7,168.7L215.8,168.9L215.8,169.6L216.2,169.9L215.8,170.1L216.0,170.4L215.8,170.8L215.6,171.1Z" data-name="Costa Rica"/>
+<path d="M217.1,144.8L219.1,145.0L220.9,145.0L222.9,145.5L223.8,146.2L226.0,146.1L226.7,146.4L228.7,147.5L230.0,148.4L230.7,148.4L232.0,148.8L231.8,149.3L233.6,149.3L235.1,150.0L234.9,150.4L233.3,150.8L232.0,150.8L230.4,150.6L227.1,150.8L228.7,149.9L227.8,149.3L226.4,149.3L225.6,148.8L225.1,147.7L223.8,147.7L221.8,147.3L221.1,147.0L218.2,146.6L217.3,146.2L218.2,145.9L216.0,145.7L214.4,146.6L213.6,146.6L213.1,147.2L212.2,147.3L211.1,147.2L212.4,146.6L212.9,145.9L213.8,145.5L214.9,145.1L216.7,145.0L217.1,144.8Z" data-name="Cuba"/>
+<path d="M472.7,121.7L472.9,121.7L473.1,121.1L474.9,121.1L476.9,120.5L475.3,121.5L475.6,121.7L475.3,121.7L474.9,122.0L474.4,122.0L474.4,122.0L474.4,121.7L474.2,121.5L473.8,121.5L473.1,121.7L472.7,121.7Z" data-name="Northern Cyprus"/>
+<path d="M475.6,121.7L475.6,122.0L473.3,122.8L472.2,122.6L471.8,121.7L472.7,121.7L473.1,121.7L473.8,121.5L474.2,121.5L474.4,121.7L474.4,122.0L474.4,122.0L474.9,122.0L475.3,121.7L475.6,121.7Z" data-name="Cyprus"/>
+<path d="M437.8,91.0L436.7,90.5L435.6,90.8L434.0,90.0L433.1,90.0L431.8,91.0L430.2,90.2L428.9,89.2L427.8,88.7L427.6,87.4L427.1,86.6L428.9,86.1L429.6,85.5L431.3,85.0L431.8,84.5L432.4,84.7L433.3,84.5L434.4,85.3L436.0,85.5L436.0,86.3L437.1,86.9L437.6,86.1L439.1,86.3L439.1,87.4L440.9,87.4L442.0,88.7L441.3,88.7L440.9,89.2L440.4,89.2L440.2,90.0L439.8,90.0L439.8,90.2L438.9,90.5L438.0,90.5L437.8,91.0Z" data-name="Czech Republic"/>
+<path d="M422.0,73.5L422.0,74.7L424.4,75.3L424.2,76.4L426.7,75.9L427.8,75.0L430.2,76.1L431.3,77.0L432.0,78.7L431.3,79.3L432.0,80.4L432.7,81.8L432.4,82.9L433.3,84.5L432.4,84.7L431.8,84.5L431.3,85.0L429.6,85.5L428.9,86.1L427.1,86.6L427.6,87.4L427.8,88.7L428.9,89.2L430.2,90.2L429.3,91.5L428.7,91.8L428.9,93.5L428.7,93.8L428.0,93.3L426.9,93.3L425.3,93.8L423.3,93.5L423.1,94.3L422.0,93.5L421.3,93.8L418.9,93.0L418.4,93.5L416.7,93.5L416.9,91.8L418.0,90.0L414.9,89.5L413.8,88.7L413.8,87.7L413.3,87.1L413.8,85.3L413.3,82.3L414.7,82.3L415.1,81.5L415.8,79.0L415.3,77.9L415.8,77.3L417.6,77.3L418.0,77.9L419.6,76.4L419.1,75.3L418.9,73.5L420.7,74.1L422.0,73.5Z" data-name="Germany"/>
+<path d="M495.8,163.4L496.2,163.9L496.2,164.6L494.9,165.1L495.8,165.5L495.1,166.5L494.7,166.2L494.0,166.3L492.9,166.2L492.7,165.7L492.7,165.3L493.3,164.5L494.2,163.8L495.1,163.8L495.8,163.4Z" data-name="Djibouti"/>
+<path d="M428.2,71.8L426.9,74.1L424.4,72.3L424.2,71.2L427.6,70.3L428.2,71.8ZM424.2,69.0L423.8,70.3L423.1,69.9L421.3,72.1L422.0,73.5L420.7,74.1L418.9,73.5L418.0,72.1L418.0,69.0L418.4,68.1L418.9,67.2L420.9,66.9L421.8,66.3L423.6,65.3L423.3,66.9L422.7,67.8L423.1,68.7L424.2,69.0Z" data-name="Denmark"/>
+<path d="M240.7,151.1L240.9,150.8L242.7,150.8L244.0,151.3L244.4,151.3L244.9,151.8L246.2,151.8L246.0,152.4L247.1,152.4L248.2,153.1L247.3,153.8L246.2,153.4L245.3,153.4L244.4,153.4L244.2,153.8L243.3,153.8L242.9,153.4L242.2,153.6L241.3,154.9L240.7,154.5L240.7,154.1L240.7,153.6L240.2,153.1L240.7,152.7L240.9,152.0L240.7,151.1Z" data-name="Dominican Republic"/>
+<path d="M426.7,144.2L419.1,147.7L412.7,151.3L409.6,152.0L407.1,152.2L406.9,151.1L406.0,150.8L404.7,150.4L404.0,149.5L396.4,145.5L389.1,141.5L380.7,136.9L380.7,136.6L380.7,136.4L380.7,134.3L384.2,132.7L386.4,132.5L388.4,132.0L389.1,131.0L391.8,130.2L392.0,128.8L393.1,128.6L394.2,127.8L397.1,127.4L397.6,126.6L396.9,126.2L396.2,124.2L396.0,123.0L395.1,121.5L397.3,120.5L399.8,120.1L401.1,119.3L403.3,118.6L407.1,118.2L410.7,118.0L411.8,118.4L414.0,117.6L416.2,117.6L417.1,118.0L418.7,118.0L418.2,119.0L418.7,120.9L418.0,122.6L416.7,123.8L416.9,125.4L418.7,126.6L418.7,127.0L420.2,127.8L421.1,131.4L421.8,133.1L422.0,133.9L421.6,135.6L421.8,136.4L421.3,137.5L421.6,138.6L420.7,139.4L422.0,140.7L422.0,141.6L422.9,142.6L424.0,142.2L425.8,143.1L426.7,144.2Z" data-name="Algeria"/>
+<path d="M221.6,190.7L222.7,189.6L222.2,188.7L221.3,189.6L220.0,188.7L220.4,188.4L220.2,186.9L220.9,186.5L221.3,185.5L222.2,184.3L222.0,183.7L223.3,183.3L224.7,182.6L226.9,183.7L227.3,183.7L228.0,184.3L229.8,184.5L230.4,184.3L231.6,184.8L232.4,185.3L232.9,186.5L232.2,187.7L229.8,189.4L227.1,190.1L225.6,191.6L225.3,192.6L224.0,193.4L223.1,192.6L222.2,192.3L221.3,192.4L221.1,191.9L221.8,191.4L221.6,190.7Z" data-name="Ecuador"/>
+<path d="M477.6,132.9L476.9,133.7L476.4,135.2L476.0,136.2L475.3,136.6L474.7,135.8L473.6,135.0L472.0,132.1L471.8,132.3L472.7,134.5L474.0,136.4L475.8,139.4L476.7,140.3L477.3,141.5L479.3,143.5L478.9,143.7L478.9,145.0L481.6,146.6L482.0,147.0L473.1,147.0L464.4,147.0L455.6,147.0L455.6,140.2L455.6,133.5L454.9,132.0L455.6,130.6L455.1,129.8L456.0,128.8L458.9,128.8L461.1,129.4L463.3,130.0L464.2,130.2L466.0,129.6L466.9,129.0L468.9,128.8L470.4,129.2L471.1,130.2L471.6,129.4L473.3,130.0L475.1,130.0L476.2,129.6L477.6,132.9Z" data-name="Egypt"/>
+<path d="M494.2,163.8L493.3,163.1L492.4,162.0L491.6,161.5L490.9,161.0L488.9,160.3L487.3,160.3L486.9,159.9L485.6,160.3L484.2,159.4L483.6,160.8L480.9,160.5L480.7,159.8L481.8,157.1L482.0,155.9L482.7,155.4L484.2,155.2L485.3,154.1L486.7,156.3L487.3,157.8L488.4,158.7L491.6,160.3L492.7,161.3L494.0,162.4L494.7,162.9L495.8,163.4L495.1,163.8L494.2,163.8Z" data-name="Eritrea"/>
+<path d="M380.0,107.1L380.0,105.5L379.1,104.6L382.2,102.9L384.9,103.2L388.0,103.2L390.4,103.6L392.2,103.4L395.8,103.6L396.7,104.6L400.7,105.5L401.6,105.0L404.0,106.2L406.7,105.7L406.7,107.1L404.7,108.7L401.8,109.1L401.6,109.8L400.2,111.1L399.3,112.9L400.2,114.2L398.9,115.0L398.4,116.5L396.9,116.9L395.3,118.4L392.4,118.4L390.2,118.4L388.9,119.3L388.0,120.1L386.9,119.9L386.2,119.0L385.6,118.0L383.3,117.6L383.3,116.9L384.0,116.1L384.4,115.4L383.6,114.8L384.2,113.5L383.3,112.2L384.2,112.0L384.4,110.9L384.7,110.7L384.7,108.9L385.8,108.2L385.1,107.1L383.8,107.1L383.6,107.3L382.2,107.3L381.6,106.2L380.7,106.6L380.0,107.1Z" data-name="Spain"/>
+<path d="M454.0,65.0L454.2,63.1L453.6,63.4L452.0,62.4L451.8,60.5L454.7,59.5L457.6,59.2L459.8,59.8L462.2,59.5L462.4,60.1L460.9,62.1L461.6,65.0L460.7,65.9L458.9,65.9L456.9,65.0L456.0,64.4L454.0,65.0Z" data-name="Estonia"/>
+<path d="M484.2,159.4L485.6,160.3L486.9,159.9L487.3,160.3L488.9,160.3L490.9,161.0L491.6,161.5L492.4,162.0L493.3,163.1L494.2,163.8L493.3,164.5L492.7,165.3L492.7,165.7L492.9,166.2L494.0,166.3L494.7,166.2L495.1,166.5L494.7,167.0L495.3,168.1L496.2,168.9L497.1,169.4L504.2,171.5L506.2,171.5L500.0,176.6L497.1,176.6L495.1,177.7L493.6,177.9L493.1,178.4L491.6,178.4L490.7,177.7L488.7,178.6L488.0,179.3L486.4,179.1L486.0,178.9L485.3,178.9L484.7,178.9L482.0,177.6L480.4,177.6L479.6,176.9L479.6,176.1L478.4,175.7L477.1,173.9L476.2,173.5L475.8,172.8L474.7,172.0L473.3,171.8L474.0,170.8L475.1,170.8L475.6,170.3L475.6,168.7L476.2,167.0L477.1,166.5L477.3,165.8L478.4,164.5L479.8,163.6L480.7,161.9L480.9,160.5L483.6,160.8L484.2,159.4Z" data-name="Ethiopia"/>
+<path d="M463.6,21.7L463.1,25.0L466.7,28.2L464.7,31.7L467.1,36.3L465.6,39.9L467.6,42.7L466.7,45.0L470.0,47.6L469.1,49.4L467.1,51.6L462.4,56.1L458.4,56.5L454.4,57.5L450.9,58.5L449.6,56.5L447.3,55.4L447.8,51.9L446.9,48.7L447.8,46.5L449.8,44.2L454.9,39.9L456.4,39.1L456.2,37.5L453.1,35.4L452.4,33.8L452.2,27.3L448.9,24.1L445.8,21.7L447.1,20.3L449.8,23.2L452.7,22.7L454.9,24.1L457.1,21.7L458.2,18.4L461.6,16.4L464.4,18.4L463.6,21.7Z" data-name="Finland"/>
+<path d="M796.4,214.6L797.1,215.1L796.9,216.2L795.3,216.4L794.2,216.2L794.0,215.3L794.9,214.8L795.8,215.0L796.4,214.6ZM798.7,213.7L797.1,214.1L796.9,213.4L798.0,213.0L798.7,213.0L800.0,212.5L800.0,213.4L798.7,213.7ZM0.2,213.2L0.0,213.4L0.0,212.5L0.4,212.3L0.2,213.2Z" data-name="Fiji"/>
+<path d="M264.0,287.7L266.7,285.8L268.7,286.6L270.0,285.5L271.6,286.6L271.1,287.7L268.0,288.5L266.9,287.7L265.1,288.8L264.0,287.7Z" data-name="Falkland Islands"/>
+<path d="M283.1,180.8L282.4,181.5L281.3,181.5L280.9,181.1L280.4,181.0L279.8,181.5L278.9,181.1L279.3,180.4L279.6,179.6L280.0,178.9L279.1,177.9L278.9,176.7L280.0,175.2L280.9,175.5L282.4,175.9L284.9,177.2L285.1,177.9L284.0,179.6L283.1,180.8ZM421.3,106.4L420.4,108.2L419.6,107.8L418.9,106.2L419.3,105.5L420.9,104.6L421.3,106.4ZM408.0,86.3L409.6,87.7L410.7,87.4L412.7,88.7L413.1,89.0L413.8,88.7L414.9,89.5L418.0,90.0L416.9,91.8L416.7,93.5L416.0,94.0L414.9,93.8L415.1,94.3L413.3,95.8L413.3,96.7L414.4,96.5L415.1,97.5L415.1,98.2L415.8,99.2L414.9,99.9L415.6,101.5L416.7,102.0L416.4,102.9L414.4,104.3L410.2,103.6L406.9,104.3L406.7,105.7L404.0,106.2L401.6,105.0L400.7,105.5L396.7,104.6L395.8,103.6L396.9,102.2L397.3,97.5L395.1,94.8L393.3,93.5L390.0,92.5L389.8,90.8L392.7,90.2L396.4,91.0L395.8,87.9L397.8,89.2L402.9,87.1L403.6,85.0L405.6,84.5L406.0,85.3L406.9,85.3L408.0,86.3Z" data-name="France"/>
+<path d="M424.7,191.7L422.4,190.1L420.9,188.5L419.6,186.9L419.6,186.3L420.0,185.8L420.7,184.5L421.1,183.3L421.8,183.1L425.1,183.1L425.1,181.1L426.2,181.1L427.6,181.3L428.9,181.1L429.1,181.1L428.9,182.0L429.6,182.8L431.1,182.6L431.8,183.0L430.7,185.0L431.8,186.0L432.0,187.2L431.8,188.4L431.1,189.2L429.1,189.0L428.0,188.2L427.8,189.0L426.2,189.2L425.6,189.7L426.4,190.7L424.7,191.7Z" data-name="Gabon"/>
+<path d="M387.3,74.7L386.2,76.7L384.4,76.1L383.1,76.1L383.6,74.7L383.1,73.2L385.1,72.9L387.3,74.7ZM393.3,62.4L390.9,65.6L393.1,65.3L395.6,65.3L395.1,67.8L393.1,70.6L395.3,70.9L395.6,71.2L397.6,74.7L399.1,75.0L400.4,78.4L401.1,79.5L403.8,80.1L403.6,81.8L402.4,82.6L403.1,83.9L401.3,85.3L398.2,85.3L394.4,86.1L393.3,85.5L392.0,86.9L390.0,86.6L388.4,87.4L387.1,86.9L390.4,84.2L392.4,83.7L392.4,83.7L388.9,83.1L388.2,82.0L390.7,81.2L389.3,79.8L389.8,77.9L393.1,78.1L393.1,78.1L393.6,76.4L392.0,74.7L392.0,74.7L389.3,74.1L388.7,73.2L389.6,72.1L388.9,71.2L387.6,72.6L387.6,69.6L386.4,68.1L387.1,65.0L388.9,62.4L390.7,62.4L393.3,62.4Z" data-name="England"/>
+<path d="M492.4,108.0L492.7,106.9L492.2,105.5L490.9,104.6L489.6,104.3L488.9,103.6L489.1,103.2L490.9,103.6L494.2,104.1L497.3,105.3L497.6,105.5L498.9,105.3L501.1,105.7L501.8,106.6L503.1,107.1L502.4,107.5L503.6,108.7L503.3,108.9L502.2,108.9L500.4,108.2L500.0,108.7L496.9,108.9L494.7,107.8L492.4,108.0Z" data-name="Georgia"/>
+<path d="M402.4,175.0L398.9,176.1L397.6,176.6L395.6,177.1L393.6,176.6L393.8,175.9L392.9,174.4L393.3,172.5L394.2,171.1L393.8,168.7L393.3,167.4L393.6,166.3L397.3,166.3L398.2,166.5L399.1,166.2L400.0,166.3L400.0,166.9L400.9,167.7L400.9,168.9L401.1,170.3L401.6,171.0L401.1,172.5L401.3,173.3L401.8,174.4L402.4,175.0Z" data-name="Ghana"/>
+<path d="M381.3,172.0L380.7,172.0L380.2,172.7L379.6,172.7L379.1,172.3L379.3,171.6L378.2,170.6L377.8,170.8L377.3,170.8L376.7,171.0L376.7,170.3L376.2,169.8L376.4,169.3L376.0,168.6L375.3,168.1L373.6,168.1L372.9,168.2L372.4,168.4L372.0,168.7L371.8,169.3L370.7,169.9L369.6,168.9L368.7,168.2L368.2,168.1L367.6,167.7L367.3,166.9L367.1,166.5L366.4,166.3L367.3,165.5L368.0,165.5L368.7,165.1L369.1,165.1L369.6,165.0L369.3,164.5L369.6,164.3L369.6,163.6L370.7,163.6L372.2,164.1L372.7,163.9L372.9,163.8L374.0,163.9L374.4,163.9L374.4,164.5L374.9,164.5L375.6,164.3L375.8,164.3L376.4,164.8L377.3,165.0L378.0,164.5L378.7,164.3L379.3,164.1L379.8,164.1L380.2,164.5L380.4,165.0L381.3,165.7L380.9,166.2L380.9,166.7L381.3,166.5L381.6,166.7L381.6,167.2L382.2,167.7L381.8,167.9L381.6,168.4L382.0,169.1L382.7,170.4L381.8,170.6L381.6,171.0L381.8,171.3L381.6,172.0L381.3,172.0Z" data-name="Guinea"/>
+<path d="M362.7,162.6L362.9,161.9L365.3,161.9L365.8,161.3L366.4,161.3L367.3,161.9L368.0,161.9L368.9,161.5L369.3,162.0L368.2,162.4L367.3,162.4L366.4,162.0L365.6,162.4L365.1,162.4L364.7,162.7L362.7,162.6Z" data-name="Gambia"/>
+<path d="M366.4,166.3L365.1,165.5L364.2,165.5L363.8,165.0L363.8,164.6L363.1,164.3L362.9,163.9L364.2,163.8L364.9,163.8L365.6,163.6L369.6,163.6L369.6,164.3L369.3,164.5L369.6,165.0L369.1,165.1L368.7,165.1L368.0,165.5L367.3,165.5L366.4,166.3Z" data-name="Guinea Bissau"/>
+<path d="M421.1,183.3L420.7,183.0L421.3,181.1L425.1,181.1L425.1,183.1L421.8,183.1L421.1,183.3Z" data-name="Equatorial Guinea"/>
+<path d="M452.7,120.5L453.8,121.1L455.6,121.1L457.3,121.1L457.1,121.5L458.4,121.3L458.2,122.0L454.9,122.2L454.9,121.7L452.2,121.3L452.7,120.5ZM459.1,107.8L458.4,109.3L458.0,109.6L456.4,109.3L455.3,109.3L452.7,109.8L454.2,111.1L453.1,111.3L451.8,111.3L450.7,110.2L450.2,110.7L450.7,112.0L452.0,113.1L451.1,113.5L452.2,114.6L453.3,115.2L453.3,116.3L451.3,115.9L452.0,116.9L450.7,117.2L451.6,119.0L450.0,119.0L448.2,118.2L447.3,116.5L446.9,115.0L446.0,113.9L444.9,112.9L444.9,112.2L445.8,111.1L446.0,110.4L446.7,110.0L446.7,109.6L448.2,109.3L449.1,108.9L450.2,108.9L450.7,108.4L451.1,108.4L452.7,108.4L454.4,107.8L456.0,108.7L458.0,108.4L458.0,107.3L459.1,107.8Z" data-name="Greece"/>
+<path d="M296.0,-79.5L303.6,-87.7L311.3,-87.7L314.2,-92.0L322.0,-93.5L339.8,-92.0L353.8,-80.8L349.6,-75.6L341.1,-75.6L329.1,-74.4L330.2,-71.9L338.0,-73.1L344.9,-69.5L349.1,-73.1L350.9,-68.4L348.4,-62.7L354.2,-66.0L364.9,-70.7L371.6,-68.4L372.9,-63.8L363.8,-56.3L362.4,-53.2L355.6,-52.2L360.7,-51.3L358.0,-44.6L356.2,-39.3L356.2,-29.4L358.9,-24.8L355.6,-24.0L351.8,-21.8L356.0,-18.2L356.4,-12.1L354.0,-12.1L356.9,-6.4L352.0,-5.7L354.7,-3.3L353.8,-1.5L350.7,-0.3L347.6,-0.3L350.4,3.7L350.4,5.9L346.0,3.7L344.9,5.4L348.0,6.5L350.9,9.7L351.6,13.9L347.8,14.9L346.0,12.9L343.3,10.3L344.0,13.4L341.3,16.4L347.3,16.4L350.4,16.9L344.4,20.8L338.4,24.5L331.8,26.4L329.3,26.4L327.1,28.2L324.0,32.5L319.1,35.4L317.8,35.9L314.7,36.7L311.6,37.5L309.6,40.3L309.6,43.0L308.4,45.3L304.9,48.3L305.8,51.2L304.7,54.0L303.6,57.5L300.4,57.8L297.1,54.7L292.7,54.7L290.7,53.0L289.1,49.4L285.3,45.0L284.2,42.3L283.8,38.7L280.7,35.0L281.6,32.1L280.0,30.4L282.2,25.0L285.6,23.6L286.4,21.7L286.9,17.9L284.4,19.4L283.1,20.3L281.1,20.8L278.4,19.4L278.2,15.9L279.1,13.4L281.3,13.4L285.8,14.4L282.0,11.3L280.0,9.7L277.8,10.3L276.0,8.7L278.4,3.7L277.1,1.4L275.3,-2.1L272.7,-8.9L269.8,-11.5L269.8,-14.1L263.8,-18.2L259.1,-19.0L253.1,-18.2L247.8,-18.2L245.1,-20.4L241.3,-24.8L247.1,-27.0L251.6,-27.8L242.2,-29.4L237.1,-32.6L237.3,-35.9L245.8,-40.1L254.0,-44.6L254.9,-48.4L248.9,-51.3L250.7,-55.3L258.4,-62.7L261.8,-63.8L260.7,-69.5L266.0,-71.9L272.9,-74.4L279.8,-74.4L282.2,-70.7L288.0,-76.9L293.3,-73.1L296.4,-71.9L301.1,-68.4L295.8,-74.4L296.0,-79.5Z" data-name="Greenland"/>
+<path d="M199.8,161.7L198.7,161.3L197.3,161.3L196.2,161.0L195.1,160.3L195.1,159.8L195.3,159.2L195.1,158.9L196.2,157.5L198.9,157.5L199.1,157.0L198.7,156.8L198.4,156.4L197.6,156.1L196.7,155.4L197.8,155.4L197.8,154.5L199.8,154.5L202.0,154.5L201.8,155.9L201.8,157.8L202.4,157.8L203.1,158.2L203.3,157.8L204.0,158.2L202.9,158.9L201.8,159.2L201.8,159.6L202.0,159.9L201.3,160.5L200.9,160.5L201.1,160.8L200.7,161.0L199.8,161.3L199.8,161.7Z" data-name="Guatemala"/>
+<path d="M267.1,170.8L268.7,171.5L270.0,172.7L270.0,173.5L270.9,173.5L272.2,174.4L273.1,174.9L272.7,176.4L271.3,176.9L271.3,177.2L271.1,178.1L272.0,179.4L272.7,179.4L272.9,180.3L274.4,181.8L273.8,181.8L272.7,181.8L271.8,182.1L270.9,182.5L270.2,182.5L270.0,182.8L268.9,182.8L267.6,182.0L267.3,181.3L266.7,180.3L267.1,178.9L267.8,178.3L267.1,177.6L266.4,177.2L266.7,176.6L266.2,176.2L265.1,176.2L263.6,174.9L264.2,174.5L264.0,173.7L265.6,173.3L266.0,173.2L265.3,172.5L265.3,171.8L267.1,170.8Z" data-name="Guyana"/>
+<path d="M206.0,162.9L205.6,162.4L204.9,162.2L205.1,161.5L204.7,161.3L204.2,161.2L203.3,161.5L203.3,161.2L202.7,161.0L202.0,160.6L201.3,160.5L202.0,159.9L201.8,159.6L201.8,159.2L202.9,158.9L204.0,158.2L204.2,158.2L204.7,157.8L205.3,157.8L205.6,158.0L205.8,158.0L206.9,158.0L208.0,158.0L208.7,157.8L208.9,157.7L209.6,157.7L210.2,157.8L210.7,157.8L211.1,157.7L212.2,157.8L212.4,158.0L213.1,158.4L213.8,158.7L214.7,158.9L215.3,159.4L214.4,159.4L214.2,159.6L213.3,159.9L212.9,159.9L212.4,160.1L212.0,159.9L211.6,159.8L211.3,159.8L210.9,160.1L210.9,160.1L210.7,160.5L210.0,161.0L209.6,161.2L209.3,161.5L208.7,161.2L208.2,161.5L207.8,161.5L207.1,161.5L207.3,162.4L206.9,162.4L206.7,162.9L206.0,162.9Z" data-name="Honduras"/>
+<path d="M441.8,97.7L442.4,98.7L443.1,99.4L442.2,100.1L441.3,99.6L439.8,99.6L437.8,99.4L436.7,99.4L436.2,99.9L435.6,99.4L435.1,100.4L436.0,101.3L436.7,102.2L437.6,102.9L438.4,103.6L439.3,104.6L441.3,105.5L441.1,105.7L438.9,105.0L437.6,104.1L435.6,103.4L433.8,101.8L434.2,101.5L433.1,100.6L433.1,99.6L431.8,99.4L431.1,100.4L430.4,99.6L430.4,98.7L430.4,98.7L432.0,98.7L432.4,98.4L433.1,98.7L434.0,98.7L434.0,98.2L434.9,98.0L435.1,97.0L436.9,96.3L437.6,96.5L439.1,97.5L441.1,98.0L441.8,97.7Z" data-name="Croatia"/>
+<path d="M237.3,150.8L238.7,150.8L240.7,151.1L240.9,152.0L240.7,152.7L240.2,153.1L240.7,153.6L240.7,154.1L239.1,153.8L238.2,154.0L236.7,153.8L235.8,154.1L234.4,153.6L234.7,152.9L236.9,153.3L238.4,153.4L239.3,152.9L238.2,152.2L238.2,151.5L236.9,151.3L237.3,150.8Z" data-name="Haiti"/>
+<path d="M436.0,95.3L436.7,93.8L436.2,93.3L437.6,93.3L437.8,92.3L438.9,92.8L439.8,93.0L441.6,92.8L441.8,92.3L442.7,92.3L443.8,91.8L444.0,92.0L444.9,91.8L445.6,91.0L446.2,91.0L448.7,91.8L449.1,91.5L450.2,92.0L450.4,92.8L449.1,93.3L448.0,95.0L446.7,96.7L444.9,97.2L443.6,97.0L441.8,97.7L441.1,98.0L439.1,97.5L437.6,96.5L436.9,96.3L436.4,95.5L436.0,95.3Z" data-name="Hungary"/>
+<path d="M668.2,202.3L667.3,202.5L664.4,201.3L666.4,200.9L667.6,201.4L668.4,201.9L668.2,202.3ZM676.4,202.1L674.7,202.6L674.4,202.3L674.7,201.8L675.6,200.7L677.8,200.1L678.0,200.4L678.0,200.9L676.4,202.1ZM662.0,198.7L662.9,199.2L664.2,199.0L664.7,199.7L662.2,200.1L660.7,200.2L659.3,200.2L660.2,199.4L661.3,199.2L662.0,198.7ZM673.1,198.7L672.9,199.6L669.6,200.1L666.4,199.9L666.4,199.2L668.2,198.9L669.6,199.4L671.1,199.4L673.1,198.7ZM641.3,196.5L645.6,196.7L646.2,196.0L650.2,196.7L651.1,197.8L654.4,198.2L657.1,199.2L654.7,199.9L652.2,199.0L650.2,199.2L647.8,199.0L645.8,198.7L643.1,198.0L641.6,197.8L640.7,198.2L636.7,197.5L636.2,196.7L634.2,196.7L635.8,195.0L638.4,195.1L640.2,195.6L641.1,195.8L641.3,196.5ZM699.3,195.5L698.2,196.7L698.0,195.3L698.4,194.8L698.9,194.1L699.3,194.6L699.3,195.5ZM682.7,190.9L682.0,191.4L680.4,191.1L680.0,190.4L682.2,190.2L682.7,190.9ZM690.0,190.2L690.7,191.6L688.9,190.7L687.1,190.7L685.8,190.7L684.2,190.7L684.7,189.7L687.6,189.7L690.0,190.2ZM698.0,187.0L698.7,189.7L701.1,190.7L702.9,188.9L705.3,187.9L707.3,187.9L709.3,188.5L710.9,189.0L713.3,189.4L713.3,195.0L713.3,200.4L711.3,199.0L709.1,198.7L708.7,199.2L705.8,199.2L706.7,197.8L708.2,197.3L707.6,195.5L706.4,194.1L702.2,192.6L700.4,192.6L697.1,190.9L696.4,191.7L695.6,191.9L695.1,191.2L695.1,190.6L693.3,189.7L695.8,189.2L697.3,189.2L697.1,188.7L693.8,188.7L692.9,187.7L690.9,187.4L690.0,186.5L693.1,186.2L694.2,185.7L697.8,186.3L698.0,187.0ZM678.2,182.6L676.4,184.3L674.9,184.7L672.7,184.3L669.1,184.3L667.1,184.7L666.7,185.8L668.7,187.4L670.0,186.7L674.0,186.0L674.0,186.9L672.9,186.5L672.0,187.5L670.0,188.2L672.2,190.4L671.8,190.9L673.8,192.9L673.8,193.9L672.4,194.5L671.6,193.9L672.7,192.6L670.4,193.3L670.0,192.8L670.2,192.1L668.7,191.1L668.9,189.4L667.3,189.9L667.6,191.9L667.6,194.3L666.2,194.6L665.3,194.1L666.0,192.6L665.6,190.9L664.7,190.9L664.0,189.7L664.9,188.5L665.1,187.4L666.2,184.7L666.7,184.0L668.7,182.8L670.4,183.3L673.1,183.5L675.8,183.5L678.0,182.3L678.2,182.6ZM686.0,183.1L685.8,184.5L684.7,184.3L684.4,185.5L685.3,186.3L684.7,186.5L683.8,185.5L683.1,183.3L683.6,182.0L684.2,181.3L684.4,182.3L685.8,182.5L686.0,183.1ZM662.0,182.0L664.4,183.5L661.8,183.7L661.1,184.8L661.1,186.3L659.1,187.5L658.9,189.2L658.0,191.7L657.8,191.2L655.3,191.9L654.4,190.9L652.9,190.7L651.8,190.2L649.1,190.9L648.2,190.1L646.7,190.1L644.9,189.9L644.7,187.7L643.6,187.2L642.4,185.8L642.2,184.3L642.4,182.8L643.8,181.6L644.0,182.8L645.6,183.7L647.1,183.3L648.4,183.5L649.8,182.6L650.9,182.5L652.9,183.0L654.7,182.6L655.8,180.3L656.7,179.6L657.6,177.7L660.0,177.7L662.0,178.1L660.7,179.6L662.2,181.1L662.0,182.0ZM635.1,195.0L632.7,195.0L630.9,193.4L628.0,192.1L627.1,191.1L625.3,189.7L624.2,188.5L622.4,186.2L620.7,184.7L620.0,183.3L619.1,182.0L617.1,180.8L616.0,179.4L614.2,178.4L612.0,176.6L611.8,175.7L613.1,175.9L616.7,176.2L618.7,177.7L620.2,178.9L621.6,179.6L623.6,181.5L626.0,181.5L627.8,182.6L629.1,184.0L630.7,184.8L629.8,186.2L631.1,186.9L632.0,186.9L632.2,188.0L633.1,188.9L634.7,189.0L635.8,190.2L635.3,192.3L635.1,195.0Z" data-name="Indonesia"/>
+<path d="M572.9,120.9L575.3,123.4L575.1,125.0L576.0,126.0L576.0,127.0L574.4,126.8L574.9,129.0L577.1,130.2L580.2,131.6L578.9,132.5L578.0,134.3L580.2,135.0L582.2,136.0L585.1,136.9L588.2,137.3L589.6,138.3L591.1,138.5L593.8,138.8L595.8,138.8L596.0,138.1L595.6,136.9L595.8,136.0L597.1,135.6L597.3,137.1L597.3,137.5L599.3,138.3L600.9,137.9L602.7,138.1L604.4,138.1L604.7,136.8L603.8,136.2L605.6,136.0L607.6,134.7L610.2,133.3L612.0,133.9L613.6,132.9L614.7,134.3L613.8,135.0L616.2,135.2L616.4,136.0L615.8,136.4L615.8,137.5L614.2,137.1L611.3,138.5L611.6,139.6L610.2,141.1L610.2,142.0L609.1,143.5L607.3,143.1L607.3,145.1L606.9,145.7L607.1,146.4L606.0,147.0L604.7,144.0L604.2,144.0L603.8,145.1L602.7,144.2L603.3,143.1L604.2,143.1L605.3,141.5L604.0,141.3L602.0,141.3L599.8,140.9L599.6,139.6L598.7,139.6L596.9,138.8L596.0,140.0L597.6,141.1L596.2,141.6L595.8,142.4L597.1,142.9L596.7,144.0L597.6,145.3L597.8,146.8L597.6,147.5L596.0,147.5L593.3,147.9L593.3,149.3L592.2,150.2L589.1,151.5L586.4,153.6L584.9,154.7L582.7,155.9L582.7,156.6L581.6,157.1L579.6,157.7L578.4,157.8L577.8,159.2L578.2,161.5L578.4,162.9L577.6,164.5L577.6,167.4L576.2,167.5L575.3,168.9L576.0,169.4L574.0,169.9L573.1,171.0L572.2,171.5L570.2,169.9L569.1,167.5L568.2,165.8L567.6,165.0L566.4,163.4L565.8,161.2L565.3,160.1L563.3,157.7L562.4,154.3L561.8,152.0L561.8,149.9L561.3,148.1L558.2,149.1L556.7,149.0L553.8,146.8L554.7,146.1L554.0,145.5L551.6,143.9L552.9,142.6L557.8,142.6L557.3,141.1L556.2,140.2L556.0,138.6L554.4,137.9L556.9,135.8L559.6,136.0L561.8,133.9L563.3,132.0L565.3,130.0L565.3,128.6L567.3,127.4L565.6,126.4L564.7,125.2L563.8,123.4L564.9,122.6L568.4,123.0L570.9,122.6L572.9,120.9Z" data-name="India"/>
+<path d="M386.2,76.7L386.7,78.7L384.9,81.2L380.9,82.9L377.8,82.6L379.6,79.5L378.4,76.7L381.6,74.4L383.1,73.2L383.6,74.7L383.1,76.1L384.4,76.1L386.2,76.7Z" data-name="Ireland"/>
+<path d="M519.8,117.4L521.8,116.9L523.3,115.7L524.9,115.9L525.8,115.4L527.3,115.7L529.8,116.7L531.6,116.9L534.2,118.8L535.8,118.8L536.0,120.5L535.1,123.2L534.4,124.6L535.6,125.0L534.4,126.0L535.3,127.6L535.3,129.0L537.1,129.2L537.3,130.6L535.3,132.3L536.4,133.3L537.3,134.5L539.3,135.2L539.6,136.9L540.4,137.3L540.7,138.1L537.6,139.2L536.7,141.3L532.4,140.7L530.0,140.3L527.6,140.2L526.7,137.7L525.6,137.5L523.8,137.7L521.6,138.6L518.9,138.1L516.7,136.6L514.4,136.0L513.1,134.3L511.3,131.8L510.2,132.0L508.7,131.4L508.0,132.1L506.7,131.0L506.7,130.0L506.0,130.0L506.2,128.6L505.1,127.0L502.4,126.0L500.9,124.0L501.3,122.6L502.7,121.7L502.4,120.5L500.9,119.9L499.6,117.4L498.2,115.7L498.7,115.0L498.0,112.6L499.6,112.0L500.0,112.9L501.1,113.7L502.4,114.2L503.3,113.9L506.0,112.4L506.9,112.2L507.6,112.9L506.7,113.9L508.0,115.0L508.7,115.0L509.3,116.5L511.3,116.9L512.9,118.0L516.2,118.4L519.6,117.8L519.8,117.4Z" data-name="Iran"/>
+<path d="M500.9,119.9L502.4,120.5L502.7,121.7L501.3,122.6L500.9,124.0L502.4,126.0L505.1,127.0L506.2,128.6L506.0,130.0L506.7,130.0L506.7,131.0L508.0,132.1L506.7,132.0L505.1,131.8L503.6,133.7L499.3,133.5L493.1,129.6L489.8,128.2L487.1,127.6L486.2,125.2L491.1,123.2L492.0,120.7L491.8,119.0L492.9,118.6L494.0,117.4L495.1,116.9L497.6,117.2L498.4,117.8L499.6,117.4L500.9,119.9Z" data-name="Iraq"/>
+<path d="M367.8,33.4L367.3,36.3L369.8,39.1L366.9,41.9L360.4,44.6L358.4,45.3L355.6,45.0L349.3,43.4L351.6,41.9L346.7,39.9L350.7,39.1L350.7,37.9L346.0,37.1L347.3,34.2L350.9,33.8L354.2,36.7L357.6,34.2L360.4,35.4L364.0,33.4L367.8,33.4Z" data-name="Iceland"/>
+<path d="M479.3,126.6L478.9,127.2L478.2,127.0L477.8,128.2L478.2,128.4L477.8,128.8L477.6,129.2L478.7,129.0L478.7,129.8L477.6,132.9L476.2,129.6L476.9,129.0L476.7,128.8L477.3,127.8L477.8,126.4L478.0,125.8L478.0,125.8L478.9,125.8L479.1,125.4L479.6,125.4L479.6,126.2L479.3,126.6L479.3,126.6Z" data-name="Israel"/>
+<path d="M434.4,115.2L433.8,116.9L434.0,117.6L433.6,118.6L431.8,117.8L430.7,117.6L427.6,116.5L428.0,115.4L430.4,115.7L432.9,115.4L434.4,115.2ZM420.4,108.7L421.8,110.2L421.6,113.1L420.4,113.1L419.6,113.7L418.7,113.1L418.7,110.4L418.2,109.1L419.3,109.3L420.4,108.7ZM427.6,95.5L430.7,96.3L430.4,97.5L430.9,98.4L429.1,98.2L427.3,98.9L427.6,100.1L427.3,100.8L428.0,102.0L430.0,103.2L431.1,105.0L433.6,106.9L435.3,106.9L436.0,107.5L435.3,108.0L437.3,108.7L438.9,109.3L440.9,110.4L441.1,110.9L440.7,111.8L439.3,110.7L437.6,110.4L436.4,111.8L438.2,112.6L438.0,113.7L436.9,113.9L435.8,115.7L434.9,115.9L434.9,115.2L435.3,113.9L435.8,113.5L434.9,112.4L434.2,111.3L433.3,110.9L432.7,110.0L431.3,109.6L430.2,108.7L428.7,108.4L426.9,107.5L424.9,105.9L423.3,104.8L422.7,102.5L421.6,102.2L419.8,101.3L418.7,101.8L417.6,102.7L416.4,102.9L416.7,102.0L415.6,101.5L414.9,99.9L415.8,99.2L415.1,98.2L415.1,97.5L416.2,98.0L417.3,98.0L418.4,97.0L418.9,97.5L420.0,97.5L420.4,96.5L422.0,96.7L423.1,96.3L423.1,95.3L424.4,95.5L424.9,95.3L427.1,94.8L427.6,95.5Z" data-name="Italy"/>
+<path d="M227.6,153.3L229.1,153.4L230.2,153.8L230.7,154.3L229.1,154.3L228.4,154.7L227.1,154.3L226.0,153.8L226.2,153.3L227.1,153.3L227.6,153.3Z" data-name="Jamaica"/>
+<path d="M478.9,127.2L479.3,126.6L481.8,127.4L486.2,125.2L487.1,127.6L486.7,128.0L482.2,129.0L484.4,131.0L483.8,131.4L483.3,132.0L481.6,132.1L481.1,132.9L480.2,133.5L477.8,133.1L477.6,132.9L478.7,129.8L478.7,129.0L478.9,128.4L478.9,127.2Z" data-name="Jordan"/>
+<path d="M699.1,123.8L699.6,124.4L698.2,125.6L697.3,125.0L696.2,125.4L695.6,126.6L694.2,126.0L694.2,125.0L695.3,123.8L696.7,124.2L697.6,123.2L699.1,123.8ZM713.3,117.6L712.4,119.3L712.9,120.3L711.8,121.7L708.9,122.6L704.9,122.8L701.8,125.0L700.2,124.4L700.2,122.8L696.2,123.2L693.8,124.2L691.1,124.2L693.3,125.8L691.8,129.0L690.4,130.0L689.3,129.2L689.8,127.4L688.4,126.8L687.6,125.4L689.8,124.8L690.9,123.6L693.1,122.6L694.7,121.1L699.1,120.5L701.6,120.9L703.8,117.2L705.3,118.2L708.7,116.1L709.8,115.2L711.3,112.6L710.9,110.0L711.8,108.7L714.2,108.2L715.3,111.3L715.3,113.1L713.3,115.2L713.3,117.6ZM719.8,101.8L721.3,102.2L722.9,101.3L723.3,103.9L720.2,104.6L718.2,106.9L714.7,105.3L713.6,107.8L711.1,107.8L710.7,105.5L711.8,103.9L714.2,103.6L714.9,100.4L715.6,98.4L718.0,101.1L719.8,101.8Z" data-name="Japan"/>
+<path d="M557.8,106.2L556.4,106.6L553.6,108.2L552.4,109.8L551.8,109.8L551.1,108.9L548.2,108.7L547.8,106.9L546.7,106.9L546.9,104.6L544.2,102.9L540.4,102.9L537.8,103.4L535.8,101.3L533.8,100.4L530.4,98.7L530.0,98.4L524.2,99.9L524.4,108.4L523.3,108.4L521.8,106.9L520.2,106.2L517.6,106.6L516.7,107.3L516.4,106.9L517.1,105.9L516.7,105.0L514.0,104.3L513.1,102.2L511.8,101.5L511.8,100.8L514.0,101.1L514.0,99.4L516.0,98.9L517.8,99.2L518.2,97.0L517.8,95.3L515.6,95.5L513.8,95.0L511.1,96.0L509.1,96.5L508.0,96.0L508.2,94.8L506.9,93.3L505.1,93.3L503.3,91.5L504.4,89.5L504.0,89.0L505.6,86.1L508.0,87.7L508.2,85.8L512.9,82.9L516.2,82.9L521.1,84.7L523.8,85.8L526.2,84.7L529.8,84.5L532.4,86.1L533.1,85.3L536.2,85.3L536.9,83.9L533.3,82.0L535.3,80.9L534.9,80.1L537.1,79.3L535.6,77.3L536.4,76.4L544.9,75.3L546.0,74.7L551.6,73.5L553.6,72.3L557.6,72.9L558.2,76.1L560.4,75.3L563.3,76.4L563.1,77.9L565.3,77.9L570.9,75.0L570.0,75.9L572.9,78.1L577.8,85.0L579.1,83.7L582.0,85.3L585.3,84.5L586.4,85.0L587.6,86.6L589.1,87.1L590.0,88.2L592.9,87.9L594.2,89.5L592.4,91.3L590.7,91.3L590.4,93.8L589.3,95.0L584.9,94.3L583.3,98.7L582.0,99.2L577.8,100.1L579.8,104.1L578.2,104.8L578.4,106.2L576.9,105.7L575.8,104.8L572.7,104.6L568.9,104.6L568.0,104.8L564.9,103.9L563.6,104.3L563.3,105.7L559.6,105.0L558.2,105.3L557.8,106.2Z" data-name="Kazakhstan"/>
+<path d="M491.1,186.5L492.4,187.9L490.9,188.5L490.2,189.2L489.6,189.4L489.1,190.6L488.4,191.2L488.0,192.3L487.1,192.9L484.0,191.2L483.8,190.2L475.8,186.9L475.3,186.5L475.3,184.8L476.0,184.2L477.1,183.0L477.8,181.8L476.9,179.8L476.7,178.9L475.6,177.9L476.9,176.9L478.4,175.7L479.6,176.1L479.6,176.9L480.4,177.6L482.0,177.6L484.7,178.9L485.3,178.9L486.0,178.9L486.4,179.1L488.0,179.3L488.7,178.6L490.7,177.7L491.6,178.4L493.1,178.4L491.1,180.3L491.1,186.5Z" data-name="Kenya"/>
+<path d="M557.8,106.2L558.2,105.3L559.6,105.0L563.3,105.7L563.6,104.3L564.9,103.9L568.0,104.8L568.9,104.6L572.7,104.6L575.8,104.8L576.9,105.7L578.4,106.2L578.0,106.6L574.4,107.8L573.8,108.7L570.9,108.9L570.0,110.4L567.8,110.0L566.2,110.4L564.0,111.5L564.4,112.0L563.8,112.6L559.6,112.9L556.7,112.2L554.4,112.4L554.7,111.1L556.9,111.5L557.8,110.9L559.6,111.1L562.4,109.3L559.8,108.2L558.2,108.9L556.4,108.0L558.4,106.4L557.8,106.2Z" data-name="Kyrgyzstan"/>
+<path d="M630.0,167.0L629.1,166.0L628.0,164.3L627.3,162.2L628.9,160.8L631.8,160.5L633.8,160.6L635.6,161.3L636.7,160.1L638.7,160.8L639.1,162.0L638.9,164.1L635.1,165.3L636.0,166.3L633.8,166.5L631.8,167.2L630.0,167.0Z" data-name="Cambodia"/>
+<path d="M685.1,114.4L687.1,116.9L687.8,118.2L687.8,120.7L686.9,121.7L684.9,122.2L683.1,123.0L681.1,123.2L680.9,122.2L681.3,120.5L680.2,118.4L682.0,118.0L680.4,116.3L680.4,116.1L681.6,116.1L682.4,115.0L684.0,115.0L684.9,114.8L685.1,114.4Z" data-name="South Korea"/>
+<path d="M446.2,106.6L446.0,107.3L445.8,107.1L445.6,106.4L445.1,106.2L444.7,105.5L445.1,105.0L445.6,104.8L445.8,104.1L446.2,103.9L446.7,104.3L446.9,104.3L447.3,104.8L447.6,104.8L448.0,105.3L448.4,105.3L448.2,105.9L447.8,106.2L448.0,106.4L447.6,106.4L446.2,106.6Z" data-name="Kosovo"/>
+<path d="M506.7,132.0L507.1,132.9L506.9,133.3L507.6,134.7L506.0,134.8L505.6,133.9L503.6,133.7L505.1,131.8L506.7,132.0Z" data-name="Kuwait"/>
+<path d="M633.8,160.6L634.4,159.9L634.7,158.4L632.9,157.0L632.7,155.2L631.1,153.8L629.3,153.6L628.9,154.1L627.6,154.3L626.9,154.0L624.7,155.0L624.4,153.4L625.1,151.5L623.6,151.5L623.3,150.4L622.4,149.9L622.9,149.1L624.9,148.1L625.1,148.4L626.2,148.4L626.0,146.4L627.1,146.1L628.4,147.5L629.3,149.1L632.0,149.1L632.9,150.8L631.6,151.3L630.9,151.8L633.6,152.9L635.3,155.0L636.9,156.6L638.4,157.8L639.1,159.1L638.7,160.8L636.7,160.1L635.6,161.3L633.8,160.6Z" data-name="Laos"/>
+<path d="M479.6,125.4L479.1,125.4L478.9,125.8L478.0,125.8L478.9,124.2L480.0,122.8L480.0,122.8L480.9,122.8L481.3,123.6L480.2,124.4L479.6,125.4Z" data-name="Lebanon"/>
+<path d="M382.9,177.6L382.2,177.6L380.0,176.9L378.0,175.5L376.0,174.7L374.7,173.5L375.1,173.0L375.3,172.5L376.2,171.6L377.3,170.8L377.8,170.8L378.2,170.6L379.3,171.6L379.1,172.3L379.6,172.7L380.2,172.7L380.7,172.0L381.3,172.0L381.1,172.5L381.3,173.3L380.9,174.0L381.6,174.5L382.2,174.7L383.1,175.4L383.3,176.1L383.1,176.2L382.9,177.6Z" data-name="Liberia"/>
+<path d="M433.1,145.3L431.3,146.1L430.2,145.1L426.7,144.2L425.8,143.1L424.0,142.2L422.9,142.6L422.0,141.6L422.0,140.7L420.7,139.4L421.6,138.6L421.3,137.5L421.8,136.4L421.6,135.6L422.0,133.9L421.8,133.1L421.1,131.4L422.2,131.0L422.4,130.0L422.2,129.2L423.6,128.4L424.2,127.8L425.3,127.2L425.6,125.8L428.2,126.4L429.1,126.2L430.9,126.6L433.8,127.4L434.9,129.2L436.9,129.6L440.0,130.4L442.4,131.4L443.6,131.0L444.7,130.0L444.0,128.4L444.7,127.6L446.4,126.6L447.8,126.4L450.9,126.8L451.6,127.6L452.4,127.6L453.1,128.0L455.3,128.2L456.0,128.8L455.1,129.8L455.6,130.6L454.9,132.0L455.6,133.5L455.6,140.2L455.6,147.0L455.6,150.6L453.1,150.6L452.9,151.3L444.0,147.9L435.3,144.4L433.1,145.3Z" data-name="Libya"/>
+<path d="M581.8,172.3L581.3,174.0L580.4,174.5L578.4,174.9L577.6,173.5L577.1,171.1L578.0,168.4L579.6,169.3L580.7,170.4L581.8,172.3Z" data-name="Sri Lanka"/>
+<path d="M464.4,236.1L465.1,236.7L464.4,237.5L464.0,238.2L462.9,238.4L462.4,239.0L461.6,239.2L460.0,237.9L461.1,236.5L462.4,235.9L463.3,235.3L464.4,236.1Z" data-name="Lesotho"/>
+<path d="M450.4,75.6L450.4,74.7L450.7,73.8L449.6,73.5L447.3,72.9L446.9,70.6L449.3,69.6L453.1,69.6L455.3,69.3L455.6,69.9L456.7,70.3L458.9,71.8L459.1,72.9L457.3,74.1L456.7,75.6L454.4,76.7L452.2,76.7L451.6,75.9L450.4,75.6Z" data-name="Lithuania"/>
+<path d="M413.3,87.1L413.8,87.7L413.8,88.7L413.1,89.0L412.7,88.7L412.9,87.1L413.3,87.1Z" data-name="Luxembourg"/>
+<path d="M446.9,70.6L446.9,68.1L448.0,66.3L450.0,65.0L451.8,67.5L453.6,67.5L454.0,65.0L456.0,64.4L456.9,65.0L458.9,65.9L460.7,65.9L461.8,66.9L462.0,68.1L462.7,69.9L460.2,71.2L458.9,71.8L456.7,70.3L455.6,69.9L455.3,69.3L453.1,69.6L449.3,69.6L446.9,70.6Z" data-name="Latvia"/>
+<path d="M388.4,120.3L389.8,121.3L392.0,121.1L394.2,121.5L395.1,121.5L396.0,123.0L396.2,124.2L396.9,126.2L397.6,126.6L397.1,127.4L394.2,127.8L393.1,128.6L392.0,128.8L391.8,130.2L389.1,131.0L388.4,132.0L386.4,132.5L384.2,132.7L380.7,134.3L380.7,136.4L380.4,136.4L380.4,136.4L380.4,137.5L379.1,137.5L378.4,137.9L377.3,137.9L376.4,137.7L374.7,137.9L374.0,139.4L373.3,139.6L372.2,141.8L369.1,143.9L368.4,146.4L367.6,147.2L367.1,147.9L362.2,148.1L362.2,148.1L362.2,147.2L363.1,146.6L363.8,145.7L363.8,145.1L364.4,143.9L365.8,142.6L366.4,142.4L367.1,141.3L367.1,140.3L368.0,139.0L369.3,138.5L370.9,136.6L370.9,136.4L372.0,135.8L374.0,135.6L375.8,134.3L376.9,133.7L378.7,132.1L378.2,129.6L379.1,128.0L379.3,126.8L380.7,125.6L382.9,124.6L384.7,123.8L386.2,121.7L386.9,120.3L388.4,120.3Z" data-name="Morocco"/>
+<path d="M459.1,92.0L459.8,91.5L461.1,91.3L462.9,92.0L463.8,92.3L464.7,93.0L464.7,93.8L465.3,94.3L465.8,95.3L466.4,95.8L466.2,96.3L466.7,96.5L466.2,96.7L464.9,96.5L464.7,96.3L464.2,96.5L464.2,96.7L463.8,97.7L463.3,98.4L462.7,98.7L462.4,97.7L462.7,96.5L462.4,95.5L461.3,94.0L460.4,93.0L459.8,92.3L459.1,92.0Z" data-name="Moldova"/>
+<path d="M510.0,206.2L510.7,206.9L511.3,208.1L511.6,210.2L512.2,210.9L512.0,211.8L511.6,212.3L510.9,211.3L510.4,211.8L510.9,213.2L510.7,213.9L510.0,214.3L509.8,215.9L508.9,217.8L507.8,220.3L506.4,223.8L505.6,226.3L504.7,228.4L502.9,228.9L500.9,229.7L499.6,229.1L497.8,228.5L497.3,227.6L497.1,226.0L496.2,224.5L496.2,223.2L496.4,221.8L497.6,221.6L497.6,220.9L498.7,219.6L498.9,218.3L498.2,217.6L497.8,216.4L497.8,214.8L498.4,213.9L498.7,212.7L499.8,212.7L501.1,212.3L502.0,212.0L502.9,212.0L504.2,210.9L506.0,209.9L506.7,209.0L506.4,208.3L507.3,208.5L508.4,207.3L508.7,206.2L509.3,205.4L510.0,206.2Z" data-name="Madagascar"/>
+<path d="M184.2,139.8L183.3,141.5L182.9,142.8L182.7,145.3L182.4,146.2L182.9,147.2L183.6,148.1L184.0,149.5L185.6,150.8L186.0,151.8L186.9,152.7L189.3,153.1L190.2,154.0L192.2,153.4L193.8,153.3L195.6,152.9L196.9,152.5L198.2,151.8L198.9,150.8L198.9,149.3L199.3,148.8L200.9,148.2L203.3,147.9L205.1,147.9L206.4,147.9L207.1,148.2L207.1,149.1L205.8,150.0L205.3,151.3L205.8,151.5L205.3,152.4L204.9,153.6L204.2,153.3L203.8,153.3L203.3,153.3L202.7,154.3L202.2,154.1L201.8,154.1L202.0,154.5L199.8,154.5L197.8,154.5L197.8,155.4L196.7,155.4L197.6,156.1L198.4,156.4L198.7,156.8L199.1,157.0L198.9,157.5L196.2,157.5L195.1,158.9L195.3,159.2L195.1,159.8L195.1,160.3L192.4,158.4L191.3,157.8L189.6,157.3L188.2,157.5L186.4,158.0L185.3,158.2L183.8,157.8L182.2,157.5L180.2,156.6L178.4,156.4L176.0,155.6L174.0,154.9L173.6,154.3L172.2,154.1L170.0,153.6L169.1,152.9L166.7,151.8L165.6,150.8L165.1,149.9L165.8,149.7L165.6,149.1L166.0,148.6L166.0,148.1L165.3,147.2L165.1,146.4L164.4,145.5L162.4,143.7L160.2,142.4L159.1,141.1L157.1,140.3L156.9,140.0L157.1,138.8L156.0,138.3L154.7,137.3L154.2,136.0L152.9,136.0L151.6,134.8L150.7,133.9L150.4,133.3L149.3,132.0L148.4,130.4L148.7,129.6L146.9,128.8L146.2,129.0L144.9,128.4L144.7,129.2L144.9,130.2L145.1,131.6L146.0,132.3L147.6,133.7L148.0,134.3L148.2,134.3L148.7,135.0L148.9,135.0L149.3,136.2L150.0,136.8L150.7,137.3L152.0,138.3L152.7,140.2L153.3,140.9L154.0,141.8L154.0,142.8L155.1,142.8L156.0,143.7L156.9,144.4L156.9,144.8L155.8,145.5L155.6,145.5L154.9,144.4L153.6,143.3L151.8,142.4L150.7,142.0L150.9,140.5L150.4,139.6L149.3,139.0L147.8,138.1L147.6,138.5L147.1,137.9L145.6,137.5L144.2,136.4L144.4,136.2L145.3,136.4L146.2,135.6L146.2,134.7L144.7,133.3L143.3,132.7L142.4,131.6L141.6,130.4L140.7,128.8L139.8,127.0L142.2,126.8L145.1,126.6L144.9,127.0L148.2,128.0L153.3,129.4L157.8,129.4L159.6,129.4L159.6,128.4L163.3,128.4L164.2,129.2L165.3,129.8L166.7,130.8L167.3,131.8L167.8,132.7L169.1,133.3L170.9,133.9L172.2,132.3L174.0,132.3L175.6,133.1L176.7,134.5L177.6,135.6L178.9,136.8L179.3,138.1L180.0,138.8L181.8,139.4L183.3,140.0L184.2,139.8Z" data-name="Mexico"/>
+<path d="M445.8,107.1L446.0,107.3L446.2,106.6L447.6,106.4L448.0,106.4L448.7,106.2L449.8,106.2L450.9,106.9L451.1,108.4L450.7,108.4L450.2,108.9L449.1,108.9L448.2,109.3L446.7,109.6L445.8,108.9L445.6,108.0L445.8,107.1Z" data-name="Macedonia"/>
+<path d="M372.9,160.1L373.8,159.8L374.0,158.7L374.9,158.7L376.2,159.2L377.6,158.9L378.4,158.9L378.7,158.5L387.8,158.5L388.2,157.3L387.8,157.1L386.7,149.5L385.6,141.5L389.1,141.5L396.4,145.5L404.0,149.5L404.7,150.4L406.0,150.8L406.9,151.1L407.1,152.2L409.6,152.0L409.6,156.1L408.2,157.3L408.0,158.4L406.0,158.7L403.1,158.9L402.2,159.4L400.9,159.6L399.3,159.6L398.9,159.2L397.6,159.4L395.6,160.1L395.1,160.8L393.3,161.5L393.1,162.0L392.2,162.4L391.1,162.0L390.4,162.6L390.2,163.8L388.4,165.1L388.4,165.7L387.8,166.3L388.0,167.4L387.1,167.7L386.4,167.9L386.2,167.2L385.6,167.4L385.1,167.4L384.7,167.9L383.1,167.9L382.4,167.5L382.2,167.7L381.6,167.2L381.6,166.7L381.3,166.5L380.9,166.7L380.9,166.2L381.3,165.7L380.4,165.0L380.2,164.5L379.8,164.1L379.3,164.1L378.7,164.3L378.0,164.5L377.3,165.0L376.4,164.8L375.8,164.3L375.6,164.3L374.9,164.5L374.4,164.5L374.4,163.9L374.4,163.2L374.2,162.7L373.6,162.2L373.1,161.2L372.9,160.1Z" data-name="Mali"/>
+<path d="M621.1,150.2L620.0,150.9L618.4,151.1L617.3,153.1L616.4,153.4L617.6,154.9L618.9,156.3L619.8,157.3L618.9,158.9L618.2,159.2L618.7,160.1L620.2,161.5L620.4,162.4L620.4,163.2L621.3,164.8L620.0,166.3L619.1,168.2L618.9,166.9L619.6,165.7L618.7,164.6L618.9,162.7L618.0,161.9L617.3,159.8L616.9,157.5L616.0,156.1L614.4,157.0L612.0,158.2L610.7,158.0L609.3,157.7L610.0,155.4L609.6,153.8L607.8,151.7L608.2,151.1L606.9,150.8L605.3,149.3L605.1,147.9L606.0,148.2L606.0,147.0L607.1,146.4L606.9,145.7L607.3,145.1L607.3,143.1L609.1,143.5L610.2,142.0L610.2,141.1L611.6,139.6L611.3,138.5L614.2,137.1L615.8,137.5L615.8,136.4L616.4,136.0L616.2,135.2L617.6,135.2L618.2,136.4L619.3,136.8L619.3,138.3L619.3,139.8L617.1,141.3L616.9,143.5L619.3,143.1L619.8,145.0L621.1,145.3L620.4,146.8L622.2,147.5L623.1,147.7L624.9,147.3L624.9,148.1L622.9,149.1L622.4,149.9L621.1,150.2Z" data-name="Myanmar"/>
+<path d="M444.0,105.7L443.8,105.3L442.9,106.4L443.1,107.1L442.7,106.9L442.0,106.2L440.9,105.7L441.3,105.5L441.6,104.1L442.2,103.6L442.7,103.4L443.3,103.6L443.6,104.1L444.4,104.3L445.1,104.8L445.1,105.0L444.7,105.5L444.0,105.7Z" data-name="Montenegro"/>
+<path d="M595.1,89.2L597.3,88.7L601.6,86.6L604.9,85.3L606.9,86.1L609.1,86.1L610.7,87.4L612.9,87.4L616.2,88.2L618.2,86.3L617.3,84.7L619.8,82.0L622.2,83.1L624.2,83.4L626.9,83.9L627.3,86.1L630.4,87.1L632.4,86.6L635.3,86.3L637.6,86.6L639.8,87.9L641.1,89.2L643.1,89.2L646.0,89.7L648.0,89.0L650.9,88.7L654.2,86.9L655.6,87.1L656.7,87.9L659.3,87.7L658.2,89.7L656.7,92.3L657.1,93.3L658.4,92.8L660.7,93.3L662.4,92.3L664.2,93.3L666.2,95.0L666.0,95.8L664.2,95.5L660.9,95.8L659.3,96.5L657.8,98.2L654.4,99.2L652.2,100.4L649.8,99.9L648.7,99.6L647.3,101.1L648.2,102.0L648.4,102.9L646.9,103.6L645.3,104.8L642.7,105.7L639.3,105.7L635.8,106.6L633.3,107.8L632.2,107.1L629.6,107.1L626.2,105.7L624.0,105.3L621.1,105.7L616.7,105.3L614.0,105.3L612.9,103.9L611.8,101.8L610.4,101.3L607.8,99.9L604.7,99.6L602.0,99.2L601.3,98.2L602.2,95.3L600.7,93.3L597.6,92.3L595.6,91.0L595.1,89.2Z" data-name="Mongolia"/>
+<path d="M476.9,204.5L478.4,204.3L481.1,204.9L481.8,204.7L483.3,204.7L484.0,204.2L485.3,204.2L487.8,203.5L489.6,202.5L490.0,203.3L489.8,205.0L490.2,206.4L490.2,209.2L490.7,210.1L490.0,211.3L489.1,212.5L487.8,213.6L485.6,214.3L483.1,215.1L480.7,217.1L479.8,217.3L478.2,218.7L477.3,219.1L477.1,220.3L478.2,221.8L478.7,222.7L478.7,223.2L479.1,223.2L478.9,225.0L478.7,225.8L479.1,226.1L478.9,226.9L477.8,227.6L476.0,228.2L473.3,229.3L472.4,229.8L472.7,230.6L473.1,230.8L472.9,231.7L471.3,231.7L471.1,231.0L470.7,230.0L470.7,229.5L470.9,227.4L470.4,226.1L469.3,223.6L471.6,221.4L472.2,220.1L472.7,220.0L472.9,218.9L472.4,218.3L472.7,217.1L472.9,215.9L472.9,213.6L471.8,213.0L470.9,212.9L470.2,212.5L469.3,212.2L467.3,212.2L467.3,211.5L467.1,210.2L473.8,208.8L475.1,209.7L475.8,209.5L476.7,209.9L476.7,210.6L476.2,211.5L476.4,212.7L477.8,213.7L478.4,212.5L479.6,212.2L479.3,209.9L478.4,208.7L477.6,208.1L476.9,208.1L476.2,205.9L476.9,204.5Z" data-name="Mozambique"/>
+<path d="M372.9,160.1L371.6,158.9L370.2,157.7L368.7,157.1L367.6,156.6L366.4,156.6L365.3,157.0L364.2,156.8L363.3,157.5L363.3,156.4L363.8,155.6L364.2,154.0L363.8,152.2L363.6,151.3L363.8,150.4L363.3,149.5L362.0,148.8L362.7,148.2L371.3,148.2L370.9,145.5L371.3,144.6L373.6,144.4L373.3,139.8L380.7,139.8L380.7,136.9L389.1,141.5L385.6,141.5L386.7,149.5L387.8,157.1L388.2,157.3L387.8,158.5L378.7,158.5L378.4,158.9L377.6,158.9L376.2,159.2L374.9,158.7L374.0,158.7L373.8,159.8L372.9,160.1Z" data-name="Mauritania"/>
+<path d="M476.9,204.5L476.2,205.9L476.9,208.1L477.6,208.1L478.4,208.7L479.3,209.9L479.6,212.2L478.4,212.5L477.8,213.7L476.4,212.7L476.2,211.5L476.7,210.6L476.7,209.9L475.8,209.5L475.1,209.7L473.8,208.8L472.7,208.3L473.3,206.8L474.0,206.1L473.6,204.7L474.0,203.3L474.4,202.8L473.8,201.4L472.9,200.6L474.9,200.9L475.3,201.4L476.2,202.3L476.9,204.5Z" data-name="Malawi"/>
+<path d="M624.7,174.5L624.9,175.4L626.2,175.2L626.9,174.5L627.6,174.7L628.9,175.7L629.8,176.7L629.8,177.9L629.6,178.8L629.8,179.3L630.0,180.3L630.9,180.8L631.6,182.3L631.6,182.8L630.0,183.0L628.0,181.6L625.3,180.3L625.1,179.4L623.8,178.4L623.6,176.9L622.7,176.1L622.9,174.9L622.4,174.0L622.9,173.9L624.7,174.5ZM663.6,177.4L662.0,178.1L660.0,177.7L657.6,177.7L656.7,179.6L655.8,180.3L654.7,182.6L652.9,183.0L650.9,182.5L649.8,182.6L648.4,183.5L647.1,183.3L645.6,183.7L644.0,182.8L643.8,181.6L645.3,182.1L647.1,181.8L647.6,180.4L648.4,180.1L651.1,179.8L652.7,178.4L653.8,177.4L654.9,178.3L655.3,177.7L656.2,177.7L656.4,176.6L656.7,175.9L658.2,174.7L659.3,173.3L660.2,173.3L661.3,174.2L661.6,174.9L662.9,175.4L664.9,175.9L664.7,176.6L663.1,176.6L663.6,177.4Z" data-name="Malaysia"/>
+<path d="M436.2,235.3L434.7,233.8L433.8,232.5L433.3,230.6L432.7,229.3L432.0,226.5L432.0,224.3L431.8,223.2L430.9,222.5L429.8,221.0L428.4,218.9L428.0,217.6L426.2,216.0L426.0,214.6L427.1,214.3L428.4,213.9L430.0,214.1L431.3,214.8L431.6,214.8L440.7,214.6L442.2,215.5L447.6,215.7L451.6,215.0L453.3,214.6L454.9,214.8L455.8,215.1L455.8,215.3L454.4,215.7L453.8,215.7L452.4,216.4L451.6,215.7L448.2,216.2L446.4,216.4L446.4,222.7L444.2,222.7L444.2,228.2L444.2,235.2L442.2,236.1L441.1,236.1L439.6,235.9L438.7,235.7L438.2,235.0L437.3,234.4L436.2,235.3Z" data-name="Namibia"/>
+<path d="M768.4,221.4L770.2,222.5L771.3,223.4L770.4,223.8L769.3,223.2L767.8,222.5L766.2,221.4L764.9,220.1L764.4,219.6L765.6,219.6L766.7,220.3L767.8,220.9L768.4,221.4Z" data-name="New Caledonia"/>
+<path d="M404.9,164.8L404.9,163.6L402.2,163.1L402.2,162.4L400.9,161.2L400.7,160.5L400.9,159.6L402.2,159.4L403.1,158.9L406.0,158.7L408.0,158.4L408.2,157.3L409.6,156.1L409.6,152.0L412.7,151.3L419.1,147.7L426.7,144.2L430.2,145.1L431.3,146.1L433.1,145.3L433.6,148.2L434.4,148.8L434.4,149.3L435.3,149.9L434.9,150.6L434.0,154.3L433.8,156.6L431.1,158.2L430.0,160.5L431.1,161.2L431.1,162.2L432.4,162.4L432.2,163.1L431.6,163.2L431.6,163.8L431.1,163.8L429.6,161.9L429.1,161.9L427.3,162.9L425.6,162.4L424.4,162.2L423.8,162.6L422.4,162.4L421.1,163.1L420.0,163.2L417.3,162.4L416.2,162.7L415.1,162.7L414.2,162.0L412.0,161.3L409.8,161.7L409.1,162.0L408.9,162.9L408.2,163.6L408.0,165.1L406.2,164.3L405.6,164.3L404.9,164.8Z" data-name="Niger"/>
+<path d="M418.9,176.9L416.7,177.6L415.8,177.4L414.9,177.9L413.1,177.7L412.0,176.7L411.1,175.5L409.6,174.4L408.0,174.4L406.0,174.4L406.0,171.6L406.0,170.6L406.4,169.6L407.1,169.1L408.2,167.9L408.0,167.5L408.4,166.9L408.0,165.8L408.0,165.1L408.2,163.6L408.9,162.9L409.1,162.0L409.8,161.7L412.0,161.3L414.2,162.0L415.1,162.7L416.2,162.7L417.3,162.4L420.0,163.2L421.1,163.1L422.4,162.4L423.8,162.6L424.4,162.2L425.6,162.4L427.3,162.9L429.1,161.9L429.6,161.9L431.1,163.8L431.6,163.8L432.4,164.5L432.2,164.8L432.0,165.3L430.2,166.7L429.6,167.7L429.3,168.7L428.9,169.1L428.4,170.3L427.1,171.0L426.9,171.8L426.2,172.5L426.0,173.2L424.7,173.9L423.3,173.0L422.4,173.2L421.1,174.0L420.4,174.2L419.6,175.7L418.9,176.9Z" data-name="Nigeria"/>
+<path d="M209.6,166.2L208.7,165.7L207.8,165.0L207.3,164.5L206.2,163.8L205.1,163.1L205.3,162.7L205.8,163.1L206.0,162.9L206.7,162.9L206.9,162.4L207.3,162.4L207.1,161.5L207.8,161.5L208.2,161.5L208.7,161.2L209.3,161.5L209.6,161.2L210.0,161.0L210.7,160.5L210.9,160.1L210.9,160.1L211.3,159.8L211.6,159.8L212.0,159.9L212.4,160.1L212.9,159.9L213.3,159.9L214.2,159.6L214.4,159.4L215.3,159.4L215.1,159.6L214.9,159.9L215.1,160.6L214.7,161.2L214.4,161.9L214.2,162.7L214.4,163.1L214.4,163.9L214.2,164.1L214.0,164.8L214.0,165.3L213.6,165.7L213.8,166.2L214.0,166.5L213.6,166.9L212.9,166.7L212.4,166.3L211.8,166.2L211.3,166.3L209.8,166.0L209.6,166.2Z" data-name="Nicaragua"/>
+<path d="M413.6,77.9L415.3,77.9L415.8,79.0L415.1,81.5L414.7,82.3L413.3,82.3L413.8,85.3L412.4,84.7L411.1,83.4L408.9,83.9L407.3,83.9L408.4,83.1L410.4,79.0L413.6,77.9Z" data-name="Netherlands"/>
+<path d="M462.7,11.3L469.6,14.9L466.7,16.4L469.1,19.4L465.3,21.3L463.6,21.7L464.4,18.4L461.6,16.4L458.2,18.4L457.1,21.7L454.9,24.1L452.7,22.7L449.8,23.2L447.1,20.3L445.8,21.7L444.4,21.7L444.2,25.0L440.0,24.1L439.3,26.8L437.3,26.8L435.8,29.9L433.6,34.6L430.2,40.3L430.9,41.9L430.2,43.4L428.0,43.0L426.4,46.8L426.7,51.6L428.0,53.3L427.3,57.5L425.6,59.8L424.4,61.5L423.1,59.5L418.7,63.4L415.6,64.0L412.7,62.4L411.8,58.8L411.1,50.9L413.1,48.7L419.1,45.3L423.3,41.5L427.6,35.9L432.9,27.7L436.4,24.1L442.7,18.4L447.6,15.9L451.1,16.4L454.4,12.4L458.7,12.4L462.7,11.3ZM454.9,-31.8L450.0,-27.8L446.0,-30.2L447.6,-31.8L446.2,-35.0L450.9,-36.7L451.8,-33.4L454.9,-31.8ZM440.7,-47.4L447.8,-41.0L442.2,-37.6L441.1,-31.0L439.1,-29.4L438.0,-23.3L435.3,-23.3L430.7,-27.8L432.7,-30.2L429.3,-32.6L424.9,-40.1L423.1,-47.4L429.3,-50.3L430.4,-47.4L433.6,-47.4L434.4,-50.3L437.8,-51.3L440.7,-47.4ZM456.4,-54.2L460.9,-51.3L457.6,-45.5L451.1,-44.6L444.7,-46.5L444.2,-48.4L441.1,-49.3L438.7,-53.2L445.6,-56.3L448.7,-54.2L450.9,-57.3L456.4,-54.2Z" data-name="Norway"/>
+<path d="M595.8,136.0L595.6,136.9L596.0,138.1L595.8,138.8L593.8,138.8L591.1,138.5L589.6,138.3L588.2,137.3L585.1,136.9L582.2,136.0L580.2,135.0L578.0,134.3L578.9,132.5L580.2,131.6L581.1,131.2L582.9,131.8L585.1,132.9L586.4,133.3L587.1,134.3L588.9,134.7L590.7,135.4L593.3,135.8L595.8,136.0Z" data-name="Nepal"/>
+<path d="M784.4,260.7L784.9,261.6L786.7,260.7L787.1,261.6L787.1,262.7L786.4,263.6L784.9,265.4L783.8,266.4L784.7,267.5L782.9,267.5L781.1,268.2L780.4,269.9L779.1,272.3L777.3,273.5L776.2,274.0L774.2,274.0L772.9,273.3L770.4,273.0L770.0,272.3L771.1,270.4L774.0,268.0L775.3,267.5L777.1,266.8L778.9,265.4L780.2,264.3L781.3,262.7L782.0,262.0L782.4,260.9L784.0,259.8L784.4,260.7ZM788.0,250.5L789.6,252.6L789.8,251.2L790.7,251.8L791.1,253.5L792.9,254.1L794.2,254.3L795.6,253.5L796.7,253.7L796.2,255.6L795.6,256.9L793.8,256.7L793.1,257.4L793.3,258.5L793.1,258.9L792.2,260.0L791.1,261.6L789.3,262.5L789.1,261.8L788.2,261.6L789.3,259.8L788.7,258.5L786.2,257.6L786.4,256.7L788.0,256.1L788.2,254.3L788.2,253.1L787.3,251.6L787.3,251.2L786.2,250.3L784.7,248.5L783.6,247.0L784.4,247.0L785.8,248.0L787.3,248.7L788.0,250.5Z" data-name="New Zealand"/>
+<path d="M530.9,148.6L530.0,149.9L528.9,149.7L528.4,150.2L528.2,151.1L528.4,152.2L528.2,152.5L527.1,152.5L525.8,153.1L525.6,154.0L525.1,154.3L523.8,154.3L522.9,154.9L522.9,155.6L521.8,155.9L520.4,155.9L519.1,156.4L518.0,156.4L517.3,155.4L515.6,152.4L522.2,150.6L523.8,147.0L522.7,145.7L522.7,145.0L523.3,144.2L523.3,143.5L524.4,143.1L524.0,142.8L524.2,141.6L525.3,141.6L526.2,142.9L527.6,143.5L529.1,143.9L530.4,144.0L531.6,145.1L532.2,145.7L532.9,146.1L532.9,146.4L532.0,147.5L531.8,148.1L530.9,148.6ZM525.3,139.8L525.1,140.2L524.7,139.4L525.3,138.8L525.6,139.0L525.3,139.8Z" data-name="Oman"/>
+<path d="M567.1,117.6L568.7,118.4L569.3,120.1L572.9,120.9L570.9,122.6L568.4,123.0L564.9,122.6L563.8,123.4L564.7,125.2L565.6,126.4L567.3,127.4L565.3,128.6L565.3,130.0L563.3,132.0L561.8,133.9L559.6,136.0L556.9,135.8L554.4,137.9L556.0,138.6L556.2,140.2L557.3,141.1L557.8,142.6L552.9,142.6L551.6,143.9L549.8,143.5L549.1,142.0L547.6,140.7L543.3,141.1L539.8,141.1L536.7,141.3L537.6,139.2L540.7,138.1L540.4,137.3L539.6,136.9L539.3,135.2L537.3,134.5L536.4,133.3L535.3,132.3L538.9,133.3L541.3,132.9L542.4,133.3L543.1,132.7L544.4,132.9L547.3,132.1L547.6,130.6L548.7,129.4L550.4,129.4L550.7,128.8L552.4,128.6L553.1,128.8L554.0,128.2L554.0,127.0L554.9,125.8L556.2,125.2L555.3,124.0L557.6,124.0L558.2,123.4L558.0,122.6L559.1,121.5L558.9,120.5L558.4,119.7L559.6,118.8L562.0,118.4L564.7,118.2L565.8,117.8L567.1,117.6Z" data-name="Pakistan"/>
+<path d="M226.9,172.8L226.2,172.3L225.8,171.3L226.2,171.0L225.8,170.8L225.3,170.3L224.2,169.8L223.1,169.9L222.7,170.4L221.8,171.0L221.3,171.0L221.1,171.3L222.2,172.3L221.6,172.5L221.3,172.7L220.2,172.8L219.8,171.8L219.6,172.2L218.9,172.0L218.4,171.3L217.6,171.1L216.9,171.0L216.0,171.0L215.8,171.3L215.6,171.1L215.8,170.8L216.0,170.4L215.8,170.1L216.2,169.9L215.8,169.6L215.8,168.9L216.7,168.7L217.3,169.4L217.3,169.8L218.2,169.8L218.4,169.8L219.1,170.1L220.2,169.9L221.1,169.6L222.4,169.3L223.1,168.7L224.4,168.7L224.2,168.9L225.6,169.1L226.4,169.4L227.3,169.9L228.0,170.3L227.8,170.6L228.4,171.6L228.0,172.2L227.1,172.0L226.9,172.8Z" data-name="Panama"/>
+<path d="M245.3,215.1L244.7,216.0L243.6,216.4L241.3,215.5L241.1,214.8L236.9,213.0L232.9,211.1L231.1,209.9L230.2,208.5L230.4,208.0L228.7,205.7L226.4,202.6L224.4,199.2L223.6,198.4L222.7,197.2L221.1,196.0L219.6,195.3L220.2,194.6L219.1,192.9L219.8,191.7L221.6,190.7L221.8,191.4L221.1,191.9L221.3,192.4L222.2,192.3L223.1,192.6L224.0,193.4L225.3,192.6L225.6,191.6L227.1,190.1L229.8,189.4L232.2,187.7L232.9,186.5L232.4,185.3L233.1,185.2L234.7,185.8L235.3,186.7L236.2,187.2L237.6,188.9L239.3,189.0L240.4,188.7L241.3,188.9L242.7,188.9L244.4,189.6L242.9,191.2L243.6,191.4L244.7,192.3L242.7,192.3L242.4,192.4L240.7,192.8L238.0,193.9L237.8,194.6L237.3,195.3L237.6,196.1L236.2,196.7L236.2,197.3L235.6,197.7L236.4,199.2L237.8,200.2L237.3,201.1L238.7,201.1L239.6,202.1L241.6,202.1L243.3,201.1L243.3,203.7L244.2,203.8L245.6,203.7L247.3,206.4L246.9,206.9L246.9,208.1L246.9,209.7L246.0,210.6L246.2,211.1L245.8,211.8L246.7,213.2L245.3,215.1Z" data-name="Peru"/>
+<path d="M680.9,170.8L681.1,171.8L681.1,172.8L680.4,174.4L679.6,172.7L678.7,173.5L679.3,174.9L678.7,175.5L676.0,174.5L675.3,173.3L676.0,172.5L674.7,171.8L674.0,172.5L672.9,172.3L671.3,173.3L670.9,172.8L671.8,171.5L673.1,171.0L674.4,170.3L675.1,171.1L676.9,170.6L677.3,169.8L678.9,169.8L678.7,168.4L680.4,169.3L680.7,170.1L680.9,170.8ZM675.6,167.5L674.7,168.1L674.0,169.3L673.3,169.8L672.0,168.6L672.4,168.1L672.9,167.5L673.1,166.5L674.4,166.5L674.0,167.5L675.8,166.0L675.6,167.5ZM663.3,169.3L660.4,170.8L661.6,169.6L663.1,168.6L664.4,167.4L665.6,165.7L666.0,167.0L664.4,168.1L663.3,169.3ZM670.9,164.8L672.2,165.3L673.6,165.3L673.6,166.0L672.4,166.9L671.1,167.4L671.1,166.5L671.1,165.7L670.9,164.8ZM678.9,164.3L679.6,166.3L677.8,165.8L677.8,166.3L678.4,167.4L677.3,167.9L677.3,166.7L676.7,166.5L676.2,165.5L677.6,165.7L677.6,165.0L676.2,163.6L678.2,163.8L678.9,164.3ZM670.0,162.7L669.6,164.3L668.4,163.4L667.3,162.0L669.3,162.2L670.0,162.7ZM669.6,153.3L670.9,153.8L671.6,153.3L671.8,153.8L671.6,154.5L672.2,155.7L671.8,157.1L670.4,157.8L670.0,159.2L670.4,160.6L671.8,160.8L672.7,160.6L675.6,161.5L675.3,162.6L676.0,162.9L675.8,163.8L674.0,162.9L673.1,161.9L672.7,162.6L671.1,161.5L669.1,161.9L668.0,161.3L668.2,160.6L668.9,160.3L668.2,159.8L668.0,160.5L666.9,159.4L666.4,158.7L666.4,157.0L667.3,157.7L667.6,154.9L668.2,153.3L669.6,153.3Z" data-name="Philippines"/>
+<path d="M746.4,196.5L745.8,196.7L744.9,196.0L743.8,195.0L743.3,193.6L743.8,193.4L744.0,193.9L744.7,194.5L745.6,195.5L746.7,196.0L746.4,196.5ZM737.8,194.3L736.7,194.5L736.2,194.8L735.1,195.3L733.8,195.6L732.7,195.6L730.9,195.1L729.6,194.6L729.8,194.1L731.8,194.5L732.9,194.3L733.3,193.4L733.6,193.4L733.8,194.3L735.1,194.3L735.8,193.6L736.9,193.1L736.7,192.1L738.0,191.9L738.4,192.3L738.4,193.3L737.8,194.3ZM727.1,197.5L729.1,198.5L730.4,200.4L731.8,200.4L731.8,201.1L733.3,201.4L732.7,201.8L735.1,202.5L734.9,203.0L733.3,203.1L732.9,202.6L730.9,202.5L728.7,202.1L726.9,201.1L725.8,200.1L724.4,198.7L721.6,197.8L719.8,198.4L718.4,198.9L718.7,200.2L716.9,200.7L715.8,200.6L713.3,200.4L713.3,195.0L713.3,189.4L717.1,190.6L721.3,191.6L722.9,192.4L724.0,193.3L724.4,194.3L728.0,195.3L728.7,196.1L726.7,196.3L727.1,197.5ZM740.2,192.6L739.6,193.1L739.1,192.1L738.7,191.4L737.8,190.9L736.4,190.1L734.9,189.6L735.3,189.2L736.7,189.7L737.3,190.1L738.2,190.4L739.1,191.2L740.0,191.7L740.2,192.6Z" data-name="Papua New Guinea"/>
+<path d="M433.3,84.5L432.4,82.9L432.7,81.8L432.0,80.4L431.3,79.3L432.0,78.7L431.3,77.0L432.9,76.1L436.4,75.0L439.1,73.8L441.3,74.4L441.6,75.3L443.8,75.3L446.4,75.6L450.4,75.6L451.6,75.9L452.2,76.7L452.2,77.9L452.9,79.0L452.9,80.1L451.6,80.7L452.2,82.0L452.2,83.1L453.3,85.5L453.1,86.3L452.0,86.6L450.0,88.7L450.7,90.0L450.2,89.7L448.0,88.7L446.4,89.2L445.3,89.0L444.0,89.5L442.9,88.4L442.0,89.0L442.0,88.7L440.9,87.4L439.1,87.4L439.1,86.3L437.6,86.1L437.1,86.9L436.0,86.3L436.0,85.5L434.4,85.3L433.3,84.5Z" data-name="Poland"/>
+<path d="M252.7,153.3L253.8,153.4L254.2,153.8L253.8,154.1L252.0,154.1L250.7,154.3L250.7,153.4L250.9,153.3L252.7,153.3Z" data-name="Puerto Rico"/>
+<path d="M690.2,105.9L690.7,106.4L689.8,106.2L688.9,107.1L688.2,107.8L688.2,109.3L687.1,109.8L686.7,110.2L685.8,110.9L684.4,111.3L683.3,111.8L683.3,112.9L683.1,113.1L684.0,113.3L685.1,114.4L684.9,114.8L684.0,115.0L682.4,115.0L681.6,116.1L680.4,116.1L680.4,116.3L679.3,115.9L679.1,116.1L678.4,116.3L678.2,115.9L677.8,115.9L677.1,115.4L677.8,114.6L678.2,114.2L678.0,113.9L678.7,112.6L678.4,112.2L677.1,112.0L676.2,111.5L678.0,110.0L680.4,108.9L682.0,107.3L682.9,108.0L684.9,108.0L684.7,106.9L688.0,105.9L688.9,104.6L690.2,105.9Z" data-name="North Korea"/>
+<path d="M380.0,107.1L380.7,106.6L381.6,106.2L382.2,107.3L383.6,107.3L383.8,107.1L385.1,107.1L385.8,108.2L384.7,108.9L384.7,110.7L384.4,110.9L384.2,112.0L383.3,112.2L384.2,113.5L383.6,114.8L384.4,115.4L384.0,116.1L383.3,116.9L383.3,117.6L382.4,118.2L381.3,117.8L380.2,118.0L380.7,116.3L380.4,115.0L379.3,114.8L378.9,114.2L379.1,112.6L380.0,111.8L380.0,110.9L380.4,109.6L380.4,108.7L380.0,108.0L380.0,107.1Z" data-name="Portugal"/>
+<path d="M260.7,223.4L261.6,221.4L261.6,220.3L262.7,218.7L266.7,218.2L268.7,218.3L270.7,219.2L270.7,219.8L271.3,220.7L271.3,223.2L273.6,223.6L274.4,223.2L276.0,223.8L276.4,224.3L276.7,226.0L276.9,226.7L277.8,226.7L278.4,226.3L279.3,226.7L279.3,227.8L279.1,228.9L278.7,229.8L278.2,231.5L276.2,233.1L274.4,233.2L272.0,233.1L269.8,232.5L272.0,229.7L271.6,228.9L269.3,228.2L266.7,226.7L264.9,226.5L260.7,223.4Z" data-name="Paraguay"/>
+<path d="M512.9,141.8L512.7,140.5L513.3,139.6L514.0,139.4L514.7,140.0L514.7,141.1L514.2,142.2L513.6,142.2L512.9,141.8Z" data-name="Qatar"/>
+<path d="M450.4,92.8L451.3,92.3L452.9,92.5L454.2,92.5L455.3,93.3L456.0,92.8L457.6,92.5L458.2,92.0L459.1,92.0L459.8,92.3L460.4,93.0L461.3,94.0L462.4,95.5L462.7,96.5L462.4,97.7L462.7,98.7L463.8,99.2L464.7,98.7L465.8,99.2L465.8,99.9L464.7,100.4L464.0,100.1L463.6,102.9L462.2,102.7L460.4,101.8L458.0,102.5L456.9,102.9L453.6,102.9L451.8,102.5L450.9,102.7L450.4,101.8L450.0,101.3L450.4,100.8L450.0,100.6L449.1,101.1L448.0,100.4L447.8,99.4L446.4,98.9L446.2,98.2L444.9,97.2L446.7,96.7L448.0,95.0L449.1,93.3L450.4,92.8Z" data-name="Romania"/>
+<path d="M719.1,85.5L721.6,90.0L718.2,89.2L716.9,92.8L718.9,95.5L718.9,97.2L717.1,95.8L715.8,97.5L715.3,95.5L715.6,93.0L715.3,90.2L715.8,88.4L716.0,84.7L714.7,82.3L714.9,78.4L716.9,77.0L716.0,75.9L717.1,75.3L717.6,77.3L718.4,80.1L718.2,82.6L719.1,85.5ZM450.4,75.6L446.4,75.6L443.8,75.3L444.2,73.8L447.3,72.9L449.6,73.5L450.7,73.8L450.4,74.7L450.4,75.6ZM11.1,32.9L12.7,34.2L12.0,30.8L18.0,31.7L22.4,35.4L20.2,37.5L16.7,37.9L16.4,41.5L15.6,42.3L13.6,42.3L11.8,41.1L8.9,39.9L8.4,37.9L6.2,37.5L3.6,37.9L2.4,36.7L2.9,35.0L0.2,35.9L1.3,37.9L0.0,39.5L0.0,22.2L5.3,25.9L11.3,30.4L11.1,32.9ZM800.0,13.4L797.6,13.4L797.1,11.8L800.0,9.7L800.0,13.4ZM2.9,12.9L0.0,13.4L0.0,9.7L0.2,9.2L2.2,9.2L5.3,10.8L5.1,11.8L2.9,12.9ZM719.1,0.3L715.8,0.3L711.1,-0.3L710.9,-0.9L712.9,-3.3L715.8,-3.9L718.9,-1.5L719.1,0.3ZM734.9,-11.5L732.4,-8.9L728.9,-9.5L724.7,-12.1L725.3,-14.1L729.3,-12.8L734.9,-11.5ZM722.4,-14.8L720.7,-9.5L712.4,-9.5L708.9,-8.2L704.4,-12.8L705.6,-16.9L708.4,-18.2L714.4,-18.2L722.4,-14.8ZM527.8,13.9L526.4,14.4L519.3,13.4L518.7,11.3L514.7,9.7L514.4,7.0L516.7,5.9L516.4,2.6L520.9,-2.1L518.9,-2.7L524.2,-8.2L523.6,-11.5L528.7,-14.8L536.0,-19.7L543.3,-20.4L547.1,-23.3L551.6,-24.0L553.1,-21.1L551.6,-19.0L543.6,-15.5L536.9,-12.8L530.0,-6.4L526.7,-0.3L523.1,4.8L523.6,9.7L527.8,13.9ZM637.8,-24.8L638.2,-21.1L640.4,-22.6L646.9,-22.6L651.8,-19.0L653.6,-16.2L653.1,-12.8L650.7,-10.8L644.9,-7.6L643.1,-5.7L645.8,-4.5L649.1,-3.3L651.1,-4.5L652.2,-0.3L653.3,-2.1L656.9,-3.3L664.0,-2.1L664.4,0.9L673.8,1.4L674.0,-2.7L678.7,-2.1L682.2,-2.1L685.8,1.4L686.9,4.8L685.6,7.0L688.2,11.3L691.8,13.4L694.0,8.1L697.6,10.3L701.3,8.7L705.6,10.8L707.1,9.2L710.9,9.7L709.1,4.8L712.2,2.6L732.2,5.9L734.2,9.2L740.0,13.4L748.9,12.4L753.3,12.9L755.1,14.9L754.9,18.9L757.6,20.3L760.7,19.4L764.7,18.9L768.7,19.8L772.9,19.4L776.9,23.6L779.6,22.2L777.8,18.9L778.9,16.9L785.8,18.4L790.4,17.9L796.9,20.3L800.0,22.2L800.0,39.5L800.0,39.5L797.1,41.5L794.2,41.1L796.2,43.0L797.6,46.1L798.7,47.2L798.9,48.7L798.2,49.8L794.2,49.0L788.0,51.6L786.0,51.9L782.7,54.4L779.3,56.8L778.4,58.2L775.3,55.8L769.6,58.5L768.4,57.1L766.4,58.8L763.3,58.2L762.7,60.5L760.0,63.7L760.2,65.0L762.7,65.6L762.4,69.9L760.2,70.3L759.3,72.6L760.2,73.8L756.4,75.6L755.6,78.7L752.2,79.3L751.6,82.3L748.4,84.7L747.6,82.9L746.7,78.7L745.3,72.3L746.4,68.1L748.4,66.3L748.4,65.0L752.0,64.0L756.0,60.1L759.8,56.8L763.8,54.0L765.6,48.7L762.9,49.0L761.6,52.3L755.8,56.1L754.0,51.6L748.2,53.0L742.7,58.5L744.4,60.8L739.6,61.5L736.2,61.8L736.2,59.5L732.9,58.8L730.0,60.5L723.3,60.1L716.0,61.1L708.9,67.2L700.2,74.4L703.8,74.7L704.9,76.4L707.1,77.0L708.4,75.6L710.9,75.9L714.0,79.0L714.2,81.5L712.4,84.2L712.2,87.4L711.3,91.5L708.0,95.0L707.1,96.7L704.2,99.6L701.1,102.2L699.8,103.6L696.7,105.0L695.3,105.0L694.0,103.9L690.9,105.5L690.7,106.4L690.2,105.9L690.2,104.8L691.3,104.8L691.8,102.0L691.1,99.9L693.1,99.2L695.8,99.6L697.3,97.2L698.0,94.5L698.9,93.5L700.0,91.3L696.4,92.0L694.4,93.0L691.1,93.0L690.2,90.8L687.6,89.0L683.8,87.9L682.9,85.5L682.0,83.7L681.3,82.6L679.8,79.8L678.0,78.7L674.7,77.9L671.6,78.1L668.9,78.4L667.1,79.8L668.2,80.7L668.2,82.0L667.1,83.1L665.1,85.8L665.1,87.1L662.0,88.7L659.3,87.7L656.7,87.9L655.6,87.1L654.2,86.9L650.9,88.7L648.0,89.0L646.0,89.7L643.1,89.2L641.1,89.2L639.8,87.9L637.6,86.6L635.3,86.3L632.4,86.6L630.4,87.1L627.3,86.1L626.9,83.9L624.2,83.4L622.2,83.1L619.8,82.0L617.3,84.7L618.2,86.3L616.2,88.2L612.9,87.4L610.7,87.4L609.1,86.1L606.9,86.1L604.9,85.3L601.6,86.6L597.3,88.7L595.1,89.2L594.2,89.5L592.9,87.9L590.0,88.2L589.1,87.1L587.6,86.6L586.4,85.0L585.3,84.5L582.0,85.3L579.1,83.7L577.8,85.0L572.9,78.1L570.0,75.9L570.9,75.0L565.3,77.9L563.1,77.9L563.3,76.4L560.4,75.3L558.2,76.1L557.6,72.9L553.6,72.3L551.6,73.5L546.0,74.7L544.9,75.3L536.4,76.4L535.6,77.3L537.1,79.3L534.9,80.1L535.3,80.9L533.3,82.0L536.9,83.9L536.2,85.3L533.1,85.3L532.4,86.1L529.8,84.5L526.2,84.7L523.8,85.8L521.1,84.7L516.2,82.9L512.9,82.9L508.2,85.8L508.0,87.7L505.6,86.1L504.0,89.0L504.4,89.5L503.3,91.5L505.1,93.3L506.9,93.3L508.2,94.8L508.0,96.0L509.1,96.5L508.0,98.0L506.0,98.4L503.8,100.8L505.8,102.9L505.6,104.6L508.0,107.3L506.7,108.2L506.2,108.7L505.3,108.7L503.8,107.3L503.1,107.1L501.8,106.6L501.1,105.7L498.9,105.3L497.6,105.5L497.3,105.3L494.2,104.1L490.9,103.6L489.1,103.2L488.9,103.6L486.0,101.5L483.3,100.6L481.6,99.4L483.1,98.9L484.9,97.0L483.8,96.0L486.9,95.0L486.9,94.3L484.9,94.8L485.1,93.8L486.2,93.0L488.2,92.8L488.7,92.0L488.2,90.5L489.1,89.2L489.1,88.4L485.8,87.7L484.4,87.7L483.1,86.3L481.3,86.9L478.7,85.8L478.7,85.3L477.8,84.2L476.0,83.9L475.8,83.1L476.4,82.6L475.1,81.2L472.7,81.5L472.0,81.2L471.6,81.8L470.7,81.8L470.0,80.1L469.6,79.0L470.0,78.7L471.8,79.0L472.7,78.1L472.0,77.6L470.4,77.0L470.7,76.4L469.8,75.9L468.4,74.1L468.9,73.2L468.7,71.8L466.4,71.2L465.3,71.5L464.9,70.9L462.7,69.9L462.0,68.1L461.8,66.9L460.7,65.9L461.6,65.0L460.9,62.1L462.4,60.1L462.2,59.5L464.7,57.8L462.4,56.1L467.1,51.6L469.1,49.4L470.0,47.6L466.7,45.0L467.6,42.7L465.6,39.9L467.1,36.3L464.7,31.7L466.7,28.2L463.1,25.0L463.6,21.7L465.3,21.3L469.1,19.4L471.3,17.9L475.1,20.8L481.1,21.7L489.6,27.3L491.3,29.0L491.3,32.1L488.9,34.2L485.3,35.4L475.3,32.1L473.8,32.9L477.3,35.9L477.6,37.9L477.6,41.9L480.4,43.0L482.2,44.2L482.4,42.3L481.1,40.3L482.7,39.1L488.0,41.5L489.8,40.3L488.4,37.5L493.6,33.4L495.6,33.8L497.6,35.0L498.9,32.1L497.1,29.5L498.2,26.8L496.7,24.1L502.7,25.9L504.0,28.2L501.3,28.6L501.3,31.2L502.9,32.5L506.4,31.7L506.9,29.0L511.6,26.8L519.3,22.7L521.1,23.2L518.9,25.9L521.6,26.4L523.1,25.0L527.3,24.5L530.7,22.7L533.1,25.5L535.8,22.7L533.3,19.8L534.4,18.4L541.1,19.8L544.2,21.3L552.2,26.4L553.8,24.1L551.6,21.7L551.3,20.3L548.7,19.8L549.6,17.9L548.2,13.9L548.2,12.4L552.2,7.6L553.8,2.6L555.3,1.4L561.3,2.6L561.8,5.9L559.6,10.3L561.1,11.8L561.8,15.4L561.3,22.2L563.8,25.0L562.7,28.2L558.4,34.2L560.9,34.6L561.8,33.4L564.2,32.1L564.9,29.9L566.9,27.7L565.6,25.5L566.4,22.2L564.0,21.7L563.6,19.4L565.3,14.4L562.4,10.3L566.4,6.5L566.0,2.6L567.1,2.0L568.2,5.4L567.3,10.8L569.8,11.3L568.7,7.6L572.4,5.4L577.1,5.4L581.1,8.1L579.1,3.7L578.9,-2.1L582.7,-3.3L588.2,-3.3L592.9,-3.9L591.1,-7.6L593.8,-11.5L596.2,-11.5L600.7,-14.8L606.4,-16.2L607.1,-17.5L613.1,-18.2L614.9,-16.9L619.8,-20.4L624.0,-20.4L624.4,-24.0L626.7,-27.0L632.0,-30.2L635.8,-27.8L632.7,-25.5L637.8,-24.8ZM633.6,-35.0L620.9,-31.8L625.1,-42.8L626.9,-43.7L628.4,-43.7L634.2,-38.4L633.6,-35.0ZM513.6,-55.3L510.7,-54.2L508.7,-53.2L508.4,-52.2L505.8,-50.3L503.3,-52.2L504.7,-56.3L499.6,-56.3L504.0,-58.4L507.3,-58.4L507.8,-55.3L509.1,-58.4L511.1,-59.4L514.4,-57.3L513.6,-55.3ZM622.0,-40.1L617.3,-39.3L611.1,-41.0L607.3,-44.6L605.6,-51.3L602.7,-53.2L608.4,-60.5L613.1,-63.8L617.6,-57.3L622.7,-48.4L622.0,-40.1Z" data-name="Russia"/>
+<path d="M467.6,186.9L468.4,187.9L468.4,188.9L467.8,189.0L466.4,188.9L465.8,189.9L464.4,189.7L464.7,188.9L465.1,188.7L465.1,187.7L465.8,187.2L466.2,187.4L467.6,186.9Z" data-name="Rwanda"/>
+<path d="M380.4,137.5L380.4,136.4L380.7,136.4L380.7,136.6L380.7,136.9L380.7,139.8L373.3,139.8L373.6,144.4L371.3,144.6L370.9,145.5L371.3,148.2L362.7,148.2L362.0,148.8L362.2,148.1L362.2,148.1L367.1,147.9L367.6,147.2L368.4,146.4L369.1,143.9L372.2,141.8L373.3,139.6L374.0,139.4L374.7,137.9L376.4,137.7L377.3,137.9L378.4,137.9L379.1,137.5L380.4,137.5Z" data-name="Western Sahara"/>
+<path d="M495.1,157.1L494.7,156.3L494.0,155.7L494.0,155.0L492.9,154.5L491.6,152.9L490.9,151.5L489.3,150.2L488.4,150.0L486.9,148.2L486.7,147.0L486.9,145.9L485.6,143.9L484.4,143.1L483.3,142.8L482.7,141.6L482.7,141.3L482.0,140.3L481.3,140.0L480.4,138.5L479.1,136.9L478.0,135.6L476.9,135.6L477.3,134.7L477.3,133.9L477.8,133.1L480.2,133.5L481.1,132.9L481.6,132.1L483.3,132.0L483.8,131.4L484.4,131.0L482.2,129.0L486.7,128.0L487.1,127.6L489.8,128.2L493.1,129.6L499.3,133.5L503.6,133.7L505.6,133.9L506.0,134.8L507.6,134.7L508.4,136.4L509.6,136.8L510.0,137.5L511.6,138.3L511.6,139.0L511.3,139.8L511.6,140.3L512.2,140.9L512.7,141.5L512.9,141.8L513.6,142.2L514.2,142.2L514.7,142.9L514.7,143.3L515.6,145.1L522.2,146.1L522.7,145.7L523.8,147.0L522.2,150.6L515.6,152.4L509.1,153.1L507.1,153.8L505.6,155.7L504.4,156.1L503.8,155.4L503.1,155.6L500.9,155.4L500.4,155.2L498.0,155.2L497.3,155.4L496.4,154.9L495.8,155.7L496.0,156.4L495.1,157.1Z" data-name="Saudi Arabia"/>
+<path d="M475.6,168.9L475.1,168.9L475.1,168.1L474.9,167.5L473.8,166.9L473.6,165.7L473.8,164.3L472.7,164.3L472.7,164.6L471.3,164.6L471.8,165.1L472.0,166.2L470.9,167.2L469.8,168.4L468.4,168.6L466.7,167.5L465.8,167.9L465.6,168.4L464.4,168.7L464.4,169.1L462.2,169.1L461.8,168.7L460.2,168.7L459.6,168.9L458.9,168.7L457.8,167.9L457.3,167.4L455.8,167.5L455.1,168.4L454.4,169.9L453.8,170.3L453.1,170.4L452.9,170.3L452.2,169.8L452.0,169.3L452.4,168.6L452.4,167.9L451.1,166.9L450.9,166.2L450.9,165.7L450.0,165.1L450.0,164.1L449.6,163.6L448.7,163.6L448.9,162.9L449.6,162.2L449.3,161.5L450.0,161.0L449.6,160.6L450.2,159.6L451.1,158.2L453.1,158.4L452.9,151.3L453.1,150.6L455.6,150.6L455.6,147.0L464.4,147.0L473.1,147.0L482.0,147.0L482.7,148.8L482.2,149.1L482.4,150.9L483.3,153.1L484.2,153.4L485.3,154.1L484.2,155.2L482.7,155.4L482.0,155.9L481.8,157.1L480.7,159.8L480.9,160.5L480.7,161.9L479.8,163.6L478.4,164.5L477.3,165.8L477.1,166.5L476.2,167.0L475.6,168.7L475.6,168.9Z" data-name="Sudan"/>
+<path d="M475.6,168.9L475.6,170.3L475.1,170.8L474.0,170.8L473.3,171.8L474.7,172.0L475.8,172.8L476.2,173.5L477.1,173.9L478.4,175.7L476.9,176.9L475.6,177.9L474.2,178.6L472.7,178.6L470.9,178.9L469.3,178.6L468.4,179.1L466.7,177.9L466.0,177.2L464.9,177.6L463.8,177.4L463.1,177.7L462.2,177.6L460.9,176.2L460.4,175.5L458.9,175.0L458.2,174.0L457.3,173.2L455.8,172.3L455.8,171.8L454.7,171.1L453.1,170.4L453.8,170.3L454.4,169.9L455.1,168.4L455.8,167.5L457.3,167.4L457.8,167.9L458.9,168.7L459.6,168.9L460.2,168.7L461.8,168.7L462.2,169.1L464.4,169.1L464.4,168.7L465.6,168.4L465.8,167.9L466.7,167.5L468.4,168.6L469.8,168.4L470.9,167.2L472.0,166.2L471.8,165.1L471.3,164.6L472.7,164.6L472.7,164.3L473.8,164.3L473.6,165.7L473.8,166.9L474.9,167.5L475.1,168.1L475.1,168.9L475.6,168.9Z" data-name="South Sudan"/>
+<path d="M362.9,161.9L362.0,160.5L360.9,159.9L361.8,159.6L362.9,158.4L363.3,157.5L364.2,156.8L365.3,157.0L366.4,156.6L367.6,156.6L368.7,157.1L370.2,157.7L371.6,158.9L372.9,160.1L373.1,161.2L373.6,162.2L374.2,162.7L374.4,163.2L374.4,163.9L374.0,163.9L372.9,163.8L372.7,163.9L372.2,164.1L370.7,163.6L369.6,163.6L365.6,163.6L364.9,163.8L364.2,163.8L362.9,163.9L362.7,162.6L364.7,162.7L365.1,162.4L365.6,162.4L366.4,162.0L367.3,162.4L368.2,162.4L369.3,162.0L368.9,161.5L368.0,161.9L367.3,161.9L366.4,161.3L365.8,161.3L365.3,161.9L362.9,161.9Z" data-name="Senegal"/>
+<path d="M760.2,202.8L760.9,203.3L759.3,203.3L758.4,202.3L759.8,202.6L760.2,202.8ZM757.6,201.8L756.7,201.8L755.1,201.6L754.7,201.3L754.9,200.6L756.4,200.9L757.1,201.3L757.6,201.8ZM759.3,201.3L758.9,201.6L757.3,200.1L756.9,199.0L757.6,199.0L758.4,200.4L759.3,201.3ZM755.3,199.0L755.3,199.4L753.6,198.7L752.4,198.2L751.6,197.5L752.0,197.3L752.9,197.8L754.7,198.5L755.3,199.0ZM750.0,197.3L749.6,197.5L748.7,197.2L747.8,196.5L747.8,196.1L749.1,196.8L750.0,197.3Z" data-name="Solomon Islands"/>
+<path d="M374.7,173.5L374.0,173.3L372.4,172.7L371.3,171.8L370.9,171.1L370.7,169.9L371.8,169.3L372.0,168.7L372.4,168.4L372.9,168.2L373.6,168.1L375.3,168.1L376.0,168.6L376.4,169.3L376.2,169.8L376.7,170.3L376.7,171.0L377.3,170.8L376.2,171.6L375.3,172.5L375.1,173.0L374.7,173.5Z" data-name="Sierra Leone"/>
+<path d="M204.9,162.2L204.7,162.7L203.3,162.6L202.7,162.4L201.6,162.0L200.4,162.0L199.8,161.7L199.8,161.3L200.7,161.0L201.1,160.8L200.9,160.5L201.3,160.5L202.0,160.6L202.7,161.0L203.3,161.2L203.3,161.5L204.2,161.2L204.7,161.3L205.1,161.5L204.9,162.2Z" data-name="El Salvador"/>
+<path d="M508.7,168.9L507.8,170.1L506.2,171.5L504.2,171.5L497.1,169.4L496.2,168.9L495.3,168.1L494.7,167.0L495.1,166.5L495.8,165.5L496.7,165.8L497.1,166.5L498.0,167.4L499.1,167.4L501.3,166.9L503.6,166.7L505.6,166.2L506.7,166.0L507.6,165.7L508.7,165.7L508.7,165.7L508.7,166.3L508.7,168.1L508.7,168.9Z" data-name="Somaliland"/>
+<path d="M510.4,165.3L511.8,165.1L512.7,164.6L513.6,164.6L513.6,165.1L513.3,166.0L513.3,167.0L512.9,167.5L512.4,169.4L511.3,171.3L510.0,173.5L508.0,176.1L506.0,177.9L503.6,180.1L501.3,181.6L498.0,183.1L495.8,184.5L493.3,186.5L492.9,187.4L492.4,187.9L491.1,186.5L491.1,180.3L493.1,178.4L493.6,177.9L495.1,177.7L497.1,176.6L500.0,176.6L506.2,171.5L507.8,170.1L508.7,168.9L508.7,168.1L508.7,166.3L508.7,165.7L508.7,165.7L509.6,165.7L510.4,165.3Z" data-name="Somalia"/>
+<path d="M446.4,98.9L447.8,99.4L448.0,100.4L449.1,101.1L450.0,100.6L450.4,100.8L450.0,101.3L450.4,101.8L449.8,102.2L450.0,103.2L451.1,104.1L450.2,104.8L449.8,105.5L450.0,105.7L449.8,106.2L448.7,106.2L448.0,106.4L447.8,106.2L448.2,105.9L448.4,105.3L448.0,105.3L447.6,104.8L447.3,104.8L446.9,104.3L446.7,104.3L446.2,103.9L445.8,104.1L445.6,104.8L445.1,105.0L445.1,104.8L444.4,104.3L443.6,104.1L443.3,103.6L442.7,103.4L443.3,103.2L443.6,102.2L442.4,101.3L443.1,100.1L442.2,100.1L443.1,99.4L442.4,98.7L441.8,97.7L443.6,97.0L444.9,97.2L446.2,98.2L446.4,98.9Z" data-name="Republic of Serbia"/>
+<path d="M273.1,174.9L275.8,175.2L276.0,174.9L277.8,174.9L280.0,175.2L278.9,176.7L279.1,177.9L280.0,178.9L279.6,179.6L279.3,180.4L278.9,181.1L277.6,180.8L276.4,181.0L275.6,180.8L275.3,181.3L275.8,181.6L275.6,182.0L274.4,181.8L272.9,180.3L272.7,179.4L272.0,179.4L271.1,178.1L271.3,177.2L271.3,176.9L272.7,176.4L273.1,174.9Z" data-name="Suriname"/>
+<path d="M442.0,88.7L442.0,89.0L442.9,88.4L444.0,89.5L445.3,89.0L446.4,89.2L448.0,88.7L450.2,89.7L449.6,90.5L449.1,91.5L448.7,91.8L446.2,91.0L445.6,91.0L444.9,91.8L444.0,92.0L443.8,91.8L442.7,92.3L441.8,92.3L441.6,92.8L439.8,93.0L438.9,92.8L437.8,92.3L437.6,91.3L437.8,91.0L438.0,90.5L438.9,90.5L439.8,90.2L439.8,90.0L440.2,90.0L440.4,89.2L440.9,89.2L441.3,88.7L442.0,88.7Z" data-name="Slovakia"/>
+<path d="M430.7,96.3L432.4,96.5L433.6,95.8L435.6,95.8L436.0,95.3L436.4,95.5L436.9,96.3L435.1,97.0L434.9,98.0L434.0,98.2L434.0,98.7L433.1,98.7L432.4,98.4L432.0,98.7L430.4,98.7L430.9,98.4L430.4,97.5L430.7,96.3Z" data-name="Slovenia"/>
+<path d="M449.3,36.7L447.1,39.5L447.6,41.9L444.0,45.0L439.6,48.3L438.0,53.3L439.6,55.8L441.8,57.5L439.8,61.1L437.3,62.1L436.4,67.5L435.3,70.3L432.7,69.9L431.3,72.3L428.7,72.3L428.0,69.6L426.2,66.3L424.4,61.5L425.6,59.8L427.3,57.5L428.0,53.3L426.7,51.6L426.4,46.8L428.0,43.0L430.2,43.4L430.9,41.9L430.2,40.3L433.6,34.6L435.8,29.9L437.3,26.8L439.3,26.8L440.0,24.1L444.2,25.0L444.4,21.7L445.8,21.7L448.9,24.1L452.2,27.3L452.4,33.8L453.1,35.4L449.3,36.7Z" data-name="Sweden"/>
+<path d="M471.3,231.7L470.9,232.7L469.6,232.9L468.2,231.7L468.2,231.2L468.7,230.4L468.9,229.8L469.6,229.8L470.7,230.0L471.1,231.0L471.3,231.7Z" data-name="Swaziland"/>
+<path d="M486.2,125.2L481.8,127.4L479.3,126.6L479.3,126.6L479.6,126.2L479.6,125.4L480.2,124.4L481.3,123.6L480.9,122.8L480.0,122.8L479.8,121.1L480.2,120.3L480.9,119.9L481.6,119.3L481.6,118.2L482.4,118.6L484.9,118.0L486.0,118.4L487.8,118.4L490.4,117.6L491.6,117.6L494.0,117.4L492.9,118.6L491.8,119.0L492.0,120.7L491.1,123.2L486.2,125.2Z" data-name="Syria"/>
+<path d="M432.2,163.1L432.4,162.4L431.1,162.2L431.1,161.2L430.0,160.5L431.1,158.2L433.8,156.6L434.0,154.3L434.9,150.6L435.3,149.9L434.4,149.3L434.4,148.8L433.6,148.2L433.1,145.3L435.3,144.4L444.0,147.9L452.9,151.3L453.1,158.4L451.1,158.2L450.2,159.6L449.6,160.6L450.0,161.0L449.3,161.5L449.6,162.2L448.9,162.9L448.7,163.6L449.6,163.6L450.0,164.1L450.0,165.1L450.9,165.7L450.9,166.2L449.3,166.3L448.2,167.0L446.7,168.9L444.7,169.8L442.4,169.6L441.8,169.8L442.0,170.4L440.9,171.0L440.0,171.6L437.1,172.3L436.7,172.0L436.2,171.8L435.8,172.3L434.0,172.5L434.2,172.0L433.6,170.8L433.3,170.1L432.2,169.8L431.1,168.9L431.6,168.1L432.4,168.2L433.1,168.1L434.4,168.1L433.1,166.5L433.3,165.3L433.1,164.3L432.2,163.1Z" data-name="Chad"/>
+<path d="M404.2,174.7L402.4,175.0L401.8,174.4L401.3,173.3L401.1,172.5L401.6,171.0L401.1,170.3L400.9,168.9L400.9,167.7L400.0,166.9L400.0,166.3L402.0,166.3L401.8,167.2L402.4,167.7L403.1,168.4L403.3,169.3L403.8,169.6L403.6,173.5L404.2,174.7Z" data-name="Togo"/>
+<path d="M628.0,164.3L626.0,163.6L624.0,163.6L624.4,162.2L622.4,162.2L622.2,164.1L621.1,166.7L620.4,168.1L620.4,169.4L622.0,169.4L622.9,171.0L623.3,172.5L624.4,173.3L625.8,173.7L626.9,174.5L626.2,175.2L624.9,175.4L624.7,174.5L622.9,173.9L622.4,174.0L621.6,173.5L621.1,172.7L620.0,171.6L618.9,170.8L618.4,171.8L618.2,170.8L618.4,169.8L619.1,168.2L620.0,166.3L621.3,164.8L620.4,163.2L620.4,162.4L620.2,161.5L618.7,160.1L618.2,159.2L618.9,158.9L619.8,157.3L618.9,156.3L617.6,154.9L616.4,153.4L617.3,153.1L618.4,151.1L620.0,150.9L621.1,150.2L622.4,149.9L623.3,150.4L623.6,151.5L625.1,151.5L624.4,153.4L624.7,155.0L626.9,154.0L627.6,154.3L628.9,154.1L629.3,153.6L631.1,153.8L632.7,155.2L632.9,157.0L634.7,158.4L634.4,159.9L633.8,160.6L631.8,160.5L628.9,160.8L627.3,162.2L628.0,164.3Z" data-name="Thailand"/>
+<path d="M557.8,110.9L556.9,111.5L554.7,111.1L554.4,112.4L556.7,112.2L559.6,112.9L563.8,112.6L564.2,114.6L565.1,114.4L566.4,114.8L566.2,115.7L566.7,116.9L564.2,116.9L562.9,116.7L561.3,117.8L560.4,118.0L559.6,118.4L558.7,117.6L558.9,115.9L558.2,115.7L558.4,115.0L557.3,114.6L556.4,115.4L556.2,116.3L555.8,116.5L554.4,116.5L553.8,117.4L553.1,117.2L551.3,117.8L550.7,117.6L552.0,115.2L551.6,113.7L549.8,113.3L550.4,112.2L552.2,112.4L553.3,111.1L554.0,109.8L557.1,109.1L556.7,110.2L556.9,110.9L557.8,110.9Z" data-name="Tajikistan"/>
+<path d="M536.0,120.5L535.8,118.8L534.2,118.8L531.6,116.9L529.8,116.7L527.3,115.7L525.8,115.4L524.9,115.9L523.3,115.7L521.8,116.9L519.8,117.4L519.3,115.9L519.8,113.5L518.0,112.9L518.7,111.3L517.1,111.3L517.6,109.3L519.8,110.0L521.6,109.1L520.0,107.8L519.3,106.6L517.6,107.1L517.3,108.9L516.7,107.3L517.6,106.6L520.2,106.2L521.8,106.9L523.3,108.4L524.4,108.4L526.9,108.4L526.4,107.3L528.4,106.4L530.2,105.0L533.3,106.4L533.6,108.2L534.4,108.7L536.7,108.4L537.6,108.9L538.7,111.1L541.1,112.6L542.7,113.7L544.9,114.8L547.8,115.7L547.8,116.9L547.1,116.9L546.0,116.3L545.8,117.2L543.8,117.6L543.3,119.3L542.2,119.9L540.4,120.1L540.0,121.1L538.2,121.3L536.0,120.5Z" data-name="Turkmenistan"/>
+<path d="M677.8,200.1L678.0,199.7L679.8,199.2L681.3,199.2L682.2,199.0L682.9,199.2L682.2,199.7L679.8,200.4L678.0,200.9L678.0,200.4L677.8,200.1Z" data-name="East Timor"/>
+<path d="M262.9,166.7L264.2,166.5L264.7,166.5L264.7,167.9L262.7,168.1L262.2,167.9L262.9,167.4L262.9,166.7Z" data-name="Trinidad and Tobago"/>
+<path d="M421.1,131.4L420.2,127.8L418.7,127.0L418.7,126.6L416.9,125.4L416.7,123.8L418.0,122.6L418.7,120.9L418.2,119.0L418.7,118.0L421.1,117.2L422.7,117.4L422.7,118.4L424.4,117.6L424.7,118.0L423.6,119.0L423.6,120.1L424.2,120.5L424.0,122.4L422.4,123.4L422.9,124.4L424.2,124.4L424.7,125.4L425.6,125.8L425.3,127.2L424.2,127.8L423.6,128.4L422.2,129.2L422.4,130.0L422.2,131.0L421.1,131.4Z" data-name="Tunisia"/>
+<path d="M482.0,108.4L485.1,109.3L487.8,108.9L489.8,109.1L492.4,108.0L494.7,107.8L496.9,108.9L497.3,109.8L497.1,110.7L498.7,111.3L499.6,112.0L498.0,112.6L498.7,115.0L498.2,115.7L499.6,117.4L498.4,117.8L497.6,117.2L495.1,116.9L494.0,117.4L491.6,117.6L490.4,117.6L487.8,118.4L486.0,118.4L484.9,118.0L482.4,118.6L481.6,118.2L481.6,119.3L480.9,119.9L480.2,120.3L479.6,119.3L480.4,118.4L479.1,118.6L477.1,118.2L475.6,119.5L472.2,119.7L470.4,118.6L468.0,118.4L467.6,119.3L466.0,119.7L463.8,118.4L461.3,118.4L460.0,116.3L458.4,115.2L459.6,113.5L458.2,112.4L460.7,110.4L464.0,110.2L464.9,108.7L469.1,108.9L471.8,107.5L474.4,106.9L478.2,106.9L482.0,108.4ZM460.4,109.8L458.7,110.9L457.8,110.0L458.0,109.6L458.4,109.3L459.1,107.8L458.0,107.3L460.2,106.6L462.2,106.9L462.4,107.8L464.4,108.4L464.0,108.9L461.3,109.1L460.4,109.8Z" data-name="Turkey"/>
+<path d="M670.7,142.6L669.3,145.5L668.2,147.0L667.1,145.5L666.9,144.0L668.2,142.4L670.0,140.9L671.1,141.5L670.7,142.6Z" data-name="Taiwan"/>
+<path d="M475.3,186.5L475.8,186.9L483.8,190.2L484.0,191.2L487.1,192.9L486.0,195.0L486.2,196.0L487.6,196.5L487.8,197.0L487.1,198.0L487.3,198.5L487.1,199.4L487.8,200.4L488.7,202.1L489.6,202.5L487.8,203.5L485.3,204.2L484.0,204.2L483.3,204.7L481.8,204.7L481.1,204.9L478.4,204.3L476.9,204.5L476.2,202.3L475.3,201.4L474.9,200.9L472.9,200.6L471.6,200.1L470.2,199.9L469.3,199.6L468.2,199.0L467.1,197.0L465.8,196.0L465.3,195.0L465.6,194.1L465.1,192.6L466.2,192.6L466.9,191.9L467.8,191.1L468.4,190.7L468.2,190.1L467.8,189.7L467.8,189.0L468.4,188.9L468.4,187.9L467.6,186.9L468.4,186.7L470.9,186.7L475.3,186.5Z" data-name="United Republic of Tanzania"/>
+<path d="M470.9,186.7L468.4,186.7L467.6,186.9L466.2,187.4L465.8,187.2L465.8,186.0L466.2,185.3L466.4,184.0L466.9,183.1L467.8,182.3L468.7,182.0L469.3,181.3L468.4,181.1L468.4,179.1L469.3,178.6L470.9,178.9L472.7,178.6L474.2,178.6L475.6,177.9L476.7,178.9L476.9,179.8L477.8,181.8L477.1,183.0L476.0,184.2L475.3,184.8L475.3,186.5L470.9,186.7Z" data-name="Uganda"/>
+<path d="M470.7,81.8L471.6,81.8L472.0,81.2L472.7,81.5L475.1,81.2L476.4,82.6L475.8,83.1L476.0,83.9L477.8,84.2L478.7,85.3L478.7,85.8L481.3,86.9L483.1,86.3L484.4,87.7L485.8,87.7L489.1,88.4L489.1,89.2L488.2,90.5L488.7,92.0L488.2,92.8L486.2,93.0L485.1,93.8L484.9,94.8L483.1,95.0L481.8,95.8L479.6,96.0L477.8,96.7L477.8,98.2L478.9,98.9L481.1,98.7L480.7,99.6L478.2,100.1L475.3,101.3L474.0,100.8L474.4,99.9L472.2,99.2L472.4,98.7L474.7,97.7L474.0,97.2L470.4,96.7L470.4,95.8L468.2,96.0L467.6,97.5L465.8,99.2L464.7,98.7L463.8,99.2L462.7,98.7L463.3,98.4L463.8,97.7L464.2,96.7L464.2,96.5L464.7,96.3L464.9,96.5L466.2,96.7L466.7,96.5L466.2,96.3L466.4,95.8L465.8,95.3L465.3,94.3L464.7,93.8L464.7,93.0L463.8,92.3L462.9,92.0L461.1,91.3L459.8,91.5L459.1,92.0L458.2,92.0L457.6,92.5L456.0,92.8L455.3,93.3L454.2,92.5L452.9,92.5L451.3,92.3L450.4,92.8L450.2,92.0L449.1,91.5L449.6,90.5L450.2,89.7L450.7,90.0L450.0,88.7L452.0,86.6L453.1,86.3L453.3,85.5L452.2,83.1L453.3,83.1L454.7,82.3L456.2,82.3L458.4,82.6L461.1,83.1L462.7,83.1L463.6,83.7L464.4,83.1L465.1,83.7L467.1,83.7L468.0,83.9L468.0,82.6L468.7,82.0L470.7,81.8Z" data-name="Ukraine"/>
+<path d="M272.0,238.4L273.3,238.2L275.6,239.8L276.4,239.8L278.7,241.0L280.4,242.0L281.8,243.4L280.7,244.4L281.3,245.6L280.4,246.8L278.0,248.0L276.2,247.6L275.1,247.8L273.1,246.8L271.6,247.0L270.2,245.8L270.4,244.6L270.9,244.0L270.9,242.0L271.3,240.0L272.0,238.4Z" data-name="Uruguay"/>
+<path d="M54.4,152.2L54.0,152.5L53.6,152.2L53.6,151.8L53.1,151.1L53.3,150.9L53.6,150.6L53.6,150.2L53.6,150.0L53.8,150.2L54.7,150.4L55.1,150.6L55.3,150.8L56.0,151.5L56.0,151.5L55.1,152.0L54.4,152.2ZM53.1,149.5L52.4,149.5L52.0,149.1L51.8,149.0L51.8,149.0L52.0,148.8L52.7,149.0L53.3,149.1L53.1,149.5ZM51.6,148.4L51.6,148.6L50.4,148.6L50.4,148.4L51.6,148.4ZM49.6,148.2L49.6,148.2L49.3,148.2L48.7,148.2L48.2,147.9L48.2,147.7L48.9,147.5L49.1,147.5L49.6,148.2ZM46.0,147.0L45.6,147.2L44.9,146.8L45.1,146.8L45.3,146.6L45.8,146.6L46.0,147.0ZM189.3,89.0L189.8,90.5L190.4,90.8L192.0,91.0L194.2,91.3L196.4,92.3L198.2,91.8L200.9,92.5L201.6,92.5L203.6,91.8L205.8,92.8L207.8,93.5L209.6,94.5L211.3,95.3L211.6,96.0L212.2,96.3L212.0,96.5L212.7,96.5L213.1,96.3L213.1,96.7L213.6,97.2L214.2,97.2L214.4,97.5L214.2,98.0L216.4,99.2L217.1,101.3L217.6,103.2L216.9,104.6L215.8,105.9L215.3,106.6L215.3,106.9L215.6,107.3L216.2,107.5L216.9,107.5L219.3,106.4L221.8,105.9L224.7,104.8L224.7,104.6L224.4,103.9L224.0,103.4L225.1,103.2L227.3,103.2L229.3,103.2L230.0,102.2L230.2,102.0L232.7,100.4L233.6,99.9L237.1,99.9L241.1,99.9L241.3,99.2L242.0,99.2L242.9,98.7L243.8,97.7L244.4,95.8L246.2,94.0L246.9,94.5L248.4,94.0L249.3,94.8L249.3,98.2L250.9,99.6L251.1,100.4L248.9,101.5L246.4,102.2L244.2,102.9L243.1,104.3L242.7,104.8L242.7,106.2L243.3,107.3L244.2,107.3L244.0,106.6L244.7,107.1L244.4,107.8L243.1,108.0L242.0,108.0L240.2,108.4L239.3,108.4L238.0,108.7L236.2,109.3L239.6,108.9L240.2,109.3L237.1,110.0L235.6,110.0L235.6,109.6L234.9,110.2L235.6,110.4L235.1,112.0L233.6,113.7L233.3,113.1L232.9,113.1L232.2,112.4L232.7,113.5L233.1,113.9L233.1,114.8L232.4,115.7L231.3,117.4L231.1,117.2L231.8,115.9L230.7,115.0L230.4,113.3L230.0,114.2L230.4,115.4L228.9,115.2L230.4,115.9L230.4,117.8L231.1,118.0L231.3,118.6L231.8,120.7L230.2,122.4L228.0,123.0L226.4,124.2L225.3,124.2L224.2,125.0L224.0,125.6L221.6,127.0L220.2,128.0L219.3,129.2L218.9,130.6L219.3,132.0L220.0,133.5L221.1,134.8L221.1,135.8L222.0,137.9L222.0,139.2L222.0,140.0L221.3,141.1L220.7,141.3L219.6,141.1L219.3,140.3L218.4,139.8L217.3,138.3L216.2,136.8L215.8,136.0L216.2,134.7L215.8,133.7L214.0,132.1L213.1,131.8L210.9,132.7L210.4,132.5L209.3,131.6L208.0,131.2L205.6,131.4L203.6,131.2L201.8,131.4L200.9,131.6L201.3,132.1L201.3,132.9L201.8,133.3L201.3,133.5L200.4,133.3L199.6,133.7L198.0,133.7L196.4,132.5L194.4,132.7L192.9,132.3L191.6,132.5L189.6,132.9L187.6,134.5L185.3,135.2L184.2,136.2L183.6,136.9L183.6,138.3L183.8,139.2L184.2,139.8L183.3,140.0L181.8,139.4L180.0,138.8L179.3,138.1L178.9,136.8L177.6,135.6L176.7,134.5L175.6,133.1L174.0,132.3L172.2,132.3L170.9,133.9L169.1,133.3L167.8,132.7L167.3,131.8L166.7,130.8L165.3,129.8L164.2,129.2L163.3,128.4L159.6,128.4L159.6,129.4L157.8,129.4L153.3,129.4L148.2,128.0L144.9,127.0L145.1,126.6L142.2,126.8L139.8,127.0L139.3,126.0L138.0,124.8L136.9,124.6L136.7,124.0L135.3,123.8L134.7,123.4L132.4,123.2L132.0,122.8L131.8,121.5L129.6,119.5L127.8,116.5L127.8,116.1L126.7,115.4L125.1,113.5L124.7,111.8L123.6,110.7L124.0,108.9L124.0,106.9L123.3,105.0L124.2,102.9L124.4,100.8L124.7,98.7L124.2,95.3L123.6,93.3L122.9,92.0L123.1,91.5L126.4,92.5L127.6,94.8L128.2,94.0L127.8,92.0L127.1,90.0L133.3,90.0L140.0,90.0L142.2,90.0L148.9,90.0L155.6,90.0L162.2,90.0L168.9,90.0L176.2,90.0L184.0,90.0L188.4,90.0L188.4,89.0L189.3,89.0ZM60.0,67.2L57.8,68.4L56.7,67.5L56.2,65.9L58.2,65.0L59.6,64.4L60.9,64.7L62.0,65.6L60.0,67.2ZM32.0,58.2L30.7,58.5L29.3,58.2L27.8,57.1L30.0,56.5L31.8,56.8L32.0,58.2ZM18.4,44.2L19.8,45.0L21.1,44.6L22.9,45.7L25.1,46.1L24.9,46.5L23.3,47.2L21.6,46.5L20.7,45.7L18.7,46.1L18.2,45.7L18.4,44.2ZM55.3,11.8L57.1,13.9L58.0,12.9L61.8,13.4L61.6,14.4L65.1,15.4L67.3,14.9L72.0,16.4L76.2,16.9L78.0,17.4L80.9,16.4L84.2,17.9L86.7,18.9L86.7,18.9L86.7,35.4L86.7,56.8L88.9,56.8L91.1,57.8L92.7,59.2L94.4,61.5L96.7,59.5L98.9,58.5L100.2,60.1L101.6,61.5L103.6,63.1L105.1,65.3L107.3,68.7L111.1,70.9L111.1,72.6L110.0,74.1L108.7,72.9L106.7,72.1L106.0,69.3L103.3,66.9L102.0,64.0L100.0,63.7L96.4,63.7L93.8,62.8L89.1,59.5L87.1,58.8L83.1,57.5L80.0,57.8L75.8,56.1L73.1,54.7L70.7,55.4L71.1,57.8L69.8,58.2L67.3,58.8L65.3,59.8L62.9,60.5L62.4,58.8L63.6,55.4L66.0,54.4L65.3,53.3L62.4,55.4L60.9,57.5L57.8,59.8L59.3,61.5L57.3,64.0L54.9,65.3L52.7,66.3L52.0,67.5L48.7,69.0L48.0,70.6L45.3,71.8L43.8,71.8L41.8,72.3L39.6,73.5L37.6,74.4L33.8,75.3L33.6,74.7L36.0,73.5L38.0,72.6L40.4,70.9L43.1,70.6L44.2,69.3L47.3,67.5L47.8,66.9L49.6,65.6L49.8,63.4L51.1,61.5L48.4,62.4L47.8,61.8L46.4,63.1L45.1,61.5L44.4,62.4L43.6,60.8L41.3,62.1L40.0,62.1L39.8,60.1L40.2,59.2L38.9,57.8L36.0,58.5L34.0,56.8L32.7,56.1L32.4,54.0L30.9,52.6L31.8,50.5L33.6,48.7L34.2,46.8L36.0,46.5L37.6,46.8L39.3,45.3L41.1,45.3L42.7,44.2L42.2,42.7L41.1,41.9L42.7,40.3L41.3,40.3L38.9,41.1L38.2,42.3L36.7,41.1L33.3,41.9L30.2,40.7L29.3,39.1L26.4,36.7L29.6,35.0L34.4,32.9L36.2,32.9L36.0,35.0L40.7,35.0L38.9,32.5L36.2,30.8L34.7,28.6L32.4,26.8L29.3,25.0L30.7,22.7L34.7,22.7L37.3,20.3L38.0,17.9L40.2,15.9L42.4,15.4L46.7,12.9L48.7,13.4L52.0,10.3L55.3,11.8Z" data-name="USA"/>
+<path d="M547.8,116.9L547.8,115.7L544.9,114.8L542.7,113.7L541.1,112.6L538.7,111.1L537.6,108.9L536.7,108.4L534.4,108.7L533.6,108.2L533.3,106.4L530.2,105.0L528.4,106.4L526.4,107.3L526.9,108.4L524.4,108.4L524.2,99.9L530.0,98.4L530.4,98.7L533.8,100.4L535.8,101.3L537.8,103.4L540.4,102.9L544.2,102.9L546.9,104.6L546.7,106.9L547.8,106.9L548.2,108.7L551.1,108.9L551.8,109.8L552.4,109.8L553.6,108.2L556.4,106.6L557.8,106.2L558.4,106.4L556.4,108.0L558.2,108.9L559.8,108.2L562.4,109.3L559.6,111.1L557.8,110.9L556.9,110.9L556.7,110.2L557.1,109.1L554.0,109.8L553.3,111.1L552.2,112.4L550.4,112.2L549.8,113.3L551.6,113.7L552.0,115.2L550.7,117.6L549.1,116.9L547.8,116.9Z" data-name="Uzbekistan"/>
+<path d="M241.6,165.0L241.3,165.5L240.2,165.7L240.9,166.3L240.9,167.4L239.8,168.2L240.7,169.6L241.6,169.6L242.2,168.2L241.3,167.7L241.3,166.3L244.0,165.7L243.8,165.0L244.7,164.3L245.3,165.5L246.9,165.7L248.4,166.5L248.4,167.0L250.4,167.2L252.9,167.0L254.0,167.7L255.8,167.9L257.1,167.4L257.1,167.0L259.8,166.9L262.4,166.9L260.7,167.4L261.3,168.2L263.1,168.2L264.9,169.1L265.1,170.4L266.2,170.4L267.1,170.8L265.3,171.8L265.3,172.5L266.0,173.2L265.6,173.3L264.0,173.7L264.2,174.5L263.6,174.9L265.1,176.2L265.3,176.7L264.4,177.4L262.0,177.9L260.4,178.3L259.8,178.6L258.0,178.3L256.4,178.1L256.0,178.1L256.9,178.6L256.9,179.8L257.1,180.8L259.1,181.0L259.1,181.3L257.6,181.8L257.3,182.5L256.4,182.8L254.7,183.1L254.4,183.7L252.7,183.8L251.3,182.8L250.7,181.1L250.2,180.6L249.3,180.3L250.4,179.4L250.4,179.1L249.8,178.6L249.3,177.4L249.6,176.2L250.0,175.5L250.4,174.7L249.6,174.4L248.2,174.5L246.7,174.5L245.8,174.7L244.2,173.2L242.9,173.0L240.0,173.2L239.6,172.7L239.1,172.5L238.9,172.2L239.1,171.5L239.1,170.8L238.4,170.4L238.2,169.6L237.1,169.4L237.8,168.6L238.0,167.2L238.7,166.7L239.6,166.2L240.0,165.3L241.6,165.0Z" data-name="Venezuela"/>
+<path d="M640.2,147.7L637.1,149.3L635.3,150.9L634.9,152.2L636.4,154.1L638.7,156.4L640.7,157.5L642.0,158.9L642.9,162.2L642.7,165.1L640.9,166.3L638.2,167.4L636.4,168.9L633.8,170.4L632.9,169.4L633.6,168.2L631.8,167.2L633.8,166.5L636.0,166.3L635.1,165.3L638.9,164.1L639.1,162.0L638.7,160.8L639.1,159.1L638.4,157.8L636.9,156.6L635.3,155.0L633.6,152.9L630.9,151.8L631.6,151.3L632.9,150.8L632.0,149.1L629.3,149.1L628.4,147.5L627.1,146.1L628.2,145.7L630.0,145.7L632.2,145.5L634.0,144.4L635.1,145.1L637.1,145.5L636.9,146.6L637.8,147.3L640.2,147.7Z" data-name="Vietnam"/>
+<path d="M772.9,213.2L772.2,213.4L771.6,212.7L771.6,212.2L772.9,213.2ZM771.3,210.4L771.8,211.8L771.1,211.6L770.7,211.8L770.2,211.3L770.2,209.9L771.3,210.4Z" data-name="Vanuatu"/>
+<path d="M478.9,127.2L478.9,128.4L478.7,129.0L477.6,129.2L477.8,128.8L478.2,128.4L477.8,128.2L478.2,127.0L478.9,127.2Z" data-name="West Bank"/>
+<path d="M518.0,156.4L516.4,157.0L516.0,157.8L516.0,158.4L513.8,159.1L510.2,159.9L508.2,161.2L507.1,161.3L506.4,161.2L505.3,161.9L503.8,162.2L502.0,162.4L501.3,162.4L500.9,162.9L500.2,162.9L500.0,163.4L498.9,163.4L498.2,163.6L496.7,163.6L496.0,162.6L496.2,161.5L495.8,161.0L495.3,159.8L494.7,159.1L495.1,158.9L494.9,158.2L495.1,157.8L495.1,157.1L496.0,156.4L495.8,155.7L496.4,154.9L497.3,155.4L498.0,155.2L500.4,155.2L500.9,155.4L503.1,155.6L503.8,155.4L504.4,156.1L505.6,155.7L507.1,153.8L509.1,153.1L515.6,152.4L517.3,155.4L518.0,156.4Z" data-name="Yemen"/>
+<path d="M470.0,236.7L469.6,236.9L468.7,237.9L468.0,238.8L466.9,240.2L464.2,242.4L462.7,243.6L461.1,244.4L458.7,245.2L457.6,245.4L457.3,245.8L456.0,245.6L454.9,246.0L452.4,245.6L451.1,245.8L450.2,245.8L447.8,246.6L446.0,246.8L444.7,247.6L443.6,247.6L442.7,247.0L442.0,246.8L440.9,246.0L440.9,246.2L440.4,245.8L440.7,244.6L439.8,243.2L440.4,242.8L440.4,241.4L439.1,239.4L438.0,237.9L438.0,237.9L436.2,235.3L437.3,234.4L438.2,235.0L438.7,235.7L439.6,235.9L441.1,236.1L442.2,236.1L444.2,235.2L444.2,228.2L444.9,228.4L446.2,230.2L446.0,231.4L446.4,231.9L448.0,231.7L449.1,231.0L450.2,230.4L450.7,229.5L451.8,229.1L452.7,229.3L453.8,229.8L455.6,229.8L457.1,229.5L457.3,228.9L457.6,228.0L458.9,227.8L459.6,227.1L460.2,226.0L462.2,224.5L465.3,223.2L466.2,223.2L467.3,223.6L468.2,223.4L469.3,223.6L470.4,226.1L470.9,227.4L470.7,229.5L470.7,230.0L469.6,229.8L468.9,229.8L468.7,230.4L468.2,231.2L468.2,231.7L469.6,232.9L470.9,232.7L471.3,231.7L472.9,231.7L472.4,233.2L472.2,234.8L471.6,235.7L470.0,236.7ZM464.4,236.1L463.3,235.3L462.4,235.9L461.1,236.5L460.0,237.9L461.6,239.2L462.4,239.0L462.9,238.4L464.0,238.2L464.4,237.5L465.1,236.7L464.4,236.1Z" data-name="South Africa"/>
+<path d="M472.9,200.6L473.8,201.4L474.4,202.8L474.0,203.3L473.6,204.7L474.0,206.1L473.3,206.8L472.7,208.3L473.8,208.8L467.1,210.2L467.3,211.5L465.6,211.6L464.2,212.3L464.0,213.0L463.3,213.2L461.3,214.6L460.0,215.7L459.3,215.9L458.7,215.5L456.2,215.3L455.8,215.3L455.8,215.1L454.9,214.8L453.3,214.6L451.6,215.0L450.2,213.9L448.7,212.5L448.7,206.9L453.3,206.9L453.1,206.4L453.6,205.7L453.1,204.9L453.3,204.0L453.1,203.5L454.0,203.7L454.0,204.2L455.1,204.0L456.4,204.2L457.3,205.0L459.1,205.2L460.4,204.7L460.9,205.5L462.7,205.9L463.3,206.6L464.2,207.4L466.0,207.6L465.8,205.7L465.1,206.1L463.6,205.4L463.1,205.0L463.3,203.3L463.8,201.3L463.1,200.6L463.8,199.4L464.4,199.2L467.3,198.9L468.2,199.0L469.3,199.6L470.2,199.9L471.6,200.1L472.9,200.6Z" data-name="Zambia"/>
+<path d="M469.3,223.6L468.2,223.4L467.3,223.6L466.2,223.2L465.3,223.2L464.0,222.3L462.2,222.1L461.6,221.0L461.6,220.3L460.7,220.1L458.2,218.2L457.6,217.1L456.9,216.7L456.2,215.3L458.7,215.5L459.3,215.9L460.0,215.7L461.3,214.6L463.3,213.2L464.0,213.0L464.2,212.3L465.6,211.6L467.3,211.5L467.3,212.2L469.3,212.2L470.2,212.5L470.9,212.9L471.8,213.0L472.9,213.6L472.9,215.9L472.7,217.1L472.4,218.3L472.9,218.9L472.7,220.0L472.2,220.1L471.6,221.4L469.3,223.6Z" data-name="Zimbabwe"/>`;
+
+initGlobe();
+renderCircuits();
+loadAll();
+</script>
+</body>
+</html>
