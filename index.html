@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<title>F1 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--red:#E10600;--rd:#9B0400;--bg:#0A0A0A;--sf:#141414;--sf2:#1E1E1E;--br:#2A2A2A;--tx:#F0F0F0;--mu:#888;--gold:#FFD700;--si:#C0C0C0;--bz:#CD7F32;}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Barlow',sans-serif;overflow:hidden}
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 8px;background:var(--bg);border-bottom:1px solid var(--br)}
+.logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;letter-spacing:2px;color:var(--red);text-transform:uppercase}
+.logo span{color:var(--tx)}
+.rbadge{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--mu);text-transform:uppercase;display:flex;align-items:center;gap:5px}
+.ldot{width:7px;height:7px;border-radius:50%;background:var(--red);animation:ldot 1.2s ease-in-out infinite;flex-shrink:0}
+@keyframes ldot{0%,100%{opacity:1}50%{opacity:0.3}}
+/* COUNTDOWN */
+.countdown-bar{background:linear-gradient(135deg,#0d1520,#141e30);border-bottom:1px solid var(--br);padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
+.cd-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--mu)}
+.cd-race{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:900;color:var(--tx);letter-spacing:.5px;text-transform:uppercase}
+.cd-units{display:flex;gap:8px}
+.cd-unit{text-align:center;min-width:36px;background:var(--sf2);border-radius:5px;padding:4px 6px}
+.cd-num{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;line-height:1;color:var(--gold)}
+.cd-lbl{font-size:8px;color:var(--mu);letter-spacing:1px;text-transform:uppercase;margin-top:1px}
+/* TICKER */
+.ticker{background:var(--red);padding:4px 0;overflow:hidden;white-space:nowrap}
+.tk{display:inline-block;animation:tk 32s linear infinite;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;color:#fff;text-transform:uppercase}
+@keyframes tk{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
+/* APP */
+.app{display:flex;flex-direction:column;height:calc(100vh - 118px)}
+/* GLOBE */
+.globe-wrap{position:relative;flex:0 0 240px;overflow:hidden;background:#000}
+#gc{width:100%;height:100%;display:block;cursor:grab}
+#gc:active{cursor:grabbing}
+#greset{position:absolute;top:8px;right:8px;z-index:10;background:rgba(8,8,8,0.92);border:1px solid var(--br);color:var(--mu);font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;display:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;-webkit-tap-highlight-color:transparent}
+#greset.vis{display:block}
+.cpopup{position:absolute;bottom:8px;left:8px;right:8px;background:rgba(14,14,14,0.97);border:1px solid var(--br);border-radius:8px;padding:10px 12px;display:none;z-index:10;flex-direction:column;align-items:flex-start;gap:0}
+.cpopup.show{display:flex}
+.pflag{font-size:20px}.pname{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:1px}
+.pmeta{font-size:11px;color:var(--mu);margin-top:2px}.pclose{font-size:16px;color:var(--mu);cursor:pointer;padding:2px 6px;background:none;border:none}
+.pst{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;padding:2px 6px;border-radius:3px;text-transform:uppercase}
+.st-d{background:var(--br);color:var(--mu)}.st-c{background:var(--gold);color:#000}.st-u{background:var(--sf2);color:var(--mu)}
+/* TABS */
+.tabs{display:flex;background:var(--sf);border-bottom:1px solid var(--br);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tb{flex:0 0 auto;padding:10px 10px;border:none;background:none;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--mu);cursor:pointer;text-transform:uppercase;border-bottom:2px solid transparent;white-space:nowrap;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.tb.active{color:var(--red);border-bottom-color:var(--red)}
+.panels{flex:1;overflow:hidden;position:relative}
+.panel{position:absolute;inset:0;overflow-y:auto;padding:12px;display:none;-webkit-overflow-scrolling:touch}
+.panel.active{display:block}
+.panel::-webkit-scrollbar{width:3px}.panel::-webkit-scrollbar-thumb{background:var(--br);border-radius:2px}
+.stitle{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--mu);margin-bottom:10px;margin-top:4px;display:flex;align-items:center;gap:8px}
+.stitle::after{content:'';flex:1;height:1px;background:var(--br)}
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:120px;gap:10px;color:var(--mu);font-size:13px}
+.sp{width:24px;height:24px;border:2px solid var(--br);border-top-color:var(--red);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.apib{font-size:10px;color:var(--mu);text-align:right;margin-bottom:6px;font-style:italic}
+/* CALENDAR */
+.rc{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:6px;background:var(--sf);margin-bottom:6px;border-left:3px solid var(--br);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.rc.done{opacity:.65}.rc.current{border-left-color:var(--gold);background:rgba(255,215,0,.04)}
+.rc.current .rn,.rc.upcoming-next .rn{color:var(--gold)}
+.rc.upcoming-next{border-left-color:var(--red)}
+.rd2{min-width:36px;text-align:center;font-family:'Barlow Condensed',sans-serif}
+.rdy{font-size:22px;font-weight:900;line-height:1}.rmn{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--mu);text-transform:uppercase}
+.ri{flex:1}.rr{font-size:10px;font-weight:600;color:var(--mu);letter-spacing:1px;text-transform:uppercase}
+.rn{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;margin:1px 0}
+.rci{font-size:11px;color:var(--mu)}.rfl{font-size:18px}
+.sbadge{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;background:rgba(225,6,0,.15);color:var(--red);border:1px solid var(--rd);border-radius:3px;padding:1px 5px;text-transform:uppercase;margin-left:6px}
+.rres{font-size:11px;margin-top:3px}.win{color:var(--gold);font-weight:600}
+/* RACE DETAIL MODAL */
+.race-detail{background:var(--sf2);border-radius:6px;margin-top:6px;overflow:hidden}
+.race-detail-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid var(--br)}
+.race-detail-row:last-child{border-bottom:none}
+.rd-pos{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;min-width:24px;color:var(--mu)}
+.rd-pos.p1{color:var(--gold)}.rd-pos.p2{color:var(--si)}.rd-pos.p3{color:var(--bz)}
+.rd-flag{font-size:14px;min-width:22px}
+.rd-name{flex:1;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase}
+.rd-pts{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:900;color:var(--mu)}
+/* DRIVERS */
+.drow{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:6px;margin-bottom:4px;background:var(--sf);border-left:3px solid transparent;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.drow:active{background:var(--sf2)}
+.pos{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:var(--mu);min-width:22px;text-align:center}
+.pos.p1{color:var(--gold)}.pos.p2{color:var(--si)}.pos.p3{color:var(--bz)}
+.dn{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.dt{font-size:11px;color:var(--mu);margin-top:1px}
+.dpts{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900}
+.ptsl{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:600;color:var(--mu);letter-spacing:1px;text-align:right;margin-top:1px}
+.pb{height:3px;border-radius:2px;margin-top:4px;background:var(--br);width:60px}
+.pbf{height:100%;border-radius:2px}
+/* DRIVER MODAL */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;display:none;align-items:flex-end}
+.mbg.show{display:flex}
+.modal{background:var(--sf);border-radius:16px 16px 0 0;width:100%;max-height:90vh;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch}
+.mh{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.mfl{font-size:38px}.mdn{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:1px}
+.mtm{font-size:12px;margin-top:2px}
+.mcl{margin-left:auto;font-size:20px;color:var(--mu);background:none;border:none;cursor:pointer;padding:4px 8px;-webkit-tap-highlight-color:transparent}
+.ms{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
+.msb{background:var(--sf2);border-radius:8px;padding:8px 6px;text-align:center}
+.msv{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900}
+.msl{font-size:9px;color:var(--mu);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.ht{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:8px}
+.rh{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--sf2);border-radius:6px;margin-bottom:4px}
+.rhr{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:var(--mu);min-width:28px}
+.rhn{flex:1;font-size:12px}.rhp{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:900;min-width:36px;text-align:right}
+.rhpts{font-size:10px;color:var(--mu);min-width:36px;text-align:right}
+/* COMPARE */
+.cmp-sel{display:flex;gap:8px;margin-bottom:12px}
+.cmp-btn{flex:1;background:var(--sf);border:1px solid var(--br);color:var(--tx);padding:8px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;text-align:left}
+.cmp-row{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--br)}
+.cmp-row:last-child{border-bottom:none}
+.cmp-lbl{font-size:11px;color:var(--mu);flex:1;text-align:center}
+.cmp-val{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;min-width:60px;text-align:center}
+.cmp-bar-wrap{flex:1;display:flex;align-items:center;gap:4px}
+.cmp-bar{height:4px;border-radius:2px;background:var(--br);flex:1;position:relative}
+.cmp-barfill{height:100%;border-radius:2px;position:absolute;top:0}
+.cmp-win{color:var(--gold)}
+/* TEAMS */
+.tc{background:var(--sf);border-radius:8px;margin-bottom:8px;overflow:hidden;border-left:3px solid transparent}
+.th{display:flex;align-items:center;gap:10px;padding:12px 12px 8px}
+.tp{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--mu);min-width:26px}
+.tp.p1{color:var(--gold)}.tp.p2{color:var(--si)}.tp.p3{color:var(--bz)}
+.tdot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.tn{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;text-transform:uppercase;flex:1}
+.tpb{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900}
+.tpl{font-size:9px;color:var(--mu);letter-spacing:1px;text-transform:uppercase}
+.pb2{height:3px;background:var(--br);margin:0 12px 10px}.pb2f{height:100%;border-radius:2px}
+.tdr{display:flex;gap:6px;padding:0 12px 12px}
+.dch{flex:1;background:var(--sf2);border-radius:6px;padding:8px 10px}
+.dcf{font-size:15px}.dcn{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;margin-top:2px;line-height:1.2}
+.dcp{font-size:11px;color:var(--mu);margin-top:2px}
+/* CHART */
+.chart-wrap{background:var(--sf);border-radius:8px;padding:12px;margin-bottom:10px;overflow:hidden}
+.chart-title{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--mu);margin-bottom:10px}
+#championship-chart{width:100%;touch-action:none}
+.chart-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.cmode-btn{flex:1;background:var(--sf);border:1px solid var(--br);color:var(--mu);padding:8px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cmode-btn.active{background:rgba(225,6,0,0.15);border-color:var(--rd);color:#fff}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--tx);font-family:'Barlow Condensed',sans-serif;font-weight:600;background:var(--sf2);padding:3px 8px;border-radius:4px}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+/* CIRCUITS */
+.csel{width:100%;background:var(--sf);border:1px solid var(--br);color:var(--tx);padding:10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;appearance:none;margin-bottom:12px}
+.cd{background:var(--sf);border-radius:8px;padding:14px;margin-bottom:8px}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sb2{background:var(--sf2);border-radius:6px;padding:8px 10px}
+.sl{font-size:10px;color:var(--mu);letter-spacing:1px;text-transform:uppercase}
+.sv{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:900;margin-top:2px}
+/* STATS */
+.stat-card{background:var(--sf);border-radius:8px;padding:12px;margin-bottom:8px}
+.stat-card-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--mu);margin-bottom:10px}
+.stat-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--br)}
+.stat-row:last-child{border-bottom:none}
+.stat-rank{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:900;color:var(--mu);min-width:20px}
+.stat-name{flex:1;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase}
+.stat-val{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:900}
+/* SHARE BTN */
+.share-btn{display:flex;align-items:center;gap:6px;background:var(--sf2);border:1px solid var(--br);color:var(--tx);padding:8px 14px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-bottom:10px;width:100%;justify-content:center;-webkit-tap-highlight-color:transparent}
+.share-btn:active{background:var(--br)}
+/* ADD TO CAL BTN */
+.cal-btn{display:flex;align-items:center;gap:6px;background:rgba(225,6,0,0.1);border:1px solid var(--rd);color:var(--red);padding:8px 14px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-bottom:8px;width:100%;justify-content:center;-webkit-tap-highlight-color:transparent}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,0.95);border:1px solid var(--br);color:var(--tx);padding:10px 18px;border-radius:8px;font-size:13px;z-index:200;display:none;white-space:nowrap}
+.toast.show{display:block;animation:fadeout 2.5s forwards}
+@keyframes fadeout{0%{opacity:1}70%{opacity:1}100%{opacity:0}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div style="display:flex;align-items:center;gap:9px">
+    <svg width="52" height="20" viewBox="0 0 100 40" style="display:block" aria-label="F1"><g transform="skewX(-15)"><rect x="78" y="2" width="16" height="36" rx="1.5" fill="#E10600"/><rect x="8" y="2" width="56" height="8.5" rx="1" fill="#fff"/><rect x="8" y="2" width="11" height="36" rx="1" fill="#fff"/><rect x="22" y="15" width="40" height="8" rx="1" fill="#fff"/></g></svg>
+    <div id="hdr-year" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:20px;letter-spacing:2px;color:var(--tx)">2026</div>
+  </div>
+  <div class="rbadge"><span class="ldot"></span><span id="hround">Cargando...</span></div>
+</div>
+
+<!-- COUNTDOWN -->
+<div class="countdown-bar">
+  <div>
+    <div class="cd-label">Próxima carrera</div>
+    <div class="cd-race" id="cd-race">—</div>
+  </div>
+  <div class="cd-units">
+    <div class="cd-unit"><div class="cd-num" id="cd-d">--</div><div class="cd-lbl">días</div></div>
+    <div class="cd-unit"><div class="cd-num" id="cd-h">--</div><div class="cd-lbl">hrs</div></div>
+    <div class="cd-unit"><div class="cd-num" id="cd-m">--</div><div class="cd-lbl">min</div></div>
+    <div class="cd-unit"><div class="cd-num" id="cd-s">--</div><div class="cd-lbl">seg</div></div>
+  </div>
+</div>
+
+<div class="ticker"><span class="tk" id="tktxt">⏳ Cargando...</span></div>
+
+<div class="app">
+  <div class="globe-wrap">
+    <canvas id="gc"></canvas>
+    <button id="greset" onclick="resetGlobe()">✕ RESET</button>
+    <div class="cpopup" id="cpopup">
+      <div style="display:flex;align-items:center;gap:10px;width:100%">
+        <div class="pflag" id="pflag">🏁</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div class="pname" id="pname"></div><div class="pst" id="pst"></div>
+          </div>
+          <div class="pmeta" id="pmeta"></div>
+        </div>
+        <button class="pclose" onclick="closePopup()">✕</button>
+      </div>
+      <div id="ppodium" style="width:100%"></div>
+      <button id="pmore" onclick="togglePopupCard()" style="width:100%;margin-top:8px;background:rgba(225,6,0,0.12);border:1px solid var(--rd);color:var(--red);padding:7px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer">Ver ficha completa ▾</button>
+      <div id="pcard" style="width:100%;margin-top:8px;display:none;max-height:50vh;overflow-y:auto"></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tb active" onclick="switchTab(this,'cal')">📅 Cal</button>
+    <button class="tb" onclick="switchTab(this,'drv')">🏆 Pilotos</button>
+    <button class="tb" onclick="switchTab(this,'chart')">📈 Evolución</button>
+    <button class="tb" onclick="switchTab(this,'cmp')">⚖️ Comparar</button>
+    <button class="tb" onclick="switchTab(this,'con')">🔧 Teams</button>
+    <button class="tb" onclick="switchTab(this,'stats')">📊 Stats</button>
+    <button class="tb" onclick="switchTab(this,'cir')">🏎 Circuitos</button>
+  </div>
+  <div class="panels">
+    <div class="panel active" id="panel-cal"></div>
+    <div class="panel" id="panel-drv"></div>
+    <div class="panel" id="panel-chart"></div>
+    <div class="panel" id="panel-cmp"></div>
+    <div class="panel" id="panel-con"></div>
+    <div class="panel" id="panel-stats"></div>
+    <div class="panel" id="panel-cir"></div>
+  </div>
+</div>
+
+<div class="mbg" id="dmodal" onclick="closeModal(event)"><div class="modal" id="dmi"></div></div>
+<div class="toast" id="toast"></div>
+
+<script type="application/json" id="land-data">[[[35.7,61.2],[35.4,63.0],[37.3,65.6],[37.1,67.8],[37.6,70.1],[36.9,72.2],[37.4,75.0],[36.5,71.8],[34.3,71.2],[34.0,69.9],[31.9,69.3],[31.3,66.9],[29.5,65.0],[29.8,60.9],[31.4,61.7],[33.0,60.5],[35.7,61.2]],[[-5.9,16.3],[-8.1,17.5],[-7.1,20.0],[-7.3,21.7],[-9.5,21.9],[-11.1,22.2],[-10.9,23.9],[-12.9,24.0],[-12.9,21.9],[-16.1,21.9],[-17.5,23.2],[-17.8,19.0],[-17.3,18.3],[-17.4,14.2],[-17.3,11.7],[-14.9,12.1],[-12.5,13.3],[-9.8,13.1],[-6.9,12.7],[-5.9,13.4],[-5.9,16.3]],[[-5.7,12.4],[-4.4,12.6],[-5.7,12.4]],[[41.9,20.6],[39.6,20.2],[41.7,19.5],[41.9,20.6]],[[24.2,51.6],[24.1,54.0],[26.1,56.1],[24.3,55.8],[22.5,55.0],[23.0,52.0],[24.2,51.6]],[[-55.2,-65.5],[-54.9,-68.6],[-52.6,-68.6],[-54.5,-66.5],[-54.7,-65.0],[-55.2,-65.5]],[[-22.1,-65.0],[-22.0,-62.8],[-22.2,-62.7],[-24.8,-58.8],[-25.6,-57.6],[-27.1,-58.6],[-27.4,-55.7],[-25.5,-54.1],[-28.9,-56.3],[-32.0,-58.1],[-34.4,-58.5],[-36.4,-56.7],[-38.7,-59.2],[-38.8,-62.3],[-41.0,-62.7],[-40.8,-64.7],[-42.4,-64.3],[-42.6,-63.5],[-45.0,-65.6],[-46.3,-67.6],[-47.2,-65.6],[-49.9,-67.8],[-50.7,-69.1],[-52.3,-68.6],[-52.0,-71.9],[-49.3,-73.4],[-45.6,-71.6],[-42.3,-72.1],[-39.8,-71.7],[-36.7,-71.1],[-34.2,-69.8],[-31.4,-70.5],[-28.5,-69.7],[-26.9,-68.3],[-24.5,-68.4],[-21.8,-66.3],[-22.1,-65.0]],[[41.1,43.6],[40.8,45.6],[38.8,46.5],[40.3,43.7],[41.1,43.6]],[[-80.0,-59.6],[-80.9,-64.5],[-80.3,-66.3],[-80.4,-61.9],[-80.0,-59.6]],[[-79.5,-159.2],[-79.3,-162.4],[-78.6,-163.7],[-78.7,-160.2],[-79.5,-159.2]],[[-78.0,-45.2],[-79.5,-43.4],[-80.0,-43.3],[-80.8,-48.4],[-81.0,-52.9],[-80.2,-54.0],[-79.6,-51.0],[-78.0,-48.7],[-78.0,-45.2]],[[-73.5,-121.2],[-73.5,-118.7],[-74.0,-121.6],[-73.3,-122.4],[-73.5,-121.2]],[[-73.5,-125.6],[-73.9,-124.0],[-73.5,-127.3],[-73.5,-125.6]],[[-71.9,-99.0],[-72.0,-96.8],[-72.5,-100.8],[-71.9,-102.3],[-71.9,-99.0]],[[-71.0,-68.5],[-72.5,-72.4],[-72.1,-71.9],[-72.1,-75.0],[-71.2,-72.1],[-69.0,-71.2],[-70.1,-69.1],[-71.0,-68.5]],[[-64.2,-58.6],[-64.5,-61.3],[-65.9,-62.6],[-67.2,-64.9],[-69.6,-62.8],[-72.0,-61.4],[-74.1,-61.4],[-74.9,-63.7],[-75.8,-67.2],[-76.2,-69.8],[-76.6,-74.0],[-76.7,-77.2],[-77.6,-74.3],[-77.9,-73.7],[-78.4,-77.9],[-80.3,-75.4],[-80.7,-71.4],[-81.5,-65.7],[-82.0,-61.6],[-82.8,-58.7],[-82.3,-53.6],[-81.7,-47.3],[-82.1,-42.8],[-81.3,-38.2],[-80.9,-34.4],[-80.6,-30.1],[-80.3,-28.5],[-79.5,-33.7],[-79.1,-35.9],[-77.7,-32.2],[-76.7,-28.9],[-76.4,-26.2],[-76.1,-22.5],[-75.4,-18.9],[-74.5,-15.7],[-72.4,-12.3],[-71.3,-9.1],[-71.7,-7.4],[-71.5,-4.3],[-71.2,-0.7],[-71.0,3.0],[-70.5,6.3],[-70.0,9.5],[-70.6,12.0],[-70.0,14.7],[-69.9,18.2],[-70.1,21.5],[-70.5,24.8],[-70.3,28.1],[-69.8,31.0],[-68.8,33.3],[-69.2,36.2],[-69.5,39.7],[-68.5,42.9],[-67.8,45.7],[-67.4,48.3],[-66.9,50.8],[-65.9,53.6],[-66.0,56.4],[-67.4,59.9],[-68.0,62.4],[-67.7,66.0],[-67.9,68.9],[-69.7,69.6],[-70.3,67.8],[-72.2,68.7],[-72.1,71.0],[-70.7,73.1],[-69.6,76.6],[-68.1,80.1],[-67.2,82.8],[-67.1,85.7],[-66.2,88.0],[-67.1,91.6],[-67.1,94.2],[-67.2,97.8],[-66.9,100.4],[-65.6,102.8],[-66.9,106.2],[-66.8,109.2],[-66.1,112.9],[-66.7,115.6],[-67.2,118.6],[-66.9,121.7],[-66.7,125.2],[-66.7,127.9],[-66.4,130.8],[-66.3,133.9],[-65.6,135.7],[-66.9,139.9],[-66.8,143.1],[-66.9,145.5],[-68.4,148.8],[-68.7,151.5],[-68.6,154.3],[-69.5,158.0],[-70.2,160.8],[-70.7,163.8],[-70.8,167.3],[-71.4,170.5],[-73.7,169.3],[-74.4,166.1],[-75.9,163.8],[-78.2,164.7],[-78.8,167.0],[-79.2,161.8],[-80.9,159.8],[-82.4,163.7],[-83.3,168.9],[-83.8,169.4],[-84.0,172.3],[-84.4,173.2],[-84.5,178.3],[-84.7,180.0],[-84.7,-179.9],[-84.5,-177.3],[-84.1,-173.1],[-84.1,-172.9],[-83.9,-170.0],[-84.8,-164.2],[-85.4,-158.1],[-85.3,-150.9],[-85.3,-145.9],[-85.0,-143.1],[-84.6,-142.9],[-84.3,-150.1],[-83.9,-150.9],[-83.7,-153.6],[-82.0,-152.9],[-81.1,-156.8],[-81.0,-152.1],[-80.7,-147.2],[-79.9,-146.8],[-79.3,-151.6],[-79.1,-155.3],[-78.0,-158.1],[-77.1,-153.7],[-77.2,-150.0],[-76.5,-146.1],[-75.3,-142.8],[-75.0,-138.9],[-74.3,-135.2],[-74.5,-130.9],[-74.4,-126.9],[-74.5,-122.6],[-74.5,-119.7],[-74.2,-116.2],[-73.7,-113.9],[-74.8,-110.1],[-75.1,-106.1],[-75.1,-102.0],[-74.9,-100.1],[-74.1,-102.5],[-72.6,-103.7],[-72.8,-100.3],[-73.2,-98.1],[-73.5,-95.0],[-73.2,-92.4],[-72.6,-89.2],[-73.1,-86.0],[-73.6,-82.7],[-73.5,-80.7],[-73.4,-77.9],[-73.9,-74.9],[-73.3,-71.6],[-73.0,-68.9],[-72.0,-67.1],[-69.7,-68.5],[-67.7,-67.6],[-65.6,-64.6],[-64.6,-62.0],[-63.7,-59.2],[-63.5,-57.2],[-64.2,-58.6]],[[-48.6,68.9],[-49.3,70.6],[-49.8,68.7],[-48.6,68.9]],[[-40.8,145.4],[-40.8,147.7],[-43.2,147.9],[-42.7,145.4],[-40.7,144.7],[-40.8,145.4]],[[-13.8,143.6],[-15.0,145.4],[-16.8,145.6],[-19.0,146.4],[-20.4,148.8],[-22.3,149.7],[-25.3,152.9],[-28.1,153.6],[-30.4,153.1],[-32.6,152.5],[-35.2,150.7],[-37.4,150.0],[-38.2,147.4],[-38.4,144.9],[-38.5,142.7],[-37.4,140.0],[-35.7,139.1],[-34.4,138.2],[-35.3,136.8],[-32.9,137.8],[-34.9,136.0],[-32.8,134.1],[-31.6,129.5],[-32.2,126.1],[-33.0,124.2],[-33.8,121.3],[-34.5,119.3],[-35.0,116.6],[-33.6,115.0],[-30.6,115.2],[-28.5,114.6],[-26.1,113.3],[-23.8,113.5],[-21.8,114.1],[-20.7,116.7],[-20.3,118.8],[-19.7,120.9],[-16.4,123.0],[-15.1,124.9],[-13.8,127.1],[-15.0,129.6],[-12.5,130.6],[-12.1,132.6],[-12.2,135.3],[-12.4,137.0],[-14.7,135.4],[-16.8,138.3],[-17.4,140.9],[-15.0,141.7],[-12.9,141.7],[-10.7,142.5],[-13.4,143.6],[-13.8,143.6]],[[48.1,17.0],[46.4,14.6],[46.8,12.4],[46.9,9.9],[47.7,12.1],[48.6,14.3],[48.8,16.5],[48.1,17.0]],[[39.7,45.0],[38.7,46.1],[39.7,45.0]],[[41.2,47.4],[40.6,49.6],[40.3,50.4],[38.3,48.9],[39.5,47.7],[39.9,45.6],[41.4,45.2],[41.2,46.6],[41.2,47.4]],[[-4.5,29.3],[-2.8,29.0],[-3.0,30.7],[-4.5,29.3]],[[51.3,3.3],[51.0,5.6],[49.5,5.7],[50.4,3.6],[51.1,2.5],[51.3,3.3]],[[6.3,2.7],[6.8,1.6],[9.1,1.7],[11.0,0.9],[12.2,2.8],[10.3,3.6],[6.3,2.7]],[[9.6,-2.8],[9.8,-4.8],[12.5,-4.4],[14.2,-2.2],[14.9,0.4],[12.9,1.0],[11.1,1.2],[10.9,-0.8],[11.0,-2.9],[9.6,-2.8]],[[22.0,92.7],[20.7,92.4],[22.8,91.4],[22.1,89.0],[24.2,88.7],[26.4,88.6],[25.1,91.8],[23.0,91.7],[23.6,92.1],[22.0,92.7]],[[44.2,22.7],[43.7,25.6],[43.8,28.0],[42.0,28.0],[41.8,26.1],[41.3,23.7],[43.6,22.5],[44.2,22.7]],[[23.8,-77.5],[25.2,-77.9],[23.8,-77.5]],[[26.6,-77.8],[26.8,-79.0],[26.6,-77.8]],[[26.6,-77.0],[27.0,-77.8],[26.6,-77.0]],[[44.9,19.0],[42.6,18.6],[44.0,16.5],[45.1,18.6],[44.9,19.0]],[[53.9,23.5],[54.3,25.5],[56.2,28.2],[55.6,30.9],[53.6,32.4],[51.8,30.6],[51.6,28.2],[51.9,25.3],[51.6,23.5],[53.9,23.5]],[[17.8,-89.1],[15.9,-88.9],[17.8,-89.1]],[[-22.0,-62.8],[-21.8,-66.3],[-22.9,-67.8],[-19.4,-68.4],[-17.6,-69.6],[-15.3,-69.2],[-12.9,-68.9],[-11.0,-69.5],[-10.3,-67.2],[-9.8,-65.3],[-12.5,-64.3],[-13.2,-62.1],[-13.8,-60.5],[-16.3,-60.2],[-16.3,-58.2],[-19.0,-57.7],[-19.6,-61.8],[-22.2,-62.7],[-22.0,-62.8]],[[-30.2,-57.6],[-27.9,-55.2],[-26.9,-53.6],[-24.6,-54.3],[-22.7,-55.6],[-22.1,-57.9],[-20.2,-58.2],[-17.6,-57.7],[-16.3,-60.2],[-13.8,-60.5],[-13.0,-62.8],[-11.6,-65.4],[-9.8,-65.3],[-10.7,-68.0],[-11.1,-70.1],[-9.5,-70.5],[-9.5,-73.2],[-7.5,-74.0],[-4.6,-71.7],[-4.3,-69.9],[-1.6,-69.4],[0.5,-70.0],[1.7,-69.8],[2.0,-67.5],[0.8,-65.5],[2.2,-63.4],[4.1,-64.8],[4.2,-62.1],[5.2,-60.2],[2.8,-60.0],[1.3,-58.5],[1.8,-56.0],[2.1,-54.1],[4.2,-51.7],[1.9,-50.5],[-0.1,-50.4],[-0.2,-48.6],[-1.2,-48.6],[-1.6,-44.9],[-2.9,-41.5],[-3.7,-38.5],[-5.1,-35.6],[-9.0,-35.1],[-12.2,-37.7],[-15.7,-38.9],[-17.9,-39.3],[-20.9,-40.8],[-23.0,-42.0],[-23.4,-44.6],[-24.9,-47.6],[-28.2,-48.7],[-31.0,-50.7],[-33.2,-52.7],[-30.9,-55.6],[-30.2,-57.6]],[[27.8,91.7],[27.1,88.8],[28.0,91.3],[27.8,91.7]],[[-18.5,25.6],[-20.4,27.3],[-22.1,29.4],[-23.6,27.1],[-25.5,25.7],[-25.3,23.3],[-26.8,20.9],[-24.9,20.2],[-24.8,19.9],[-21.8,19.9],[-21.8,20.9],[-18.3,20.9],[-17.9,23.2],[-17.7,25.1],[-18.5,25.6]],[[7.4,15.3],[7.9,18.0],[9.5,21.0],[11.1,22.9],[9.0,23.5],[7.8,25.1],[5.6,27.2],[5.2,25.3],[4.7,22.8],[4.7,20.3],[4.2,18.5],[2.3,16.0],[4.7,14.5],[7.4,15.3]],[[46.6,-63.7],[46.4,-62.0],[46.4,-64.1],[46.6,-63.7]],[[49.1,-61.8],[49.9,-64.5],[49.3,-61.8],[49.1,-61.8]],[[48.5,-123.5],[48.8,-125.7],[50.0,-128.1],[50.3,-125.8],[48.5,-123.5]],[[50.7,-56.1],[49.3,-54.9],[49.2,-53.5],[46.7,-53.1],[47.8,-54.2],[46.9,-56.0],[47.4,-55.3],[47.6,-59.3],[50.7,-57.4],[51.6,-55.4],[50.7,-56.1]],[[54.0,-132.7],[52.2,-131.2],[53.4,-133.1],[54.0,-132.7]],[[62.7,-81.9],[62.2,-83.8],[62.9,-81.9],[62.7,-81.9]],[[65.7,-85.2],[64.5,-81.6],[63.7,-80.1],[63.7,-82.5],[63.1,-85.5],[63.5,-87.2],[65.7,-85.9],[65.7,-85.2]],[[67.1,-75.9],[67.6,-77.2],[68.0,-75.1],[67.1,-75.9]],[[69.1,-95.6],[69.4,-99.8],[69.9,-97.2],[69.1,-95.6]],[[69.5,-90.5],[68.5,-90.6],[68.6,-88.0],[67.2,-87.4],[68.8,-85.6],[69.7,-82.6],[68.7,-81.2],[67.1,-81.4],[66.3,-84.7],[65.2,-87.0],[64.0,-89.9],[62.0,-93.2],[58.9,-94.7],[57.1,-92.3],[56.9,-89.0],[55.7,-86.1],[55.2,-83.4],[52.2,-81.4],[51.5,-79.1],[54.1,-79.1],[54.7,-79.8],[55.8,-77.1],[58.1,-77.3],[58.8,-78.5],[59.9,-77.3],[62.3,-78.1],[62.2,-74.7],[61.5,-71.7],[61.1,-69.6],[59.0,-69.3],[58.8,-66.2],[60.3,-64.6],[57.0,-61.4],[56.3,-61.8],[54.9,-58.0],[53.3,-55.8],[51.4,-57.1],[50.1,-61.7],[50.3,-65.4],[47.7,-70.0],[46.8,-71.1],[49.1,-66.6],[48.7,-64.2],[46.2,-64.5],[45.9,-61.5],[47.0,-60.5],[45.9,-59.8],[44.7,-63.3],[43.6,-66.1],[44.5,-66.2],[45.3,-64.4],[45.1,-67.1],[47.1,-67.8],[46.7,-70.0],[45.0,-71.5],[45.0,-74.9],[43.6,-77.7],[43.5,-79.2],[42.9,-78.9],[41.7,-82.4],[44.4,-82.3],[46.1,-83.6],[47.6,-86.5],[48.0,-89.3],[48.5,-92.6],[48.8,-94.6],[49.0,-100.7],[49.0,-107.0],[49.0,-113.0],[49.0,-116.0],[49.0,-117.0],[49.0,-122.8],[49.0,-123.0],[50.8,-127.4],[53.6,-129.3],[54.8,-130.5],[55.9,-130.0],[57.7,-132.7],[59.3,-134.9],[58.9,-137.5],[60.3,-141.0],[66.0,-141.0],[69.7,-141.0],[69.0,-137.5],[69.5,-132.9],[70.2,-129.8],[69.5,-125.8],[69.6,-123.1],[69.0,-117.6],[68.4,-113.9],[67.9,-115.3],[67.8,-110.8],[67.9,-107.8],[68.3,-108.8],[68.8,-106.2],[67.6,-101.5],[67.8,-98.4],[68.2,-96.1],[67.3,-96.1],[69.1,-94.2],[70.1,-96.5],[71.9,-95.2],[70.2,-91.5],[69.7,-92.4],[69.5,-90.5]],[[73.1,-114.2],[72.7,-114.7],[72.5,-111.1],[71.7,-108.2],[73.2,-107.5],[71.7,-104.8],[70.0,-101.0],[69.5,-102.7],[68.8,-102.4],[69.2,-106.0],[68.6,-111.5],[69.3,-115.2],[70.0,-117.3],[70.2,-113.7],[70.4,-112.4],[70.5,-116.5],[70.9,-118.4],[71.3,-116.1],[71.6,-119.4],[73.3,-115.2],[73.1,-114.2]],[[73.4,-104.5],[73.5,-106.9],[73.4,-104.5]],[[73.1,-76.3],[72.7,-79.5],[73.7,-80.8],[73.8,-80.4],[73.1,-76.3]],[[73.2,-86.6],[73.8,-82.3],[72.7,-80.6],[72.1,-80.7],[72.2,-75.6],[71.6,-72.2],[70.5,-68.8],[69.2,-67.0],[68.7,-68.8],[67.8,-64.9],[66.9,-61.9],[65.0,-63.9],[66.3,-68.0],[64.6,-65.7],[62.7,-65.0],[63.7,-68.8],[62.3,-66.3],[61.9,-66.2],[62.9,-71.0],[64.7,-74.8],[64.4,-74.8],[64.2,-77.7],[64.6,-78.6],[65.5,-74.0],[67.7,-72.9],[68.9,-76.9],[69.1,-76.2],[70.2,-79.0],[70.0,-84.9],[70.4,-88.7],[70.8,-89.5],[71.2,-88.5],[72.2,-90.2],[73.8,-85.8],[73.2,-86.6]],[[73.8,-100.4],[73.8,-97.4],[73.0,-98.1],[72.6,-96.5],[71.4,-99.3],[71.7,-100.0],[72.5,-102.5],[72.8,-102.5],[72.7,-100.4],[73.4,-101.5],[73.8,-100.4]],[[72.8,-93.2],[72.1,-95.4],[73.9,-95.5],[73.9,-90.5],[72.8,-93.2]],[[71.4,-120.5],[70.9,-123.1],[71.3,-123.6],[71.9,-125.9],[73.7,-123.9],[74.3,-124.9],[74.4,-121.5],[74.2,-117.6],[73.5,-115.5],[72.5,-119.2],[71.4,-120.5]],[[75.0,-93.6],[74.9,-96.8],[75.3,-94.0],[75.0,-93.6]],[[76.7,-98.5],[75.0,-98.2],[75.1,-100.9],[75.6,-100.9],[76.3,-102.6],[76.6,-98.6],[76.7,-98.5]],[[76.2,-108.2],[76.0,-105.9],[75.0,-106.3],[74.4,-112.2],[74.7,-113.9],[75.2,-111.8],[75.0,-116.3],[75.2,-117.7],[76.5,-115.4],[75.5,-110.8],[75.5,-109.1],[76.4,-110.5],[76.7,-108.5],[76.2,-108.2]],[[77.1,-94.7],[76.8,-91.6],[75.6,-87.8],[75.8,-82.8],[75.3,-80.1],[74.4,-86.1],[74.8,-92.4],[76.4,-96.0],[77.2,-96.7],[77.1,-94.7]],[[77.6,-116.2],[76.1,-119.9],[76.1,-122.9],[76.1,-122.9],[77.5,-119.1],[77.6,-116.2]],[[77.5,-93.8],[77.6,-96.2],[77.8,-96.4],[77.6,-93.7],[77.5,-93.8]],[[77.7,-110.2],[77.7,-113.5],[78.0,-109.9],[77.7,-110.2]],[[78.6,-109.7],[78.4,-112.5],[78.6,-109.7]],[[78.1,-95.8],[78.1,-98.1],[78.9,-98.6],[78.4,-95.6],[78.1,-95.8]],[[78.3,-100.1],[77.9,-99.7],[78.4,-105.2],[78.7,-104.2],[79.3,-105.5],[78.8,-100.8],[78.3,-100.1]],[[79.7,-87.0],[79.3,-85.8],[78.2,-90.8],[78.8,-94.0],[79.4,-93.1],[79.7,-96.1],[81.0,-94.3],[81.2,-94.7],[80.7,-91.1],[80.3,-87.8],[79.7,-87.0]],[[83.1,-68.5],[82.9,-63.7],[82.6,-61.9],[82.4,-61.9],[81.7,-66.8],[81.5,-67.7],[81.5,-65.5],[80.6,-69.5],[79.6,-73.2],[79.4,-73.9],[79.3,-76.9],[79.2,-75.5],[77.9,-77.9],[77.2,-79.8],[77.0,-77.9],[76.8,-77.9],[76.5,-83.2],[76.4,-87.6],[76.5,-89.5],[77.0,-89.6],[77.2,-87.8],[78.0,-87.7],[77.5,-85.0],[78.4,-88.0],[79.0,-85.4],[79.3,-85.1],[80.3,-86.9],[80.2,-84.2],[80.5,-81.8],[80.5,-87.6],[81.6,-91.4],[81.9,-91.6],[82.3,-87.0],[82.6,-84.3],[83.1,-79.3],[83.2,-76.2],[83.1,-75.7],[83.2,-70.7],[83.1,-68.5]],[[47.5,9.6],[46.0,8.5],[46.3,6.0],[47.6,8.3],[47.5,9.6]],[[-52.6,-68.6],[-54.9,-68.6],[-54.9,-67.0],[-55.2,-70.0],[-54.0,-73.3],[-52.8,-74.7],[-54.1,-71.1],[-52.5,-69.3],[-52.6,-68.6]],[[-21.5,-68.2],[-22.9,-67.8],[-26.2,-68.4],[-29.4,-70.0],[-33.1,-70.1],[-36.0,-70.4],[-38.6,-70.8],[-42.1,-71.7],[-44.2,-71.8],[-46.9,-71.9],[-48.9,-72.6],[-50.7,-73.0],[-52.1,-69.5],[-52.3,-68.6],[-52.9,-70.8],[-52.8,-73.7],[-51.6,-75.3],[-48.7,-75.6],[-46.9,-74.1],[-46.6,-75.6],[-44.1,-74.4],[-44.5,-73.2],[-42.4,-72.7],[-42.1,-73.4],[-43.2,-74.3],[-39.9,-73.7],[-37.2,-73.6],[-33.9,-71.9],[-30.9,-71.7],[-25.7,-70.7],[-21.4,-70.1],[-18.3,-70.4],[-19.4,-68.4],[-21.5,-68.2]],[[18.7,110.3],[19.4,108.6],[20.1,110.8],[18.7,110.3]],[[49.8,127.7],[48.7,130.6],[48.5,135.0],[45.1,133.1],[45.0,131.0],[42.9,131.1],[42.0,128.1],[40.6,125.1],[39.2,122.1],[40.9,121.6],[39.3,119.0],[38.7,117.5],[37.2,119.7],[37.5,122.4],[35.6,119.7],[32.5,121.2],[30.1,121.5],[28.2,121.7],[24.5,118.7],[22.8,115.9],[21.6,111.8],[20.3,109.9],[21.8,107.0],[23.4,105.3],[22.7,102.7],[21.2,101.3],[22.1,99.2],[24.1,98.7],[25.1,97.7],[27.5,98.7],[28.4,96.2],[29.5,96.1],[28.6,93.4],[28.1,90.7],[27.3,88.8],[28.2,85.8],[30.1,82.3],[30.9,79.7],[32.6,78.5],[35.5,77.8],[37.1,75.2],[39.4,73.7],[40.4,76.5],[42.1,80.1],[43.2,80.9],[44.9,80.0],[45.5,82.5],[47.3,83.2],[47.5,85.7],[49.3,87.8],[47.7,90.3],[45.3,90.9],[44.4,94.7],[42.7,96.3],[42.5,99.5],[41.9,103.3],[42.5,107.7],[42.9,110.4],[44.1,111.7],[45.7,116.0],[46.8,118.9],[47.0,119.8],[47.9,116.3],[49.9,116.7],[50.1,119.3],[52.5,120.7],[53.2,125.1],[50.7,127.3],[49.8,127.7]],[[5.0,-2.9],[5.0,-5.8],[4.4,-7.7],[6.5,-8.6],[8.5,-8.2],[10.3,-7.9],[10.5,-6.2],[9.9,-4.0],[8.2,-2.6],[5.4,-2.8],[5.0,-2.9]],[[2.3,13.1],[2.3,9.6],[4.4,8.7],[6.4,9.2],[7.0,11.7],[9.4,13.0],[11.6,14.4],[12.9,14.5],[10.0,15.5],[9.5,14.0],[7.4,15.3],[5.0,14.6],[2.6,15.9],[2.3,13.1]],[[3.5,30.8],[1.1,30.1],[-1.3,29.6],[-4.5,29.3],[-8.3,30.7],[-8.5,28.7],[-11.8,28.4],[-13.3,29.7],[-12.1,27.4],[-11.2,24.8],[-11.0,22.4],[-8.3,21.9],[-6.9,20.1],[-8.1,17.5],[-5.9,16.3],[-5.9,13.4],[-4.5,14.1],[-3.5,16.0],[-1.2,16.9],[1.7,17.9],[4.2,18.5],[4.2,21.7],[5.1,24.4],[5.1,27.0],[4.4,29.2],[3.5,30.8]],[[-4.8,13.0],[-4.0,11.1],[-1.9,12.6],[-2.0,14.3],[1.2,14.3],[2.3,13.1],[1.7,15.9],[3.7,17.1],[2.9,18.4],[0.3,17.8],[-2.7,16.0],[-5.0,14.6],[-4.8,13.0]],[[-0.2,-75.4],[0.4,-77.4],[1.7,-79.0],[3.8,-77.1],[5.6,-77.5],[7.7,-77.8],[9.4,-75.7],[11.1,-74.9],[11.7,-72.6],[12.1,-71.1],[10.5,-72.9],[8.6,-72.7],[7.0,-72.0],[6.1,-69.4],[6.1,-67.3],[3.8,-67.6],[1.3,-66.9],[1.7,-69.8],[-0.2,-70.0],[-4.3,-69.9],[-2.3,-70.8],[-2.3,-73.1],[-0.1,-75.1],[-0.2,-75.4]],[[8.2,-83.0],[10.1,-85.0],[9.6,-82.5],[8.2,-83.0]],[[23.2,-82.3],[22.8,-79.7],[21.7,-77.1],[20.3,-74.2],[19.9,-77.8],[21.6,-78.7],[22.2,-81.8],[22.2,-83.9],[21.9,-85.0],[23.1,-82.5],[23.2,-82.3]],[[35.1,32.7],[35.7,34.6],[35.1,32.7]],[[35.1,34.0],[35.1,32.3],[35.1,34.0]],[[48.6,17.0],[48.6,14.3],[49.5,12.5],[51.1,14.3],[50.7,16.2],[50.0,18.4],[48.6,17.0]],[[55.0,9.9],[54.2,12.0],[53.8,14.1],[51.1,15.0],[50.3,12.2],[48.9,13.6],[47.5,12.9],[47.6,10.5],[47.8,8.5],[49.5,6.2],[51.9,6.0],[53.7,7.1],[54.0,8.8],[55.0,9.9]],[[12.7,43.1],[10.9,42.8],[12.7,43.1]],[[55.6,12.7],[55.4,11.0],[55.8,10.9],[55.6,12.7]],[[56.5,10.9],[55.5,9.6],[56.5,8.1],[57.7,10.6],[56.5,10.9]],[[19.7,-71.7],[19.3,-69.2],[17.6,-71.4],[19.7,-71.7]],[[23.5,12.0],[19.6,5.7],[19.1,3.2],[20.6,1.8],[25.0,-4.9],[27.4,-8.7],[29.6,-7.1],[30.9,-3.7],[32.3,-1.3],[35.2,-2.2],[36.3,0.5],[36.9,4.8],[37.1,7.3],[34.7,8.1],[32.7,8.4],[29.4,9.8],[27.1,9.6],[24.9,9.9],[23.5,12.0]],[[-3.4,-80.3],[-2.2,-80.0],[0.4,-80.0],[1.4,-78.9],[0.3,-76.6],[-0.9,-75.2],[-3.0,-77.8],[-5.0,-79.2],[-4.1,-80.5],[-3.4,-80.3]],[[29.5,34.9],[27.6,33.9],[29.9,32.4],[26.1,34.1],[23.9,35.7],[22.0,36.9],[22.0,29.0],[22.0,25.0],[29.2,25.0],[31.6,25.2],[31.0,28.5],[31.6,31.0],[31.0,33.8],[31.2,34.3],[29.5,34.9]],[[12.5,42.4],[14.5,40.0],[15.0,37.9],[14.8,36.3],[17.0,36.9],[18.0,38.4],[15.4,39.8],[13.3,42.3],[12.5,42.4]],[[41.9,-9.0],[43.0,-9.4],[43.6,-5.4],[43.4,-1.9],[42.6,0.3],[42.5,3.0],[41.0,0.8],[38.7,0.1],[36.7,-2.1],[36.7,-4.4],[37.1,-7.5],[39.6,-7.5],[41.9,-6.7],[42.1,-8.7],[41.9,-9.0]],[[57.8,24.3],[59.2,23.3],[59.6,25.9],[59.5,28.0],[57.5,27.3],[57.8,24.3]],[[15.0,37.9],[14.1,40.9],[12.5,42.4],[10.0,42.9],[9.2,43.7],[8.0,46.9],[8.0,47.8],[5.0,45.0],[4.2,42.1],[3.8,39.9],[4.4,36.9],[6.6,34.7],[7.8,33.0],[10.6,34.3],[13.6,36.3],[15.0,37.9]],[[69.1,28.6],[68.4,28.4],[67.7,30.0],[66.9,29.1],[65.8,30.2],[63.6,30.0],[62.9,31.5],[60.5,28.1],[60.1,24.5],[60.7,21.3],[63.2,21.5],[64.9,24.7],[65.5,25.3],[66.4,23.6],[68.6,22.0],[69.1,20.6],[68.9,23.7],[70.2,27.7],[69.8,29.0],[69.1,28.6]],[[-51.9,-61.2],[-51.1,-58.5],[-51.9,-58.0],[-52.3,-60.7],[-51.9,-61.2]],[[2.5,-52.6],[2.3,-54.5],[4.9,-54.5],[4.6,-51.8],[2.5,-52.6]],[[42.2,9.6],[42.6,8.7],[42.2,9.6]],[[50.4,3.6],[49.5,5.7],[49.0,8.1],[47.4,7.2],[46.3,6.0],[44.3,7.0],[43.1,3.1],[42.8,0.7],[43.0,-1.5],[46.0,-1.2],[48.0,-4.5],[48.6,-1.6],[49.8,-1.9],[50.1,1.3],[50.4,3.6]],[[-4.0,11.1],[-1.1,8.8],[1.0,9.5],[1.1,11.3],[2.3,13.0],[1.2,14.3],[-1.3,14.4],[-1.9,12.6],[-4.0,11.1]],[[54.6,-5.7],[54.1,-7.6],[55.2,-6.7],[54.6,-5.7]],[[58.6,-3.0],[57.6,-4.1],[57.7,-2.0],[56.0,-3.1],[54.5,-0.4],[52.7,1.7],[50.8,0.6],[50.5,-2.5],[50.0,-5.2],[50.2,-5.8],[51.4,-3.4],[52.0,-5.3],[52.3,-4.2],[53.5,-4.6],[54.0,-2.9],[54.8,-4.8],[56.8,-6.1],[58.6,-5.0],[58.6,-3.0]],[[41.5,41.6],[43.4,40.0],[42.7,43.8],[41.9,46.4],[41.1,43.6],[41.5,41.6]],[[5.9,1.1],[4.7,-2.0],[7.4,-3.0],[10.4,-3.0],[10.9,-0.8],[8.7,0.5],[6.3,0.8],[5.9,1.1]],[[7.7,-8.4],[8.3,-10.5],[10.0,-11.1],[8.9,-13.2],[10.9,-14.8],[12.6,-13.7],[12.4,-11.7],[12.2,-9.6],[10.2,-8.0],[8.3,-8.3],[7.7,-8.4]],[[13.2,-16.8],[13.6,-14.7],[13.2,-16.8]],[[11.0,-15.1],[12.4,-16.7],[12.6,-13.7],[11.0,-15.1]],[[1.0,9.5],[2.3,9.6],[2.3,11.3],[1.0,9.5]],[[35.7,23.7],[35.4,25.8],[35.0,26.2],[35.3,23.5],[35.7,23.7]],[[41.6,26.6],[40.7,23.7],[38.5,23.5],[36.4,23.2],[37.6,21.3],[40.1,20.6],[41.1,22.6],[41.2,25.2],[41.6,26.6]],[[82.6,-46.8],[83.2,-39.9],[83.5,-38.6],[83.6,-35.1],[83.5,-27.1],[82.7,-20.8],[82.3,-22.7],[82.2,-31.9],[82.0,-31.4],[81.8,-24.8],[81.7,-22.1],[81.2,-23.2],[81.5,-20.6],[81.9,-15.8],[81.7,-12.8],[81.3,-12.2],[80.6,-16.3],[80.3,-16.9],[80.2,-20.0],[80.1,-17.7],[78.8,-19.7],[77.0,-18.5],[76.6,-21.7],[76.1,-19.8],[75.2,-20.7],[74.3,-19.4],[74.2,-21.6],[73.8,-20.4],[73.3,-23.6],[72.2,-22.3],[72.3,-24.8],[71.5,-22.1],[70.7,-21.8],[71.4,-25.5],[70.2,-26.4],[70.1,-22.3],[68.5,-27.7],[68.1,-30.7],[66.0,-36.4],[65.5,-39.8],[62.7,-42.8],[60.1,-43.4],[60.9,-48.3],[63.6,-51.6],[66.1,-53.7],[68.4,-53.0],[69.1,-51.1],[69.6,-54.7],[70.6,-51.4],[71.5,-54.0],[71.7,-55.8],[72.6,-54.7],[74.7,-57.3],[76.1,-61.3],[76.1,-66.1],[76.4,-69.7],[77.0,-71.4],[77.4,-66.8],[77.6,-71.0],[78.0,-73.3],[78.4,-73.2],[79.4,-65.7],[79.8,-65.3],[80.1,-68.0],[80.5,-67.2],[81.2,-63.7],[81.3,-62.2],[81.8,-62.7],[82.2,-57.2],[82.2,-54.1],[82.1,-48.0],[81.7,-44.5],[82.2,-46.9],[82.6,-46.8]],[[13.7,-90.1],[14.5,-92.2],[16.1,-91.7],[17.8,-91.0],[17.8,-89.1],[15.9,-89.2],[14.1,-89.7],[13.7,-90.1]],[[8.4,-59.8],[6.3,-57.5],[3.3,-57.6],[1.5,-58.1],[2.8,-60.0],[5.0,-60.0],[6.0,-61.4],[8.4,-59.8]],[[13.0,-87.3],[14.4,-89.4],[15.9,-87.6],[16.0,-85.7],[15.3,-83.4],[14.6,-85.1],[13.8,-86.8],[13.0,-87.3]],[[45.9,18.8],[45.2,16.5],[43.0,17.7],[42.5,18.5],[43.5,16.0],[45.2,14.3],[46.5,16.6],[45.9,18.8]],[[19.9,-73.2],[19.2,-71.6],[18.0,-73.9],[18.7,-72.3],[19.9,-73.2]],[[46.9,16.2],[47.9,18.7],[48.3,21.9],[46.3,21.0],[45.9,18.8],[46.5,16.6],[46.9,16.2]],[[-10.2,120.7],[-9.6,119.0],[-10.0,120.8],[-10.2,120.7]],[[-8.1,117.9],[-8.7,119.1],[-9.0,116.7],[-8.1,117.9]],[[-8.1,122.9],[-8.8,119.9],[-8.1,122.9]],[[-6.8,108.6],[-6.9,110.5],[-6.9,112.6],[-8.4,115.7],[-8.4,112.6],[-7.7,109.4],[-7.4,106.5],[-6.9,105.4],[-6.3,108.1],[-6.8,108.6]],[[-3.5,127.2],[-3.2,126.0],[-3.5,127.2]],[[-3.1,130.5],[-3.4,127.9],[-3.1,130.5]],[[-1.2,134.1],[-3.4,135.5],[-1.7,137.4],[-2.6,141.0],[-9.1,141.0],[-8.1,139.1],[-8.4,137.6],[-5.4,137.9],[-3.5,133.7],[-2.8,132.0],[-2.5,133.8],[-1.4,130.9],[-0.9,130.5],[-0.8,134.0],[-1.2,134.1]],[[1.4,125.2],[0.4,121.1],[-0.5,120.0],[-0.6,123.3],[-1.9,121.5],[-4.7,123.2],[-4.6,121.5],[-2.6,121.0],[-5.5,120.4],[-3.5,119.5],[0.2,119.8],[0.9,122.9],[1.6,125.1],[1.4,125.2]],[[1.1,128.7],[-0.8,128.4],[1.8,127.6],[1.1,128.7]],[[1.8,117.9],[0.9,119.0],[-1.5,116.6],[-4.0,116.1],[-3.4,113.8],[-3.0,111.0],[-0.5,109.1],[2.0,109.7],[0.9,111.8],[1.4,114.6],[4.3,115.9],[4.1,117.9],[1.8,117.9]],[[-5.9,105.8],[-4.2,102.6],[-0.7,100.1],[1.8,98.6],[5.0,95.4],[4.3,98.4],[2.1,100.6],[0.6,103.1],[-1.1,104.0],[-3.1,106.1],[-5.9,105.8]],[[35.5,77.8],[33.0,79.2],[30.2,81.1],[28.8,80.1],[27.4,83.3],[26.4,87.2],[28.1,88.7],[26.7,89.7],[26.8,92.0],[29.3,94.6],[28.8,96.6],[27.1,97.1],[26.6,95.1],[23.9,94.1],[22.0,92.7],[23.6,92.1],[25.3,89.9],[26.4,88.6],[24.5,88.1],[22.1,89.0],[21.5,87.0],[18.3,83.9],[17.0,82.2],[15.9,80.3],[13.0,80.3],[10.4,79.9],[8.3,77.9],[11.3,75.7],[14.0,74.6],[17.9,73.1],[21.4,72.6],[20.9,70.5],[22.1,69.2],[24.4,68.8],[24.4,71.0],[26.5,70.2],[26.9,69.5],[29.0,72.8],[31.7,74.4],[32.3,75.3],[34.3,73.7],[34.7,76.9],[35.5,77.8]],[[53.9,-6.2],[51.7,-8.6],[51.8,-10.0],[54.7,-8.3],[53.9,-6.2]],[[37.2,53.9],[37.9,56.2],[37.4,59.2],[36.5,61.1],[33.7,60.5],[31.5,60.9],[30.7,61.8],[28.7,61.8],[26.8,63.3],[25.1,61.5],[25.6,58.5],[27.0,55.7],[27.6,52.5],[30.1,50.1],[30.5,48.0],[34.0,45.4],[37.2,44.8],[39.4,44.1],[39.5,47.7],[37.6,49.2],[37.0,53.8],[37.2,53.9]],[[36.0,45.4],[33.0,46.1],[31.7,47.8],[29.9,48.6],[29.2,44.7],[31.9,40.4],[33.4,38.8],[34.4,41.0],[36.4,41.3],[37.3,43.9],[36.0,45.4]],[[66.5,-14.5],[65.1,-13.6],[64.4,-14.9],[63.7,-17.8],[64.0,-22.8],[64.4,-21.8],[64.9,-24.0],[65.1,-22.2],[65.4,-22.2],[65.6,-24.3],[65.7,-20.6],[66.5,-16.2],[66.5,-14.5]],[[32.7,35.7],[29.5,34.9],[31.5,34.6],[33.1,35.1],[32.7,35.7]],[[38.2,15.5],[36.6,15.1],[37.6,12.4],[38.1,14.8],[38.2,15.5]],[[41.2,9.2],[39.2,9.7],[41.0,8.2],[41.2,9.2]],[[46.8,12.4],[45.6,13.9],[45.4,12.3],[42.8,14.0],[41.7,16.2],[40.4,18.4],[39.8,16.4],[38.0,16.1],[40.0,15.4],[41.3,12.9],[42.9,10.5],[44.4,8.9],[43.7,7.4],[45.7,6.8],[46.0,9.0],[46.8,11.0],[46.8,12.4]],[[18.5,-77.6],[17.9,-76.2],[18.2,-78.3],[18.5,-77.6]],[[32.4,35.5],[33.4,38.8],[32.0,39.0],[31.5,37.0],[29.5,36.5],[29.5,34.9],[31.5,35.4],[32.4,35.5]],[[34.1,134.6],[32.7,133.0],[34.4,133.9],[34.1,134.6]],[[37.1,141.0],[34.7,139.0],[33.5,135.8],[33.9,132.2],[33.9,131.0],[33.1,132.0],[31.0,130.7],[33.3,129.4],[34.7,131.9],[35.5,135.7],[37.3,136.7],[37.8,138.9],[40.6,139.9],[41.4,141.4],[38.2,141.0],[37.1,141.0]],[[44.2,143.9],[43.3,145.5],[42.0,143.2],[42.7,141.6],[41.6,140.0],[44.8,141.7],[45.6,142.0],[44.2,143.9]],[[42.3,71.0],[40.7,68.6],[41.2,66.7],[43.7,64.9],[43.5,62.0],[45.5,58.7],[45.6,58.5],[45.0,55.9],[41.3,56.0],[42.1,52.9],[44.0,50.9],[45.3,53.0],[46.9,53.0],[46.6,50.0],[47.7,47.3],[50.5,47.5],[51.7,50.8],[51.0,54.5],[51.1,58.4],[50.8,61.3],[51.3,61.6],[52.0,60.0],[53.0,61.7],[54.0,61.4],[54.4,65.2],[54.6,65.7],[55.0,68.2],[55.2,70.9],[54.0,73.5],[53.5,74.4],[54.5,76.9],[54.2,76.5],[53.4,77.8],[50.9,80.0],[51.1,83.4],[49.8,86.8],[47.5,85.7],[47.3,83.2],[45.3,81.9],[44.9,80.0],[43.2,80.9],[43.0,76.0],[43.1,73.6],[42.7,71.2],[42.3,71.0]],[[-0.9,41.0],[-3.3,40.1],[-4.7,39.2],[-3.1,37.7],[-1.1,34.1],[1.2,34.7],[3.6,34.5],[5.5,35.3],[3.6,38.1],[4.3,40.8],[3.9,41.9],[2.8,41.0],[-0.9,41.0]],[[42.3,71.0],[42.5,73.5],[42.9,75.6],[42.9,79.1],[42.1,80.1],[41.1,76.9],[39.9,73.8],[39.4,73.7],[39.6,70.5],[40.1,69.6],[40.9,73.1],[41.5,70.4],[42.3,71.0]],[[10.6,103.5],[13.4,102.3],[14.3,105.2],[14.2,107.4],[12.3,107.5],[11.6,105.8],[10.6,103.5]],[[38.6,128.3],[35.6,129.5],[34.4,126.5],[36.7,126.1],[38.4,128.2],[38.6,128.3]],[[30.0,48.0],[28.5,47.7],[29.1,46.6],[30.0,48.0]],[[14.3,105.2],[17.4,104.7],[17.9,102.4],[18.4,101.0],[20.8,100.3],[22.5,102.2],[20.8,103.2],[19.9,104.8],[19.3,103.9],[16.6,106.6],[14.2,107.4],[14.3,105.2]],[[33.3,35.8],[34.6,36.4],[33.3,35.8]],[[4.4,-7.7],[6.1,-10.8],[8.4,-10.2],[7.7,-8.4],[5.3,-7.5],[4.4,-7.7]],[[22.9,14.9],[23.5,12.0],[24.9,9.9],[27.1,9.6],[30.3,9.5],[32.4,11.4],[32.3,15.2],[30.8,18.0],[31.0,20.1],[32.7,20.9],[32.6,22.9],[31.9,24.9],[25.7,25.0],[22.0,25.0],[20.0,25.0],[19.6,23.8],[23.4,15.9],[22.9,14.9]],[[7.5,81.8],[6.0,80.3],[9.8,80.1],[7.5,81.8]],[[-29.0,29.0],[-30.6,27.7],[-28.6,28.5],[-29.0,29.0]],[[54.3,22.7],[56.0,21.1],[56.3,23.9],[55.6,26.5],[53.9,24.5],[54.3,22.7]],[[56.0,21.1],[57.8,22.5],[58.0,25.2],[57.5,27.3],[56.2,28.2],[56.1,25.5],[56.3,22.2],[56.0,21.1]],[[35.8,-5.2],[35.2,-2.6],[32.9,-1.4],[31.6,-3.6],[29.7,-6.1],[28.8,-8.7],[27.1,-8.8],[26.9,-11.4],[23.7,-13.9],[21.5,-14.8],[21.4,-17.0],[23.7,-16.0],[26.3,-14.4],[28.1,-11.7],[29.9,-9.6],[32.6,-9.3],[34.1,-6.9],[35.8,-5.9],[35.8,-5.2]],[[48.2,26.6],[48.1,28.7],[46.4,30.0],[45.5,28.2],[47.8,27.2],[48.2,26.6]],[[-12.5,49.5],[-14.8,50.2],[-16.0,50.2],[-19.1,49.0],[-22.4,47.9],[-24.9,47.1],[-25.0,44.0],[-22.1,43.3],[-19.4,44.5],[-16.9,44.3],[-15.2,46.9],[-13.7,47.9],[-12.0,49.2],[-12.5,49.5]],[[25.9,-97.1],[22.9,-97.8],[19.9,-96.5],[18.1,-94.4],[18.7,-92.0],[20.7,-90.5],[21.5,-87.7],[19.6,-87.6],[17.9,-88.8],[17.8,-91.0],[16.1,-90.5],[15.3,-92.2],[14.5,-92.2],[16.2,-94.7],[15.9,-97.3],[17.2,-100.8],[18.3,-103.5],[19.9,-105.5],[22.3,-105.7],[24.5,-107.9],[26.4,-109.3],[28.5,-111.8],[30.8,-113.2],[31.4,-114.9],[29.1,-113.6],[26.7,-111.6],[24.3,-110.7],[23.2,-109.4],[24.5,-111.7],[26.8,-113.5],[27.7,-115.1],[30.2,-115.9],[32.5,-117.1],[32.7,-114.7],[31.3,-111.0],[31.3,-108.2],[31.8,-108.2],[31.1,-105.6],[29.0,-103.1],[29.4,-101.0],[26.8,-99.3],[25.9,-97.1]],[[41.9,20.6],[42.0,22.9],[41.1,20.6],[41.9,20.6]],[[14.6,-12.2],[15.3,-10.1],[15.5,-9.6],[15.5,-5.5],[16.3,-5.5],[25.0,-6.5],[25.0,-4.9],[20.6,1.8],[19.1,3.2],[19.2,4.3],[16.9,4.3],[15.3,1.4],[14.6,-2.0],[13.5,-4.0],[11.4,-5.2],[10.1,-6.1],[10.3,-7.9],[12.3,-9.1],[12.2,-10.9],[14.6,-12.2]],[[20.2,99.5],[18.4,97.4],[16.2,98.9],[13.8,99.1],[11.0,99.0],[9.9,98.6],[13.1,98.5],[16.1,97.6],[15.7,95.4],[19.4,93.5],[21.5,92.3],[24.1,93.3],[26.0,95.2],[27.1,97.1],[28.3,97.9],[25.9,98.7],[23.9,97.6],[22.9,99.5],[21.8,101.2],[20.2,99.5]],[[49.3,87.8],[50.8,92.2],[50.0,94.8],[50.4,98.2],[52.0,98.9],[51.3,102.1],[50.4,105.9],[49.3,108.5],[49.4,111.6],[50.2,114.4],[49.9,116.7],[47.7,115.7],[47.7,118.9],[46.7,119.7],[46.4,116.7],[44.8,113.5],[44.5,111.3],[42.5,109.2],[42.1,106.1],[42.5,101.8],[42.7,97.5],[44.4,94.7],[45.3,90.9],[47.7,90.3],[48.6,88.0],[49.3,87.8]],[[-11.5,34.6],[-11.6,37.5],[-10.3,40.3],[-14.2,40.6],[-16.7,39.5],[-18.7,36.3],[-20.5,34.7],[-22.1,35.4],[-24.1,35.5],[-25.4,33.0],[-26.7,32.1],[-24.4,31.9],[-22.3,31.2],[-20.4,32.5],[-16.7,32.8],[-15.9,30.3],[-14.8,30.2],[-14.0,33.2],[-16.2,34.4],[-14.6,35.7],[-12.3,34.3],[-11.5,34.6]],[[14.6,-12.2],[16.6,-14.6],[16.1,-16.5],[19.1,-16.3],[21.3,-16.8],[21.3,-12.9],[23.3,-12.9],[23.4,-11.9],[25.9,-12.0],[25.9,-8.7],[27.4,-8.7],[25.0,-4.9],[25.0,-6.5],[16.3,-5.5],[15.5,-5.5],[15.5,-9.6],[15.4,-11.7],[14.6,-12.2]],[[-11.5,34.6],[-13.6,34.6],[-15.9,35.8],[-15.5,34.3],[-13.7,32.7],[-10.8,33.3],[-9.2,32.8],[-11.5,34.6]],[[6.2,101.1],[4.9,103.4],[2.8,103.5],[1.2,103.5],[2.8,101.4],[5.3,100.2],[6.6,100.3],[6.2,101.1]],[[4.5,118.6],[4.3,115.9],[1.4,114.6],[0.9,111.8],[1.3,109.8],[3.1,113.0],[4.5,114.2],[6.9,116.7],[5.4,119.2],[4.5,118.6]],[[-28.6,16.3],[-26.1,15.0],[-22.7,14.4],[-19.7,12.8],[-17.3,11.7],[-17.4,14.1],[-17.4,14.2],[-17.3,18.3],[-17.8,19.0],[-17.5,23.2],[-17.6,25.1],[-18.2,21.7],[-18.3,20.9],[-21.8,20.9],[-21.8,19.9],[-28.5,19.9],[-28.9,17.8],[-28.6,16.3]],[[-21.1,165.8],[-22.2,167.1],[-21.1,164.8],[-21.1,165.8]],[[11.9,2.2],[14.0,0.4],[15.6,3.6],[19.2,4.3],[19.6,5.7],[23.5,12.0],[22.9,14.9],[21.0,15.5],[17.9,15.3],[14.4,13.5],[12.5,14.2],[13.6,13.1],[13.4,11.0],[13.3,7.8],[13.7,4.4],[11.7,3.6],[11.9,2.2]],[[4.8,8.5],[4.3,5.9],[6.3,4.3],[6.3,2.7],[8.5,2.7],[11.3,3.6],[13.5,4.1],[13.5,6.4],[12.8,9.0],[13.3,11.5],[12.5,14.0],[10.2,13.3],[7.8,12.1],[6.6,11.1],[5.5,8.8],[4.8,8.5]],[[11.1,-85.7],[12.9,-87.7],[13.8,-85.8],[14.9,-83.6],[12.4,-83.5],[10.7,-83.9],[11.2,-85.6],[11.1,-85.7]],[[53.5,6.1],[50.8,6.2],[51.3,3.3],[53.5,6.1]],[[71.2,28.2],[70.5,31.3],[70.2,30.0],[69.6,31.1],[69.1,28.6],[69.8,29.0],[69.8,26.2],[68.8,22.4],[69.1,20.0],[68.4,19.9],[68.0,16.8],[64.8,13.6],[63.1,11.9],[60.1,12.3],[58.9,11.0],[59.5,10.4],[58.1,7.0],[62.0,5.0],[62.6,5.9],[64.5,10.5],[67.8,14.8],[69.8,19.2],[70.2,23.0],[71.0,26.4],[71.2,28.2]],[[77.9,24.7],[77.7,20.7],[78.3,20.8],[78.5,22.9],[77.9,24.7]],[[79.7,18.3],[79.0,21.5],[78.6,19.0],[76.8,17.1],[77.4,13.8],[77.7,14.7],[78.9,11.2],[79.7,10.4],[80.0,13.2],[80.1,17.0],[79.7,18.3]],[[80.4,25.4],[80.1,27.4],[79.6,20.1],[80.3,17.4],[80.6,20.5],[80.4,25.4]],[[27.9,88.1],[26.4,87.2],[27.4,83.3],[28.8,80.1],[30.4,81.5],[29.3,83.9],[28.0,87.0],[27.9,88.1]],[[-40.9,173.0],[-43.0,173.2],[-45.9,170.6],[-46.6,168.4],[-45.9,166.5],[-43.9,168.9],[-42.5,171.1],[-40.5,172.8],[-40.9,173.0]],[[-36.2,174.6],[-37.2,175.3],[-37.6,178.0],[-39.2,178.0],[-41.3,176.0],[-41.3,174.7],[-39.1,173.9],[-36.7,174.3],[-34.5,172.6],[-36.2,174.6]],[[21.1,58.9],[19.1,57.8],[17.9,55.7],[16.7,53.6],[19.0,52.0],[20.0,55.0],[22.7,55.2],[24.9,55.9],[23.7,58.1],[22.5,59.8],[21.1,58.9]],[[37.1,75.2],[35.5,77.8],[34.7,74.2],[32.3,75.3],[29.0,72.8],[26.9,69.5],[24.4,71.0],[24.4,68.8],[25.2,64.5],[25.1,61.5],[26.8,63.3],[29.3,61.4],[29.8,60.9],[29.5,63.6],[29.9,66.3],[31.7,68.6],[33.4,70.3],[35.7,71.5],[36.8,74.1],[37.1,75.2]],[[7.2,-77.9],[9.0,-79.1],[8.1,-80.5],[8.3,-82.8],[9.6,-82.5],[9.3,-79.9],[8.9,-77.7],[7.2,-77.9]],[[-17.6,-69.6],[-17.8,-71.4],[-17.4,-71.5],[-15.3,-75.2],[-10.4,-78.1],[-7.9,-79.4],[-6.1,-81.2],[-3.4,-80.3],[-5.0,-79.2],[-1.6,-75.5],[-0.1,-75.1],[-2.3,-73.1],[-2.7,-70.0],[-5.3,-72.9],[-7.3,-73.7],[-9.5,-73.2],[-9.5,-70.5],[-11.1,-70.1],[-11.0,-69.5],[-13.6,-68.9],[-16.5,-69.0],[-17.6,-69.6]],[[8.4,126.4],[6.3,126.2],[6.2,124.2],[7.8,123.6],[7.2,121.9],[8.7,123.5],[9.0,125.5],[8.4,126.4]],[[10.3,124.0],[9.0,123.0],[10.9,122.9],[10.3,124.0]],[[9.3,118.5],[8.4,117.2],[11.4,119.5],[9.3,118.5]],[[11.9,121.9],[11.2,123.1],[11.9,121.9]],[[12.2,125.5],[10.1,124.8],[12.6,124.3],[12.2,125.5]],[[13.1,121.5],[13.5,120.3],[13.1,121.5]],[[18.5,121.3],[16.3,122.3],[14.3,121.7],[13.8,124.0],[12.5,124.1],[13.6,121.1],[16.4,119.9],[16.0,120.3],[18.5,120.7],[18.5,121.3]],[[-6.8,155.9],[-5.1,154.5],[-6.5,156.0],[-6.8,155.9]],[[-5.5,152.0],[-6.0,148.9],[-5.1,151.1],[-5.5,152.0]],[[-7.4,147.2],[-9.1,148.7],[-10.3,150.8],[-10.1,147.9],[-7.6,144.7],[-9.3,142.6],[-9.1,141.0],[-2.6,141.0],[-3.9,144.6],[-6.1,147.6],[-7.4,147.2]],[[-4.5,153.1],[-2.7,150.7],[-4.0,153.0],[-4.5,153.1]],[[51.1,15.0],[53.0,14.1],[54.9,17.6],[54.3,22.7],[52.7,23.8],[50.7,24.0],[49.5,22.5],[49.2,19.8],[50.0,17.6],[50.8,15.5],[51.1,15.0]],[[42.4,130.6],[40.2,128.6],[39.2,127.4],[37.7,126.2],[38.1,124.7],[40.6,125.1],[41.5,128.2],[43.0,130.0],[42.4,130.6]],[[41.9,-9.0],[41.9,-6.7],[39.7,-7.1],[37.4,-7.5],[36.9,-8.9],[39.4,-9.4],[41.5,-9.0],[41.9,-9.0]],[[-22.2,-62.7],[-19.6,-61.8],[-19.4,-59.1],[-22.1,-57.9],[-22.4,-55.8],[-24.0,-55.0],[-26.6,-54.8],[-27.4,-57.6],[-27.1,-58.6],[-25.2,-57.8],[-22.2,-62.7]],[[24.8,50.8],[26.1,51.3],[24.6,51.1],[24.8,50.8]],[[47.9,22.7],[47.7,24.9],[48.1,26.9],[45.9,28.1],[45.0,29.6],[43.9,26.1],[43.9,23.3],[44.8,21.6],[46.1,20.2],[47.9,22.7]],[[50.7,143.6],[49.0,144.7],[49.3,143.2],[46.8,143.5],[46.0,142.1],[48.9,141.9],[53.3,141.7],[54.4,142.7],[50.7,143.6]],[[54.3,22.7],[54.4,19.7],[55.0,22.3],[54.3,22.7]],[[66.6,-175.0],[67.1,-174.6],[66.0,-169.9],[65.4,-172.5],[64.9,-176.0],[65.4,-178.4],[65.9,-179.9],[65.0,-180.0],[69.0,-180.0],[67.2,-174.9],[66.6,-175.0]],[[70.8,180.0],[71.1,178.7],[70.8,180.0]],[[70.9,-178.7],[71.6,-179.9],[71.3,-177.6],[70.9,-178.7]],[[73.2,143.6],[73.3,140.0],[73.5,143.5],[73.2,143.6]],[[75.1,150.7],[75.2,146.1],[75.1,150.7]],[[75.6,145.1],[74.8,144.3],[74.8,140.6],[75.3,137.0],[75.6,145.1]],[[70.7,57.5],[70.6,56.9],[70.8,53.7],[71.5,51.6],[73.6,54.4],[73.7,53.5],[74.6,55.9],[75.1,55.6],[76.3,61.2],[76.8,66.2],[76.5,68.9],[76.2,68.2],[75.3,61.6],[74.3,58.5],[72.4,55.4],[71.5,55.6],[70.7,57.5]],[[77.0,107.0],[76.7,108.2],[76.2,113.3],[75.3,113.9],[74.5,110.2],[74.2,109.4],[73.8,112.1],[73.6,118.8],[73.1,119.0],[73.0,123.2],[73.7,123.3],[73.6,127.0],[72.4,129.1],[72.0,128.5],[70.8,131.3],[71.7,135.6],[71.5,139.9],[72.4,139.1],[72.8,140.5],[72.2,149.5],[71.6,150.4],[71.0,157.0],[70.5,159.8],[69.7,164.1],[69.6,167.8],[69.0,170.8],[70.1,170.5],[69.9,175.7],[69.0,180.0],[65.0,180.0],[64.6,177.4],[63.0,179.4],[61.8,174.6],[60.3,170.7],[59.8,166.3],[59.9,163.5],[57.8,162.1],[56.2,163.1],[55.3,161.7],[54.9,162.1],[53.0,158.5],[51.0,156.8],[55.4,155.4],[57.8,156.8],[59.3,160.2],[61.1,163.7],[62.6,164.5],[60.5,160.1],[61.8,159.3],[59.8,154.2],[59.1,155.0],[58.8,151.3],[59.3,145.5],[57.1,139.0],[54.7,135.1],[53.8,138.2],[53.1,141.3],[48.4,140.1],[45.1,136.9],[42.8,133.5],[42.6,130.9],[45.0,131.0],[46.1,133.8],[48.5,135.0],[47.8,131.0],[49.8,127.7],[52.8,125.9],[53.4,122.2],[52.8,120.2],[50.6,119.3],[49.8,115.5],[49.4,111.6],[49.3,108.5],[50.3,104.6],[50.5,102.3],[52.0,98.9],[49.7,97.3],[50.0,94.8],[50.3,90.7],[49.3,87.8],[49.7,85.5],[51.1,83.4],[51.4,80.6],[50.9,80.0],[53.4,77.8],[54.2,76.5],[54.5,76.9],[53.5,73.4],[54.1,71.2],[55.4,69.1],[55.0,68.2],[54.6,65.7],[54.4,65.2],[54.0,61.4],[52.0,60.0],[51.3,61.6],[51.0,56.8],[51.7,52.3],[50.6,48.7],[49.4,46.8],[47.7,47.3],[46.4,49.1],[44.6,46.7],[41.8,48.6],[41.9,46.4],[42.6,43.9],[43.4,40.9],[44.7,37.5],[47.0,39.1],[49.3,40.1],[50.4,37.4],[50.6,35.4],[52.3,33.8],[52.1,31.8],[54.0,31.8],[55.8,29.9],[56.8,27.9],[59.3,28.1],[60.0,29.1],[60.5,28.1],[62.4,31.1],[62.9,31.5],[63.6,30.0],[66.9,29.1],[67.7,30.0],[68.4,28.4],[69.6,31.1],[67.9,40.3],[66.8,41.1],[66.0,38.4],[66.8,33.9],[66.6,33.2],[65.4,34.9],[63.8,37.0],[65.1,37.2],[64.8,40.4],[65.5,39.8],[66.4,43.0],[66.8,44.5],[68.6,43.5],[68.2,46.2],[67.7,46.8],[67.0,45.6],[66.9,47.9],[67.5,48.1],[68.9,53.7],[68.8,54.5],[68.2,53.5],[68.5,57.3],[68.9,61.1],[69.5,60.0],[69.8,60.5],[69.5,63.5],[69.2,64.9],[68.1,68.5],[68.6,69.2],[69.5,66.9],[71.0,66.7],[72.8,69.2],[73.0,69.9],[72.8,72.6],[69.0,72.6],[68.4,73.7],[66.3,71.3],[66.8,73.9],[67.8,75.1],[69.6,73.6],[70.6,74.4],[71.4,73.1],[72.1,74.9],[71.2,76.4],[71.9,75.9],[72.3,79.7],[71.8,81.5],[73.6,80.5],[73.8,84.7],[73.9,86.8],[74.5,86.0],[75.6,90.3],[75.8,92.9],[76.0,93.2],[76.1,95.9],[76.4,100.8],[77.7,104.4],[77.4,106.1],[77.1,104.7],[77.0,107.0]],[[78.3,105.1],[77.9,99.4],[79.3,102.1],[79.3,102.8],[78.7,105.4],[78.3,105.1]],[[80.5,51.1],[80.3,48.9],[80.2,46.5],[80.6,47.1],[80.6,44.8],[80.8,48.3],[80.7,51.5],[80.5,51.1]],[[78.9,99.9],[79.0,95.0],[80.3,91.2],[81.3,95.9],[79.8,100.2],[78.9,99.9]],[[-1.1,30.4],[-2.9,29.6],[-1.3,29.6],[-1.1,30.4]],[[27.1,-8.8],[27.4,-8.7],[25.9,-8.7],[25.9,-12.0],[23.4,-11.9],[21.3,-12.9],[21.3,-16.8],[21.4,-17.0],[21.5,-14.8],[24.8,-12.5],[26.9,-11.4],[27.1,-8.8]],[[16.3,42.8],[19.5,40.9],[21.3,39.1],[23.7,38.5],[25.6,36.9],[28.1,35.1],[29.9,36.7],[30.5,38.0],[31.5,37.0],[32.0,39.0],[29.2,44.7],[29.0,47.5],[27.5,49.3],[25.3,50.5],[23.0,52.0],[22.5,55.0],[20.0,55.0],[18.6,49.1],[16.9,47.0],[17.4,44.1],[16.3,42.8]],[[9.5,34.0],[12.2,33.2],[9.8,31.4],[10.1,29.6],[9.6,27.1],[10.3,25.1],[8.6,23.9],[10.7,23.0],[12.6,22.3],[15.7,23.0],[15.6,23.9],[19.6,23.8],[20.0,25.0],[22.0,25.0],[22.0,32.9],[22.0,36.9],[18.6,37.5],[14.8,36.3],[12.6,35.9],[9.6,34.0],[9.5,34.0]],[[9.5,34.0],[7.8,33.0],[5.5,35.3],[3.8,33.4],[3.8,31.2],[4.5,28.7],[5.9,26.5],[8.2,24.6],[10.3,25.1],[9.6,27.8],[9.8,29.5],[10.5,31.9],[12.2,32.7],[10.0,33.8],[9.5,34.0]],[[13.6,-16.7],[16.1,-16.5],[16.3,-14.1],[14.6,-12.2],[12.4,-11.5],[12.6,-15.5],[13.2,-16.8],[13.3,-14.7],[13.6,-16.7]],[[-9.9,160.9],[-9.2,159.7],[-9.9,160.9]],[[-9.6,161.7],[-8.3,160.9],[-9.6,161.7]],[[-8.3,159.9],[-7.4,158.2],[-8.3,159.9]],[[6.8,-11.4],[8.2,-13.1],[9.9,-12.2],[9.3,-10.6],[7.1,-11.2],[6.8,-11.4]],[[13.4,-87.8],[13.5,-89.8],[13.9,-87.9],[13.4,-87.8]],[[9.5,48.9],[8.0,46.9],[9.2,43.7],[11.5,43.1],[10.8,46.6],[11.4,48.9],[9.5,48.9]],[[11.6,49.7],[8.1,50.1],[5.3,48.6],[2.0,45.6],[-0.9,42.0],[-1.7,41.6],[-0.9,41.0],[2.8,41.0],[5.0,43.7],[5.0,45.0],[8.0,47.8],[11.0,48.9],[11.6,49.7]],[[45.4,20.9],[44.6,22.7],[42.6,22.4],[43.2,20.6],[43.5,19.2],[45.9,18.8],[45.7,20.8],[45.4,20.9]],[[6.0,-57.1],[5.8,-54.0],[3.6,-54.0],[2.5,-56.0],[4.1,-58.0],[6.0,-57.1]],[[49.5,18.9],[49.5,21.6],[48.2,19.8],[47.9,17.5],[49.5,18.6],[49.5,18.9]],[[46.5,13.8],[46.7,16.0],[45.5,13.7],[46.5,13.8]],[[65.7,22.2],[62.7,17.8],[60.6,17.8],[60.1,18.8],[58.7,16.8],[56.1,15.9],[55.4,12.9],[58.9,11.0],[61.3,12.6],[64.1,12.6],[64.4,13.9],[64.8,13.6],[67.3,16.1],[68.4,19.9],[67.9,23.5],[66.0,23.9],[65.7,22.2]],[[-26.7,32.1],[-26.4,30.7],[-26.7,32.1]],[[33.4,38.8],[32.7,35.7],[34.6,36.4],[36.8,36.7],[36.7,39.5],[37.2,42.3],[34.4,41.0],[33.4,38.8]],[[12.9,14.5],[15.7,14.0],[20.0,15.7],[22.9,14.9],[23.4,15.9],[19.6,23.8],[15.6,23.9],[14.3,22.3],[12.6,21.9],[11.1,22.9],[9.0,20.1],[7.5,16.7],[9.0,14.5],[11.6,15.0],[12.9,14.5]],[[6.1,1.9],[7.4,0.5],[10.2,0.4],[6.8,1.6],[6.1,1.9]],[[12.2,102.6],[12.6,100.8],[13.4,100.1],[10.8,99.5],[8.3,100.3],[6.2,102.1],[6.5,100.1],[8.4,98.5],[11.0,99.0],[13.3,99.2],[15.1,98.2],[17.6,97.9],[19.7,98.3],[20.1,100.5],[17.5,101.1],[18.0,103.0],[17.4,104.7],[14.7,105.5],[14.2,103.0],[12.2,102.6]],[[40.2,71.0],[39.5,69.5],[39.4,73.7],[37.4,75.0],[37.0,72.6],[38.5,70.8],[37.0,68.1],[38.9,68.2],[41.0,70.7],[40.2,71.0]],[[35.7,61.2],[37.4,59.2],[38.1,56.6],[37.2,53.9],[40.0,53.4],[41.0,54.7],[41.9,52.9],[41.3,55.5],[41.3,57.1],[42.8,58.6],[41.2,60.5],[39.4,63.5],[38.0,66.5],[36.0,64.0],[35.7,61.2]],[[-8.9,125.0],[-8.3,127.0],[-9.4,125.1],[-8.9,125.0]],[[10.8,-61.7],[10.1,-60.9],[10.8,-61.7]],[[30.3,9.5],[32.5,8.4],[35.5,8.4],[37.3,9.5],[36.9,11.1],[34.8,10.8],[32.4,11.4],[30.5,10.0],[30.3,9.5]],[[41.3,36.9],[41.1,39.5],[41.6,42.6],[39.7,44.8],[37.2,44.8],[37.1,41.2],[36.7,38.7],[36.8,36.7],[36.1,32.5],[36.7,30.6],[36.7,27.6],[38.2,26.3],[40.4,27.3],[41.1,31.1],[42.0,35.2],[41.3,36.9]],[[40.7,27.2],[41.8,26.1],[42.0,28.0],[41.1,28.8],[40.7,27.2]],[[24.4,121.8],[22.0,120.7],[24.5,120.7],[24.4,121.8]],[[-0.9,33.9],[-1.1,34.1],[-3.1,37.7],[-4.7,39.2],[-6.8,39.4],[-10.1,39.9],[-11.3,37.8],[-11.4,35.3],[-9.4,33.7],[-8.8,31.6],[-6.5,29.6],[-4.5,29.3],[-2.4,30.5],[-0.9,33.9]],[[-1.0,31.9],[-1.4,29.8],[1.1,30.1],[3.5,30.8],[3.8,33.4],[1.9,35.0],[-0.9,33.9],[-1.0,31.9]],[[52.1,31.8],[51.8,34.4],[50.2,36.6],[49.6,40.1],[47.9,39.7],[47.0,37.4],[46.3,35.0],[45.5,36.5],[44.4,33.9],[45.5,32.6],[46.1,33.3],[46.3,31.7],[45.5,29.1],[47.5,29.1],[48.4,26.9],[48.0,24.4],[47.9,22.7],[50.3,23.4],[51.9,24.6],[51.6,27.5],[51.4,30.2],[52.1,31.8]],[[-30.2,-57.6],[-31.5,-54.6],[-32.7,-53.2],[-35.0,-54.9],[-34.5,-57.8],[-31.0,-57.9],[-30.2,-57.6]],[[49.4,-94.8],[48.1,-91.6],[48.0,-89.6],[47.6,-86.5],[46.5,-84.5],[44.4,-82.3],[42.4,-82.9],[42.9,-78.9],[43.6,-76.8],[45.0,-73.3],[45.0,-71.5],[47.4,-69.2],[45.1,-67.1],[43.7,-70.1],[41.8,-70.5],[40.9,-73.7],[40.9,-71.9],[40.6,-74.0],[38.9,-74.9],[37.2,-75.9],[39.1,-76.3],[37.0,-76.3],[34.8,-76.4],[33.9,-78.6],[32.0,-80.9],[29.2,-81.0],[26.9,-80.1],[25.1,-80.7],[27.5,-82.7],[29.9,-83.7],[30.4,-86.4],[30.3,-89.2],[29.1,-90.9],[29.8,-93.2],[28.3,-96.6],[26.2,-97.3],[26.8,-99.3],[29.4,-101.0],[29.3,-103.9],[31.4,-106.1],[31.8,-108.2],[32.0,-113.3],[32.6,-116.0],[33.7,-118.4],[34.4,-120.4],[37.6,-122.5],[39.8,-123.9],[42.8,-124.5],[46.9,-124.1],[48.4,-124.6],[47.1,-122.6],[49.0,-122.8],[49.0,-117.0],[49.0,-116.0],[49.0,-110.0],[49.0,-104.0],[49.0,-97.2],[49.0,-95.2],[49.4,-94.8]],[[57.1,-153.0],[57.5,-154.7],[57.9,-152.6],[57.1,-153.0]],[[59.9,-165.6],[60.2,-167.5],[60.3,-165.7],[59.9,-165.6]],[[63.8,-171.7],[63.3,-168.7],[63.3,-171.6],[63.8,-171.7]],[[71.1,-155.1],[70.8,-152.2],[70.6,-152.3],[70.2,-147.6],[70.2,-143.6],[69.7,-141.0],[69.7,-141.0],[66.0,-141.0],[60.3,-141.0],[59.6,-138.3],[59.8,-135.5],[57.7,-132.7],[55.9,-130.0],[55.5,-132.0],[58.1,-134.1],[59.5,-139.9],[60.0,-144.0],[60.9,-147.1],[59.7,-149.7],[59.2,-151.7],[61.0,-150.3],[59.4,-154.0],[57.4,-156.3],[55.6,-159.6],[55.0,-162.2],[54.4,-164.8],[55.9,-161.8],[57.0,-158.7],[58.9,-157.0],[58.9,-159.7],[58.7,-162.0],[60.3,-164.7],[61.5,-166.1],[63.2,-163.8],[63.8,-160.8],[64.4,-165.0],[65.7,-168.1],[66.6,-164.5],[66.1,-161.7],[67.6,-164.4],[68.4,-166.8],[69.4,-163.2],[70.9,-159.0],[71.1,-155.1]],[[37.4,66.5],[39.4,63.5],[41.3,61.5],[42.8,58.6],[41.8,56.9],[41.3,56.0],[45.0,55.9],[45.6,58.5],[44.4,61.1],[43.7,64.9],[42.0,66.0],[41.1,68.0],[42.1,70.4],[42.2,71.3],[41.5,70.4],[40.9,73.1],[40.2,71.0],[39.5,68.5],[39.1,67.4],[37.1,67.8],[37.4,66.5]],[[11.8,-71.3],[9.1,-71.7],[11.4,-70.2],[10.9,-68.2],[10.2,-65.7],[10.7,-61.9],[8.6,-60.7],[8.4,-59.8],[6.2,-61.1],[4.2,-62.1],[4.1,-64.6],[2.2,-63.4],[1.1,-65.4],[2.6,-67.4],[5.2,-67.7],[7.0,-70.1],[7.0,-72.0],[9.1,-72.8],[11.6,-72.0],[11.8,-71.3]],[[21.6,108.1],[19.8,105.9],[16.7,107.4],[13.4,109.3],[11.0,108.4],[8.6,105.2],[10.5,104.3],[11.0,106.2],[11.6,105.8],[12.3,107.5],[15.2,107.6],[18.7,105.1],[20.8,104.4],[22.5,102.2],[23.4,105.3],[21.6,108.1]],[[16.7,53.1],[14.7,49.6],[13.4,46.7],[12.7,44.5],[14.8,42.9],[17.1,43.1],[17.4,45.2],[17.1,47.5],[19.0,52.0],[16.7,53.1]],[[-29.3,31.5],[-32.2,28.9],[-33.6,26.4],[-33.8,23.6],[-34.4,20.7],[-34.0,18.4],[-30.7,17.6],[-28.6,16.3],[-29.0,18.5],[-28.5,19.9],[-24.8,19.9],[-26.8,20.9],[-25.3,23.3],[-25.5,25.7],[-22.8,28.0],[-22.3,30.3],[-24.4,31.9],[-26.4,30.7],[-26.7,32.8],[-29.3,31.5]],[[-29.0,29.0],[-29.9,27.0],[-30.1,28.8],[-29.0,29.0]],[[-9.2,32.8],[-12.4,33.3],[-14.0,33.2],[-14.8,30.2],[-17.3,27.6],[-17.7,25.3],[-16.9,22.6],[-16.1,21.9],[-12.9,21.9],[-12.9,24.0],[-10.9,23.9],[-11.9,26.6],[-13.3,29.7],[-9.6,28.7],[-8.3,30.7],[-9.2,32.8]],[[-22.3,31.2],[-21.5,28.0],[-18.7,25.9],[-17.7,25.3],[-16.5,28.5],[-15.5,30.3],[-16.7,32.8],[-19.4,32.6],[-22.3,31.2]]]</script>
+<script>
+
+const cv=document.getElementById('gc'), cx=cv.getContext('2d');
+let LAND=[];try{LAND=JSON.parse(document.getElementById('land-data').textContent);}catch(e){console.error('LAND:',e);}
+let races=[], highlightedPolys=new Set();
+let rotX=0.35,rotY=0.5,velX=0,velY=0.007;
+let drag=false,px=0,py=0,animTgt=null;
+let zoom=1.25,tgtZoom=1.25,pulse=0;
+let W,H,R;
+
+function resize(){
+  const wr=cv.parentElement;W=wr.clientWidth;H=wr.clientHeight;
+  cv.width=W*devicePixelRatio;cv.height=H*devicePixelRatio;
+  cv.style.width=W+'px';cv.style.height=H+'px';
+  cx.scale(devicePixelRatio,devicePixelRatio);R=Math.min(W,H)*0.44;
+}
+resize();window.addEventListener('resize',resize);
+
+function proj(lat,lng){
+  const phi=lat*Math.PI/180,lam=lng*Math.PI/180;
+  let x=Math.cos(phi)*Math.sin(lam),y=-Math.sin(phi),z=Math.cos(phi)*Math.cos(lam);
+  const cY=Math.cos(rotY),sY=Math.sin(rotY);
+  const x1=x*cY+z*sY,z1=-x*sY+z*cY;
+  const cX=Math.cos(rotX),sX=Math.sin(rotX);
+  const y2=y*cX-z1*sX,z2=y*sX+z1*cX;
+  return{sx:W/2+x1*R*zoom,sy:H/2+y2*R*zoom,z:z2};
+}
+function polyCentroid(p){let la=0,ln=0;for(const pt of p){la+=pt[0];ln+=pt[1];}return[la/p.length,ln/p.length];}
+function pointInPoly(lat,lng,poly){
+  let inside=false;
+  for(let i=0,j=poly.length-1;i<poly.length;j=i++){
+    const xi=poly[i][1],yi=poly[i][0],xj=poly[j][1],yj=poly[j][0];
+    if(((yi>lat)!==(yj>lat))&&(lng<(xj-xi)*(lat-yi)/(yj-yi)+xi))inside=!inside;
+  }
+  return inside;
+}
+function highlightNear(lat,lng){
+  const mk=new Set();
+  LAND.forEach((poly,i)=>{if(pointInPoly(lat,lng,poly))mk.add(i);});
+  if(mk.size===0){
+    let bd=6,bi=-1;
+    LAND.forEach((poly,i)=>{const[c1,c2]=polyCentroid(poly);const d=Math.hypot(c1-lat,c2-lng);if(d<bd){bd=d;bi=i;}});
+    if(bi>=0)mk.add(bi);
+  }
+  return mk;
+}
+
+function drawFrame(){
+  cx.clearRect(0,0,W,H);
+  const bg=cx.createRadialGradient(W/2,H*.4,0,W/2,H*.4,Math.max(W,H)*.8);
+  bg.addColorStop(0,'#080e1e');bg.addColorStop(1,'#000');
+  cx.fillStyle=bg;cx.fillRect(0,0,W,H);
+  for(let i=0;i<100;i++){
+    const sx=((i*137.5)%1)*W,sy=((i*97.3+13)%1)*H,tw=.5+.5*Math.sin(pulse*.5+i*.9);
+    cx.globalAlpha=.15+.4*tw;cx.fillStyle='#fff';
+    const sr=((i*53.7)%1)*1.4+.3;cx.fillRect(sx,sy,sr,sr);
+  }
+  cx.globalAlpha=1;
+  cx.save();cx.beginPath();cx.arc(W/2,H/2,R*zoom,0,Math.PI*2);
+  const og=cx.createRadialGradient(W/2-R*zoom*.28,H/2-R*zoom*.22,R*zoom*.02,W/2,H/2,R*zoom);
+  og.addColorStop(0,'#1c3d70');og.addColorStop(.5,'#0c1e42');og.addColorStop(1,'#030a18');
+  cx.fillStyle=og;cx.fill();cx.restore();
+  cx.save();cx.beginPath();cx.arc(W/2,H/2,R*zoom-.5,0,Math.PI*2);cx.clip();
+  cx.strokeStyle='rgba(70,120,255,0.09)';cx.lineWidth=.6;
+  for(let lat=-60;lat<=80;lat+=30){cx.beginPath();let f=true;
+    for(let lng=-180;lng<=180;lng+=4){const p=proj(lat,lng);if(p.z<0){f=true;continue;}f?cx.moveTo(p.sx,p.sy):cx.lineTo(p.sx,p.sy);f=false;}cx.stroke();}
+  for(let lng=-180;lng<=180;lng+=30){cx.beginPath();let f=true;
+    for(let lat=-85;lat<=85;lat+=4){const p=proj(lat,lng);if(p.z<0){f=true;continue;}f?cx.moveTo(p.sx,p.sy):cx.lineTo(p.sx,p.sy);f=false;}cx.stroke();}
+  cx.strokeStyle='rgba(70,120,255,0.2)';cx.lineWidth=1;cx.beginPath();let ef=true;
+  for(let lng=-180;lng<=180;lng+=2){const p=proj(0,lng);if(p.z<0){ef=true;continue;}ef?cx.moveTo(p.sx,p.sy):cx.lineTo(p.sx,p.sy);ef=false;}cx.stroke();
+
+  if(races.length>1){
+    const seq=races.filter(r=>r.lat&&r.lng).sort((a,b)=>a.round-b.round);
+    for(let i=1;i<seq.length;i++){
+      const prev=seq[i-1],cur=seq[i];
+      const a=proj(prev.lat,prev.lng),b=proj(cur.lat,cur.lng);
+      if(a.z>0&&b.z>0){
+        const bothDone=prev.status==='done'&&cur.status==='done';
+        if(bothDone){cx.strokeStyle='rgba(40,200,80,0.5)';cx.lineWidth=1.6;cx.setLineDash([]);}
+        else{cx.strokeStyle='rgba(120,140,180,0.22)';cx.lineWidth=1;cx.setLineDash([2,4]);}
+        cx.beginPath();cx.moveTo(a.sx,a.sy);cx.lineTo(b.sx,b.sy);cx.stroke();
+      }
+    }
+    cx.setLineDash([]);
+    const done2=seq.filter(r=>r.status==='done');
+    if(done2.length>1){
+      const t=(pulse*.06)%(done2.length-1);
+      const seg=Math.floor(t),frac=t-seg;
+      const A=proj(done2[seg].lat,done2[seg].lng),B=proj(done2[seg+1].lat,done2[seg+1].lng);
+      if(A.z>0&&B.z>0){
+        const px=A.sx+(B.sx-A.sx)*frac,py=A.sy+(B.sy-A.sy)*frac;
+        cx.beginPath();cx.arc(px,py,2.5,0,Math.PI*2);cx.fillStyle='rgba(120,255,150,0.9)';cx.fill();
+      }
+    }
+  }
+
+  LAND.forEach((poly,idx)=>{
+    let sumZ=0,n=0;
+    for(let i=0;i<poly.length;i+=Math.max(1,Math.floor(poly.length/6))){sumZ+=proj(poly[i][0],poly[i][1]).z;n++;}
+    if(sumZ/n<-.25)return;
+    cx.beginPath();let started=false,prevOk=false;
+    for(let i=0;i<poly.length;i++){const p=proj(poly[i][0],poly[i][1]);
+      if(p.z<-.04){prevOk=false;continue;}
+      if(!started||!prevOk){cx.moveTo(p.sx,p.sy);started=true;}else cx.lineTo(p.sx,p.sy);prevOk=true;}
+    cx.closePath();
+    const avgZ=sumZ/n,light=Math.max(.25,Math.min(1,avgZ*.65+.5));
+    const isHL=highlightedPolys.has(idx);
+    if(isHL){cx.fillStyle=`rgba(40,180,60,${.75+.2*light})`;cx.fill();cx.strokeStyle='rgba(80,240,80,0.8)';cx.lineWidth=1;}
+    else{cx.fillStyle=`rgb(${Math.round(18*light)},${Math.round(45*light)},${Math.round(100*light)})`;cx.fill();cx.strokeStyle=`rgba(40,90,200,${.25*light})`;cx.lineWidth=.5;}
+    cx.stroke();
+  });
+  cx.restore();
+  const atm=cx.createRadialGradient(W/2,H/2,R*zoom*.85,W/2,H/2,R*zoom*1.06);
+  atm.addColorStop(0,'rgba(40,110,255,0)');atm.addColorStop(.6,'rgba(50,120,255,0.05)');atm.addColorStop(1,'rgba(70,150,255,0.20)');
+  cx.beginPath();cx.arc(W/2,H/2,R*zoom*1.06,0,Math.PI*2);cx.fillStyle=atm;cx.fill();
+  const sh=cx.createRadialGradient(W/2-R*zoom*.28,H/2-R*zoom*.22,0,W/2-R*zoom*.1,H/2-R*zoom*.05,R*zoom*.55);
+  sh.addColorStop(0,'rgba(160,200,255,0.12)');sh.addColorStop(1,'rgba(0,0,0,0)');
+  cx.save();cx.beginPath();cx.arc(W/2,H/2,R*zoom,0,Math.PI*2);cx.clip();cx.fillStyle=sh;cx.fillRect(0,0,W,H);cx.restore();
+
+  races.forEach(race=>{
+    if(!race.lat&&!race.lng)return;
+    const p=proj(race.lat,race.lng);if(p.z<.06)return;
+    const x=p.sx,y=p.sy,ps=race.status==='current'?7+2*Math.sin(pulse):5;
+    if(race.status==='done'){cx.beginPath();cx.arc(x,y,4,0,Math.PI*2);cx.fillStyle='#28C850';cx.fill();cx.strokeStyle='#7CFF9C';cx.lineWidth=1;cx.stroke();}
+    else if(race.status==='current'){
+      const hr=ps*2.5,hg=cx.createRadialGradient(x,y,0,x,y,hr);
+      hg.addColorStop(0,'rgba(255,215,0,0.4)');hg.addColorStop(1,'rgba(255,215,0,0)');
+      cx.beginPath();cx.arc(x,y,hr,0,Math.PI*2);cx.fillStyle=hg;cx.fill();
+      cx.beginPath();cx.arc(x,y,ps,0,Math.PI*2);cx.fillStyle='#FFD700';cx.fill();cx.strokeStyle='#fff';cx.lineWidth=1.5;cx.stroke();
+    }else if(race.isNext){cx.beginPath();cx.arc(x,y,5,0,Math.PI*2);cx.fillStyle='#E10600';cx.fill();cx.strokeStyle='#fff';cx.lineWidth=1.4;cx.stroke();}
+    else{cx.beginPath();cx.arc(x,y,3.5,0,Math.PI*2);cx.fillStyle='rgba(220,225,235,0.85)';cx.fill();cx.strokeStyle='rgba(255,255,255,0.5)';cx.lineWidth=1;cx.stroke();}
+  });
+}
+
+function loop(){requestAnimationFrame(loop);pulse+=.04;
+  if(animTgt){
+    let dX=animTgt.rx-rotX;let dY=animTgt.ry-rotY;
+    while(dY>Math.PI)dY-=Math.PI*2;while(dY<-Math.PI)dY+=Math.PI*2;
+    rotX+=dX*.07;rotY+=dY*.07;zoom+=(tgtZoom-zoom)*.07;
+    if(Math.abs(dX)<.002&&Math.abs(dY)<.002){rotX=animTgt.rx;rotY=animTgt.ry;animTgt=null;}
+  }else if(!drag){
+    rotY+=velY;rotX+=velX;rotX=Math.max(-1.3,Math.min(1.3,rotX));
+    velX*=.88;velY*=.88;if(Math.abs(velY)<.0015)velY=.007;zoom+=(tgtZoom-zoom)*.07;
+  }
+  drawFrame();
+}
+loop();
+
+let tSX=0,tSY=0,tMoved=false;
+cv.addEventListener('mousedown',e=>{drag=true;px=e.clientX;py=e.clientY;velX=0;velY=0;animTgt=null;});
+document.addEventListener('mousemove',e=>{if(!drag)return;const dx=e.clientX-px,dy=e.clientY-py;velY=dx*.006;velX=dy*.004;rotY+=velY;rotX+=velX;rotX=Math.max(-1.3,Math.min(1.3,rotX));px=e.clientX;py=e.clientY;});
+document.addEventListener('mouseup',e=>{if(!drag)return;drag=false;checkClick(e.clientX,e.clientY);});
+cv.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;drag=true;tMoved=false;px=tSX=e.touches[0].clientX;py=tSY=e.touches[0].clientY;velX=0;velY=0;animTgt=null;},{passive:true});
+cv.addEventListener('touchmove',e=>{if(!drag||e.touches.length!==1)return;e.preventDefault();const dx=e.touches[0].clientX-px,dy=e.touches[0].clientY-py;if(Math.abs(dx)+Math.abs(dy)>5)tMoved=true;velY=dx*.007;velX=dy*.005;rotY+=velY;rotX+=velX;rotX=Math.max(-1.3,Math.min(1.3,rotX));px=e.touches[0].clientX;py=e.touches[0].clientY;},{passive:false});
+cv.addEventListener('touchend',()=>{drag=false;if(!tMoved)checkClick(tSX,tSY);});
+function checkClick(mx,my){
+  const rect=cv.getBoundingClientRect();const sx=mx-rect.left,sy=my-rect.top;
+  let best=35,bestR=null;
+  races.forEach(race=>{if(!race.lat&&!race.lng)return;const p=proj(race.lat,race.lng);if(p.z<.05)return;const d=Math.hypot(p.sx-sx,p.sy-sy);if(d<best){best=d;bestR=race;}});
+  if(bestR){showPopup(bestR);globeGoTo(bestR.lat,bestR.lng);}
+}
+function globeGoTo(lat,lng){
+  const tY=-lng*Math.PI/180,tX=-lat*Math.PI/180;
+  let cY=rotY%(Math.PI*2);
+  if(cY<-Math.PI)cY+=Math.PI*2;if(cY>Math.PI)cY-=Math.PI*2;
+  let dY=tY-cY;while(dY>Math.PI)dY-=Math.PI*2;while(dY<-Math.PI)dY+=Math.PI*2;
+  animTgt={rx:tX,ry:cY+dY};tgtZoom=1.55;
+  document.getElementById('greset').classList.add('vis');
+  highlightedPolys=highlightNear(lat,lng);
+}
+function resetGlobe(){animTgt={rx:.35,ry:.5};tgtZoom=1.25;velY=.007;highlightedPolys=new Set();document.getElementById('greset').classList.remove('vis');closePopup();}
+
+const RACE_DATES = {
+  8:  '2026-06-28T13:00:00Z',
+  9:  '2026-07-05T13:00:00Z',
+  10: '2026-07-19T13:00:00Z',
+  11: '2026-07-26T13:00:00Z',
+  12: '2026-08-23T13:00:00Z',
+  13: '2026-09-06T13:00:00Z',
+  14: '2026-09-13T13:00:00Z',
+  15: '2026-09-27T12:00:00Z',
+  16: '2026-10-11T12:00:00Z',
+  17: '2026-10-25T19:00:00Z',
+  18: '2026-11-01T19:00:00Z',
+  19: '2026-11-08T17:00:00Z',
+  20: '2026-11-22T06:00:00Z',
+  21: '2026-11-29T17:00:00Z',
+  22: '2026-12-06T13:00:00Z',
+};
+const RACE_NAMES_CD = {
+  8:'🇦🇹 Austrian GP',9:'🇬🇧 British GP',10:'🇧🇪 Belgian GP',11:'🇭🇺 Hungarian GP',
+  12:'🇳🇱 Dutch GP',13:'🇮🇹 Italian GP',14:'🇪🇸 Madrid GP',15:'🇦🇿 Azerbaijan GP',
+  16:'🇸🇬 Singapore GP',17:'🇺🇸 US GP',18:'🇲🇽 Mexico GP',19:'🇧🇷 Brazil GP',
+  20:'🇺🇸 Las Vegas GP',21:'🇶🇦 Qatar GP',22:'🇦🇪 Abu Dhabi GP'
+};
+
+function updateCountdown(){
+  const now=new Date();
+  let nextRound=null,nextDate=null;
+  for(const[rnd,dateStr] of Object.entries(RACE_DATES)){
+    const d=new Date(dateStr);
+    if(d>now){nextRound=parseInt(rnd);nextDate=d;break;}
+  }
+  if(!nextRound){document.getElementById('cd-race').textContent='Temporada finalizada';return;}
+  document.getElementById('cd-race').textContent=RACE_NAMES_CD[nextRound]||`R${nextRound}`;
+  const diff=nextDate-now;
+  const days=Math.floor(diff/86400000);
+  const hrs=Math.floor((diff%86400000)/3600000);
+  const mins=Math.floor((diff%3600000)/60000);
+  const secs=Math.floor((diff%60000)/1000);
+  document.getElementById('cd-d').textContent=String(days).padStart(2,'0');
+  document.getElementById('cd-h').textContent=String(hrs).padStart(2,'0');
+  document.getElementById('cd-m').textContent=String(mins).padStart(2,'0');
+  document.getElementById('cd-s').textContent=String(secs).padStart(2,'0');
+}
+updateCountdown();
+setInterval(updateCountdown,1000);
+
+const REAL_RESULTS = {
+  1:{ name:'Australian GP',flag:'🇦🇺',p1:'Russell',p2:'Antonelli',p3:'Leclerc',
+      res:[['russell',1,25],['antonelli',2,18],['leclerc',3,15],['norris',4,12],['lindblad',5,10],
+           ['hamilton',6,8],['max_verstappen',7,6],['bearman',8,4],['bortoleto',9,2],['gasly',10,1],
+           ['colapinto',null,0],['piastri',null,0],['lawson',null,0],['hadjar',null,0]]},
+  2:{ name:'Chinese GP',flag:'🇨🇳',p1:'Antonelli',p2:'Russell',p3:'Piastri',
+      res:[['antonelli',1,29],['russell',2,26],['hamilton',3,21],['leclerc',4,19],['piastri',5,3],
+           ['norris',6,5],['lawson',7,8],['hadjar',8,4],['bearman',9,11],['colapinto',10,1],
+           ['gasly',11,8],['max_verstappen',null,0],['lindblad',null,0]]},
+  3:{ name:'Japanese GP',flag:'🇯🇵',p1:'Antonelli',p2:'Russell',p3:'Leclerc',
+      res:[['antonelli',1,25],['piastri',2,18],['leclerc',3,15],['norris',4,10],['russell',5,12],
+           ['hamilton',6,8],['max_verstappen',7,4],['gasly',8,6],['lawson',9,2],['ocon',10,1],
+           ['colapinto',null,0],['hadjar',null,0],['lindblad',null,0],['bearman',null,0]]},
+  4:{ name:'Bahrain GP',flag:'🇧🇭',p1:'Antonelli',p2:'Hamilton',p3:'Russell',
+      res:[['antonelli',1,28],['hamilton',2,10],['russell',3,17],['norris',4,26],['piastri',5,22],
+           ['max_verstappen',6,14],['colapinto',7,6],['sainz',8,2],['leclerc',9,10],['albon',10,1],
+           ['gasly',11,1],['lawson',null,0],['lindblad',null,0],['bearman',null,0]]},
+  5:{ name:'Saudi Arabian GP',flag:'🇸🇦',p1:'Antonelli',p2:'Hamilton',p3:'Norris',
+      res:[['antonelli',1,31],['hamilton',2,21],['leclerc',3,16],['norris',4,7],['max_verstappen',5,17],
+           ['colapinto',6,8],['piastri',7,5],['lawson',8,6],['hadjar',9,10],['gasly',10,4],
+           ['bearman',11,1],['lindblad',12,1],['albon',null,0],['russell',null,0]]},
+  6:{name:'Monaco GP',flag:'🇲🇨',p1:'Antonelli',p2:'Hamilton',p3:'Gasly',
+     res:[['antonelli',1,25],['hamilton',2,18],['gasly',3,15],['hadjar',4,12],['piastri',5,10],['lawson',6,8],['lindblad',7,6],['albon',8,4],['ocon',9,2],['alonso',10,1],['bortoleto',11,0],['russell',12,0],['hulkenberg',13,0],['colapinto',14,0],['perez',15,0],['leclerc',null,0],['max_verstappen',null,0],['stroll',null,0],['norris',null,0],['bearman',null,0]]},
+  7:{ name:'Spanish GP',flag:'🇪🇸',p1:'Hamilton',p2:'Russell',p3:'Norris',
+      res:[['hamilton',1,25],['russell',2,18],['norris',3,15],['max_verstappen',4,12],['piastri',5,10],
+           ['hadjar',6,8],['gasly',7,6],['lawson',8,4],['lindblad',9,2],['colapinto',10,1],
+           ['antonelli',null,0],['leclerc',null,0],['bearman',null,0],['albon',null,0]]},
+};
+
+const KNOWN_STANDINGS=[
+  {id:'antonelli',given:'Kimi',family:'Antonelli',nat:'Italian',num:'12',team:'mercedes',tname:'Mercedes',pts:156},
+  {id:'hamilton',given:'Lewis',family:'Hamilton',nat:'British',num:'44',team:'ferrari',tname:'Ferrari',pts:115},
+  {id:'russell',given:'George',family:'Russell',nat:'British',num:'63',team:'mercedes',tname:'Mercedes',pts:106},
+  {id:'leclerc',given:'Charles',family:'Leclerc',nat:'Monegasque',num:'16',team:'ferrari',tname:'Ferrari',pts:75},
+  {id:'norris',given:'Lando',family:'Norris',nat:'British',num:'4',team:'mclaren',tname:'McLaren',pts:73},
+  {id:'piastri',given:'Oscar',family:'Piastri',nat:'Australian',num:'81',team:'mclaren',tname:'McLaren',pts:66},
+  {id:'max_verstappen',given:'Max',family:'Verstappen',nat:'Dutch',num:'1',team:'red_bull',tname:'Red Bull',pts:55},
+  {id:'gasly',given:'Pierre',family:'Gasly',nat:'French',num:'10',team:'alpine',tname:'Alpine',pts:50},
+  {id:'hadjar',given:'Isack',family:'Hadjar',nat:'French',num:'6',team:'red_bull',tname:'Red Bull',pts:31},
+  {id:'lawson',given:'Liam',family:'Lawson',nat:'New Zealander',num:'30',team:'racing_bulls',tname:'Racing Bulls',pts:26},
+  {id:'bearman',given:'Oliver',family:'Bearman',nat:'British',num:'87',team:'haas',tname:'Haas',pts:18},
+  {id:'colapinto',given:'Franco',family:'Colapinto',nat:'Argentine',num:'43',team:'alpine',tname:'Alpine',pts:16},
+  {id:'lindblad',given:'Arvid',family:'Lindblad',nat:'British',num:'41',team:'racing_bulls',tname:'Racing Bulls',pts:11},
+  {id:'sainz',given:'Carlos',family:'Sainz',nat:'Spanish',num:'55',team:'williams',tname:'Williams',pts:6},
+  {id:'albon',given:'Alexander',family:'Albon',nat:'Thai',num:'23',team:'williams',tname:'Williams',pts:5},
+  {id:'ocon',given:'Esteban',family:'Ocon',nat:'French',num:'31',team:'haas',tname:'Haas',pts:4},
+  {id:'bortoleto',given:'Gabriel',family:'Bortoleto',nat:'Brazilian',num:'5',team:'audi',tname:'Audi',pts:2},
+  {id:'alonso',given:'Fernando',family:'Alonso',nat:'Spanish',num:'14',team:'aston_martin',tname:'Aston Martin',pts:1},
+  {id:'hulkenberg',given:'Nico',family:'Hulkenberg',nat:'German',num:'27',team:'audi',tname:'Audi',pts:0},
+  {id:'stroll',given:'Lance',family:'Stroll',nat:'Canadian',num:'18',team:'aston_martin',tname:'Aston Martin',pts:0},
+  {id:'perez',given:'Sergio',family:'Perez',nat:'Mexican',num:'11',team:'cadillac',tname:'Cadillac',pts:0},
+  {id:'bottas',given:'Valtteri',family:'Bottas',nat:'Finnish',num:'77',team:'cadillac',tname:'Cadillac',pts:0},
+];
+
+const KNOWN_CONSTRUCTORS=[
+  {id:'mercedes',name:'Mercedes',pts:262},{id:'ferrari',name:'Ferrari',pts:190},
+  {id:'mclaren',name:'McLaren',pts:139},{id:'red_bull',name:'Red Bull',pts:86},
+  {id:'alpine',name:'Alpine',pts:66},{id:'racing_bulls',name:'Racing Bulls',pts:37},
+  {id:'haas',name:'Haas',pts:22},{id:'williams',name:'Williams',pts:11},
+  {id:'audi',name:'Audi',pts:2},{id:'aston_martin',name:'Aston Martin',pts:1},
+  {id:'cadillac',name:'Cadillac',pts:0},
+];
+
+let DRIVER_HISTORY={};
+const RFLAGS={1:'🇦🇺',2:'🇨🇳',3:'🇯🇵',4:'🇧🇭',5:'🇸🇦',6:'🇲🇨',7:'🇪🇸',8:'🇦🇹',9:'🇬🇧',10:'🇧🇪',11:'🇭🇺',12:'🇳🇱',13:'🇮🇹',14:'🇪🇸',15:'🇦🇿',16:'🇸🇬',17:'🇺🇸',18:'🇲🇽',19:'🇧🇷',20:'🇺🇸',21:'🇶🇦',22:'🇦🇪'};
+const RNAMES={1:'Australian GP',2:'Chinese GP',3:'Japanese GP',4:'Bahrain GP',5:'Saudi Arabian GP',6:'Monaco GP',7:'Spanish GP',8:'Austrian GP',9:'British GP',10:'Belgian GP',11:'Hungarian GP',12:'Dutch GP',13:'Italian GP',14:'Madrid GP',15:'Azerbaijan GP',16:'Singapore GP',17:'US GP',18:'Mexico GP',19:'Brazilian GP',20:'Las Vegas GP',21:'Qatar GP',22:'Abu Dhabi GP'};
+
+function activeResults(){
+  return (LIVE_RESULTS&&Object.keys(LIVE_RESULTS).length)?LIVE_RESULTS:REAL_RESULTS;
+}
+
+function rebuildHistory(){
+  DRIVER_HISTORY={};
+  const src=activeResults();
+  Object.entries(src).forEach(([rnd,data])=>{
+    const res=Array.isArray(data)?data:data.res;
+    if(!res)return;
+    res.forEach(([did,pos,pts])=>{
+      if(!DRIVER_HISTORY[did])DRIVER_HISTORY[did]=[];
+      DRIVER_HISTORY[did].push({round:parseInt(rnd),raceName:RNAMES[rnd]||('R'+rnd),raceFlag:RFLAGS[rnd]||'🏁',pos,pts,status:pos?'Finished':'DNF/NC'});
+    });
+  });
+}
+
+const EVO_COLORS=['#00D2BE','#DC143C','#A78BFA','#FF8700','#3671C6','#FF87BC'];
+let POINTS_EVOLUTION={};
+let chartMode='team'; // 'team' o 'driver' — default equipo
+
+function rebuildEvolution(){
+  rebuildHistory();
+  POINTS_EVOLUTION={};
+  const src=activeResults();
+  const rounds=Object.keys(src).map(Number).sort((a,b)=>a-b);
+  const maxR=rounds.length?Math.max.apply(null,rounds):7;
+
+  if(chartMode==='driver'){
+    (STANDINGS.length?STANDINGS:KNOWN_STANDINGS).slice(0,6).forEach((s,i)=>{
+      let cum=0;const arr=[0];
+      for(let r=1;r<=maxR;r++){
+        const data=src[r];const res=data?(Array.isArray(data)?data:data.res):null;
+        const e=res?res.find(x=>x[0]===s.id):null;cum+=(e?e[2]:0);arr.push(cum);
+      }
+      POINTS_EVOLUTION[s.id]={name:s.family,color:gc2(s.team),pts:arr};
+    });
+  }else{
+    const cons=(CONSTRUCTORS.length?CONSTRUCTORS:KNOWN_CONSTRUCTORS).slice(0,6);
+    cons.forEach(team=>{
+      const drivers=(STANDINGS.length?STANDINGS:KNOWN_STANDINGS).filter(d=>d.team===team.id).map(d=>d.id);
+      let cum=0;const arr=[0];
+      for(let r=1;r<=maxR;r++){
+        const data=src[r];const res=data?(Array.isArray(data)?data:data.res):null;
+        let rp=0;if(res)res.forEach(x=>{if(drivers.includes(x[0]))rp+=x[2];});
+        cum+=rp;arr.push(cum);
+      }
+      POINTS_EVOLUTION[team.id]={name:team.name,color:TC[team.id]||'#888',pts:arr};
+    });
+  }
+}
+
+const TC={mercedes:'#00D2BE',ferrari:'#DC143C',mclaren:'#FF8700',red_bull:'#3671C6',alpine:'#FF87BC',racing_bulls:'#6692FF',haas:'#B6BABD',williams:'#64C4FF',aston_martin:'#358C75',cadillac:'#CFB87C',audi:'#BB0000'};
+const NF={Italian:'🇮🇹',British:'🇬🇧',Monegasque:'🇲🇨',Australian:'🇦🇺',Dutch:'🇳🇱',French:'🇫🇷','New Zealander':'🇳🇿',Spanish:'🇪🇸',German:'🇩🇪',Finnish:'🇫🇮',Thai:'🇹🇭',Mexican:'🇲🇽',Canadian:'🇨🇦',Brazilian:'🇧🇷',Argentine:'🇦🇷',American:'🇺🇸',Chinese:'🇨🇳',Japanese:'🇯🇵',Danish:'🇩🇰',Swedish:'🇸🇪',Austrian:'🇦🇹',Belgian:'🇧🇪'};
+const RE={1:{flag:'🇦🇺',lat:-37.84,lng:144.97},2:{flag:'🇨🇳',lat:31.34,lng:121.22},
+  3:{flag:'🇯🇵',lat:34.84,lng:136.54},4:{flag:'🇧🇭',lat:26.03,lng:50.51},
+  5:{flag:'🇸🇦',lat:21.63,lng:39.10},6:{flag:'🇲🇨',lat:43.73,lng:7.42},
+  7:{flag:'🇪🇸',lat:41.57,lng:2.26},8:{flag:'🇦🇹',lat:47.22,lng:14.76},
+  9:{flag:'🇬🇧',lat:52.07,lng:-1.02},10:{flag:'🇧🇪',lat:50.44,lng:5.97},
+  11:{flag:'🇭🇺',lat:47.58,lng:19.25},12:{flag:'🇳🇱',lat:52.39,lng:4.54},
+  13:{flag:'🇮🇹',lat:45.62,lng:9.28},14:{flag:'🇪🇸',lat:40.42,lng:-3.68},
+  15:{flag:'🇦🇿',lat:40.37,lng:49.85},16:{flag:'🇸🇬',lat:1.29,lng:103.86},
+  17:{flag:'🇺🇸',lat:30.13,lng:-97.64},18:{flag:'🇲🇽',lat:19.40,lng:-99.09},
+  19:{flag:'🇧🇷',lat:-23.70,lng:-46.70},20:{flag:'🇺🇸',lat:36.10,lng:-115.17},
+  21:{flag:'🇶🇦',lat:25.49,lng:51.45},22:{flag:'🇦🇪',lat:24.47,lng:54.60}};
+const CK=['albert_park','shanghai','suzuka','bahrain','jeddah','monaco','catalunya','red_bull_ring','silverstone','spa','hungaroring','zandvoort','monza','madrid','baku','marina_bay','americas','rodriguez','interlagos','las_vegas','losail','yas_marina'];
+const CI={
+  albert_park:{name:'Albert Park',flag:'🇦🇺',icon:'🦘',city:'Melbourne · Australia',laps:58,len:'5.278 km',record:'1:19.813 (Russell, 2026)',tipo:'Semi-urbano',curvas:14,nota:'Apertura de temporada desde 1996'},
+  shanghai:{name:'Shanghai International Circuit',flag:'🇨🇳',icon:'🏮',city:'Shanghai · China',laps:56,len:'5.451 km',record:'1:32.238 (Antonelli, 2026)',tipo:'Permanente',curvas:16,nota:'Sprint Race en R2 2026'},
+  suzuka:{name:'Suzuka Circuit',flag:'🇯🇵',icon:'🗼',city:'Suzuka · Japón',laps:53,len:'5.807 km',record:'1:30.983 (Hamilton, 2019)',tipo:'Permanente',curvas:18,nota:'Único circuito con forma de 8'},
+  bahrain:{name:'Bahrain International Circuit',flag:'🇧🇭',icon:'🕌',city:'Sakhir · Bahrain',laps:57,len:'5.412 km',record:'1:31.447 (De la Rosa, 2005)',tipo:'Permanente',curvas:15,nota:'Primera carrera nocturna de F1 (2014)'},
+  jeddah:{name:'Jeddah Corniche Circuit',flag:'🇸🇦',icon:'🌃',city:'Jeddah · Arabia Saudita',laps:50,len:'6.174 km',record:'1:27.511 (Leclerc, 2022)',tipo:'Urbano',curvas:27,nota:'Uno de los más rápidos del calendario'},
+  monaco:{name:'Circuit de Monaco',flag:'🇲🇨',icon:'🎰',city:'Monte Carlo · Mónaco',laps:78,len:'3.337 km',record:'1:12.909 (Leclerc, 2021)',tipo:'Urbano',curvas:19,nota:'La joya de la corona del calendario'},
+  catalunya:{name:'Circuit de Barcelona-Catalunya',flag:'🇪🇸',icon:'🏰',city:'Barcelona · España',laps:66,len:'4.675 km',record:'1:18.149 (Verstappen, 2021)',tipo:'Permanente',curvas:14,nota:'Hamilton ganó aquí en R7 2026'},
+  red_bull_ring:{name:'Red Bull Ring',flag:'🇦🇹',icon:'⛰️',city:'Spielberg · Austria',laps:71,len:'4.318 km',record:'1:05.619 (Sainz, 2020)',tipo:'Permanente',curvas:10,nota:'Próxima carrera: 28 de junio'},
+  silverstone:{name:'Silverstone Circuit',flag:'🇬🇧',icon:'👑',city:'Silverstone · Reino Unido',laps:52,len:'5.891 km',record:'1:27.097 (Hamilton, 2020)',tipo:'Permanente',curvas:18,nota:'Primer GP de la historia (1950)'},
+  spa:{name:'Circuit de Spa-Francorchamps',flag:'🇧🇪',icon:'🌲',city:'Spa · Bélgica',laps:44,len:'7.004 km',record:'1:41.252 (Bottas, 2018)',tipo:'Permanente',curvas:20,nota:'El circuito favorito de los pilotos'},
+  hungaroring:{name:'Hungaroring',flag:'🇭🇺',icon:'🛁',city:'Budapest · Hungría',laps:70,len:'4.381 km',record:'1:16.627 (Hamilton, 2020)',tipo:'Permanente',curvas:14,nota:"'Monaco sin muros'"},
+  zandvoort:{name:'Circuit Zandvoort',flag:'🇳🇱',icon:'🌷',city:'Zandvoort · Países Bajos',laps:72,len:'4.259 km',record:'1:11.097 (Verstappen, 2021)',tipo:'Permanente',curvas:14,nota:'Home race de Verstappen'},
+  monza:{name:'Autodromo Nazionale di Monza',flag:'🇮🇹',icon:'🏛️',city:'Monza · Italia',laps:53,len:'5.793 km',record:'1:21.046 (Barrichello, 2004)',tipo:'Permanente',curvas:11,nota:'El templo de la velocidad'},
+  madrid:{name:'Circuito de Madrid',flag:'🇪🇸',icon:'🐂',city:'Madrid · España',laps:55,len:'5.476 km',record:'—',tipo:'Permanente',curvas:20,nota:'Nueva sede en 2026 (segunda carrera en España)'},
+  baku:{name:'Baku City Circuit',flag:'🇦🇿',icon:'🔥',city:'Bakú · Azerbaiyán',laps:51,len:'6.003 km',record:'1:41.218 (Leclerc, 2019)',tipo:'Urbano',curvas:20,nota:'Recta de 2.2 km junto al Caspio'},
+  marina_bay:{name:'Marina Bay Street Circuit',flag:'🇸🇬',icon:'🦁',city:'Marina Bay · Singapur',laps:62,len:'4.940 km',record:'1:35.867 (Hamilton, 2023)',tipo:'Urbano',curvas:19,nota:'Primera carrera nocturna de F1 (2008)'},
+  americas:{name:'Circuit of the Americas',flag:'🇺🇸',icon:'🤠',city:'Austin · EE.UU.',laps:56,len:'5.513 km',record:'1:36.169 (Hamilton, 2019)',tipo:'Permanente',curvas:20,nota:'Diseñado por Hermann Tilke'},
+  rodriguez:{name:'Autódromo Hermanos Rodríguez',flag:'🇲🇽',icon:'🌮',city:'Cd. de México · México',laps:71,len:'4.304 km',record:'1:17.774 (Verstappen, 2021)',tipo:'Permanente',curvas:17,nota:'A 2200m de altitud'},
+  interlagos:{name:'Autódromo José Carlos Pace',flag:'🇧🇷',icon:'⚽',city:'São Paulo · Brasil',laps:71,len:'4.309 km',record:'1:10.540 (Räikkönen, 2004)',tipo:'Permanente',curvas:15,nota:'Sede de duelos históricos'},
+  las_vegas:{name:'Las Vegas Strip Circuit',flag:'🇺🇸',icon:'🎲',city:'Las Vegas · EE.UU.',laps:50,len:'6.201 km',record:'1:35.490 (Leclerc, 2023)',tipo:'Urbano',curvas:17,nota:'Espectáculo nocturno en el Strip'},
+  losail:{name:'Losail International Circuit',flag:'🇶🇦',icon:'🐪',city:'Losail · Qatar',laps:57,len:'5.380 km',record:'1:24.319 (Russell, 2023)',tipo:'Permanente',curvas:16,nota:'El calor extremo es el mayor desafío'},
+  yas_marina:{name:'Yas Marina Circuit',flag:'🇦🇪',icon:'🏝️',city:'Yas Marina · Abu Dhabi',laps:55,len:'5.554 km',record:'1:26.103 (Sainz, 2021)',tipo:'Permanente',curvas:16,nota:'Final de temporada desde 2009'}
+};
+const TRACKS={albert_park:'M20,70 C15,55 18,40 30,35 L55,28 C65,26 72,30 75,38 C78,46 74,52 68,55 L50,62 C58,60 70,62 72,70 C74,78 66,82 58,80 L30,78 C24,77 22,74 20,70 Z',shanghai:'M25,75 C20,60 30,55 35,58 C40,61 38,68 42,70 C50,74 52,60 48,50 C44,40 50,30 60,28 L72,26 C80,25 82,32 78,38 L65,48 C72,50 78,55 76,62 C74,70 65,72 58,70 L35,80 C28,82 27,80 25,75 Z',suzuka:'M22,72 C18,60 24,52 32,50 L48,46 C40,44 34,38 38,32 C42,26 52,28 56,34 L62,44 C66,38 74,38 76,44 C78,52 70,56 64,54 L70,62 C74,68 70,76 62,76 L34,80 C26,81 24,77 22,72 Z',bahrain:'M25,70 L28,45 C29,38 35,35 42,37 L55,42 C50,35 52,28 60,28 L72,30 C80,32 80,40 74,44 L62,50 C70,52 74,60 70,66 C66,72 56,72 52,68 L40,75 C32,80 26,77 25,70 Z',jeddah:'M20,78 L24,30 C25,24 30,22 34,26 L40,55 L46,28 C47,23 53,23 54,28 L58,58 L64,32 C65,27 71,28 72,33 L76,72 C77,80 70,82 66,76 L60,50 L56,78 C55,83 49,83 48,78 L44,55 L38,80 C36,85 30,84 28,80 Z',catalunya:'M25,72 C20,58 26,48 36,46 L52,42 C46,36 48,28 56,28 L70,30 C78,32 78,42 70,46 L74,58 C77,66 70,72 62,70 L40,78 C30,81 27,78 25,72 Z',red_bull_ring:'M28,72 C22,60 28,52 36,52 L60,50 C54,42 58,32 68,32 C76,32 80,40 74,46 L66,56 C74,58 78,66 72,72 C66,78 56,76 52,70 L38,78 C32,80 30,76 28,72 Z',silverstone:'M22,68 C20,55 28,48 38,50 L52,54 C46,44 50,34 60,34 L72,36 C80,38 80,46 72,50 L60,56 C70,58 74,66 68,72 C62,78 52,76 48,70 L36,74 C28,76 23,74 22,68 Z',spa:'M25,78 C20,65 24,55 32,52 L42,48 C34,42 36,32 46,30 L56,28 C50,22 54,14 62,16 C70,18 70,28 64,32 L72,40 C78,46 74,56 66,56 L72,66 C76,72 70,80 62,78 L38,82 C30,83 27,82 25,78 Z',hungaroring:'M26,72 C22,60 28,52 36,52 L50,52 C44,44 48,36 56,36 L68,38 C76,40 76,48 70,52 L58,58 C66,60 70,68 64,72 C58,76 50,74 48,70 L38,76 C32,78 28,76 26,72 Z',zandvoort:'M28,74 C22,62 28,54 36,54 L52,52 C44,46 46,36 56,34 C66,32 72,40 66,46 L74,52 C80,58 74,68 66,66 L40,78 C32,80 30,78 28,74 Z',monza:'M24,76 L30,38 C31,30 38,28 44,32 L50,40 C46,30 52,24 60,26 L72,30 C80,33 78,42 70,42 L56,44 C64,48 66,58 60,64 L68,70 C72,76 66,82 60,78 L40,80 C30,81 23,82 24,76 Z',madrid:'M26,72 C22,58 28,50 38,50 L54,48 C48,40 52,32 60,32 L70,34 C78,36 78,44 72,48 L62,54 C70,58 72,66 66,70 C60,74 52,72 48,68 L38,76 C32,78 28,76 26,72 Z',baku:'M22,78 L26,34 C27,26 34,24 40,28 L46,42 L50,30 C52,24 58,24 60,30 L64,44 L68,32 C70,26 76,28 76,34 L74,70 C73,80 66,82 62,76 L56,56 L52,78 C50,84 44,84 42,78 L38,58 L32,80 C30,85 24,84 22,78 Z',marina_bay:'M24,76 C20,64 26,56 34,56 L46,54 C40,46 44,38 52,38 L58,42 C56,34 62,28 70,30 C78,32 78,42 70,44 L64,52 C72,54 76,62 70,68 C64,74 54,72 52,66 L38,78 C32,80 26,80 24,76 Z',americas:'M26,74 C20,60 26,28 38,30 C46,31 44,44 50,46 C58,49 56,32 64,30 L72,28 C80,27 82,36 76,42 L66,52 C74,54 78,62 72,68 C66,74 56,72 54,66 L40,78 C32,81 29,80 26,74 Z',rodriguez:'M25,72 C20,58 26,48 36,48 L54,46 C48,38 52,30 60,30 L70,32 C78,34 78,44 70,48 L74,60 C77,68 70,74 62,72 L52,66 L40,76 C32,79 27,78 25,72 Z',interlagos:'M28,72 C20,62 24,48 34,48 C42,48 42,58 48,58 C56,58 52,42 58,34 C62,28 72,28 76,34 C80,42 74,50 68,50 L60,62 C66,66 68,74 60,76 L38,80 C30,81 32,78 28,72 Z',las_vegas:'M22,72 L24,40 C25,32 32,30 38,34 L66,52 L64,38 C63,30 70,28 74,34 L76,68 C77,76 70,78 66,72 L38,54 L40,70 C41,78 34,80 30,74 L22,72 Z',losail:'M26,70 C22,56 28,48 38,48 L56,46 C50,38 54,30 62,30 C70,30 74,38 68,44 L60,52 C68,54 72,62 66,68 C60,74 50,72 48,66 L38,74 C32,76 28,74 26,70 Z',yas_marina:'M24,74 C20,60 26,52 34,52 L48,50 C42,42 46,32 56,32 L68,34 C76,36 76,46 68,48 L72,40 C72,40 74,58 68,60 L56,64 C64,66 66,72 60,74 L38,78 C30,80 26,78 24,74 Z',monaco:'M28,72 C22,62 24,52 32,50 L42,48 C36,44 38,36 46,36 L54,38 C50,30 56,24 64,26 C72,28 72,38 66,40 L70,50 C74,56 70,64 62,62 L66,70 C68,76 60,80 54,76 L38,78 C30,80 30,76 28,72 Z'};
+const CXTRA={albert_park:{sentido:'Horario',primer:'1996',winners:'2025 Norris · 2024 Sainz · 2023 Verstappen'},shanghai:{sentido:'Horario',primer:'2004',winners:'2025 Piastri · 2024 Verstappen · 2019 Hamilton'},suzuka:{sentido:'Figura en 8',primer:'1987',winners:'2025 Verstappen · 2024 Verstappen · 2023 Verstappen'},bahrain:{sentido:'Horario',primer:'2004',winners:'2025 Piastri · 2024 Verstappen · 2023 Verstappen'},jeddah:{sentido:'Antihorario',primer:'2021',winners:'2025 Piastri · 2024 Verstappen · 2023 Pérez'},catalunya:{sentido:'Horario',primer:'1991',winners:'2025 Piastri · 2024 Verstappen · 2023 Verstappen'},red_bull_ring:{sentido:'Horario',primer:'1970',winners:'2025 Norris · 2024 Russell · 2023 Verstappen'},silverstone:{sentido:'Horario',primer:'1950',winners:'2025 Hamilton · 2024 Hamilton · 2023 Verstappen'},spa:{sentido:'Horario',primer:'1950',winners:'2025 Piastri · 2024 Hamilton · 2023 Verstappen'},hungaroring:{sentido:'Horario',primer:'1986',winners:'2025 Norris · 2024 Piastri · 2023 Verstappen'},zandvoort:{sentido:'Horario',primer:'1952',winners:'2025 Verstappen · 2024 Norris · 2023 Verstappen'},monza:{sentido:'Horario',primer:'1950',winners:'2025 Verstappen · 2024 Leclerc · 2023 Verstappen'},madrid:{sentido:'Horario',primer:'2026',winners:'GP inaugural'},baku:{sentido:'Antihorario',primer:'2016',winners:'2025 Verstappen · 2024 Piastri · 2023 Pérez'},marina_bay:{sentido:'Antihorario',primer:'2008',winners:'2025 Russell · 2024 Norris · 2023 Sainz'},americas:{sentido:'Antihorario',primer:'2012',winners:'2025 Norris · 2024 Leclerc · 2023 Verstappen'},rodriguez:{sentido:'Horario',primer:'1963',winners:'2025 Norris · 2024 Sainz · 2023 Verstappen'},interlagos:{sentido:'Antihorario',primer:'1973',winners:'2025 Verstappen · 2024 Verstappen · 2023 Verstappen'},las_vegas:{sentido:'Antihorario',primer:'2023',winners:'2025 Verstappen · 2024 Russell · 2023 Verstappen'},losail:{sentido:'Horario',primer:'2021',winners:'2025 Piastri · 2024 Verstappen · 2023 Verstappen'},yas_marina:{sentido:'Antihorario',primer:'2009',winners:'2025 Norris · 2024 Norris · 2023 Verstappen'},monaco:{sentido:'Horario',primer:'1950',winners:'2025 Norris · 2024 Leclerc · 2023 Verstappen'}};
+
+let allRaces=[];
+let STANDINGS=[],CONSTRUCTORS=[],LIVE_RESULTS={},dataSource='local';
+const gc2=id=>TC[id]||'#666', gf=nat=>NF[nat]||'🏁';
+
+async function loadAll(){
+  buildFromHardcoded();
+  renderEverything();
+  fetchLiveData();
+}
+
+const SEASON=(function(){
+  const now=new Date();
+  return now.getFullYear();
+})();
+
+const SCHED_HARD=[
+  {r:1,n:'Australian GP',circuit:'Albert Park Circuit',city:'Melbourne',d:'2026-03-08',sprint:false},
+  {r:2,n:'Chinese GP',circuit:'Shanghai International Circuit',city:'Shanghai',d:'2026-03-15',sprint:true},
+  {r:3,n:'Japanese GP',circuit:'Suzuka Circuit',city:'Suzuka',d:'2026-03-29',sprint:false},
+  {r:4,n:'Bahrain GP',circuit:'Bahrain International Circuit',city:'Sakhir',d:'2026-04-12',sprint:false},
+  {r:5,n:'Saudi Arabian GP',circuit:'Jeddah Corniche Circuit',city:'Jeddah',d:'2026-04-19',sprint:false},
+  {r:6,n:'Monaco GP',circuit:'Circuit de Monaco',city:'Monte Carlo',d:'2026-06-07',sprint:false},
+  {r:7,n:'Spanish GP',circuit:'Circuit de Barcelona-Catalunya',city:'Barcelona',d:'2026-06-14',sprint:false},
+  {r:8,n:'Austrian GP',circuit:'Red Bull Ring',city:'Spielberg',d:'2026-06-28',sprint:false},
+  {r:9,n:'British GP',circuit:'Silverstone Circuit',city:'Silverstone',d:'2026-07-05',sprint:true},
+  {r:10,n:'Belgian GP',circuit:'Circuit de Spa-Francorchamps',city:'Spa',d:'2026-07-19',sprint:false},
+  {r:11,n:'Hungarian GP',circuit:'Hungaroring',city:'Budapest',d:'2026-07-26',sprint:false},
+  {r:12,n:'Dutch GP',circuit:'Circuit Zandvoort',city:'Zandvoort',d:'2026-08-23',sprint:true},
+  {r:13,n:'Italian GP',circuit:'Autodromo Nazionale di Monza',city:'Monza',d:'2026-09-06',sprint:false},
+  {r:14,n:'Madrid GP',circuit:'Circuito de Madrid',city:'Madrid',d:'2026-09-13',sprint:false},
+  {r:15,n:'Azerbaijan GP',circuit:'Baku City Circuit',city:'Baku',d:'2026-09-27',sprint:false},
+  {r:16,n:'Singapore GP',circuit:'Marina Bay Street Circuit',city:'Marina Bay',d:'2026-10-11',sprint:true},
+  {r:17,n:'US GP',circuit:'Circuit of the Americas',city:'Austin',d:'2026-10-25',sprint:false},
+  {r:18,n:'Mexico GP',circuit:'Autodromo Hermanos Rodriguez',city:'Mexico City',d:'2026-11-01',sprint:false},
+  {r:19,n:'Brazilian GP',circuit:'Autodromo Jose Carlos Pace',city:'Sao Paulo',d:'2026-11-08',sprint:false},
+  {r:20,n:'Las Vegas GP',circuit:'Las Vegas Strip Circuit',city:'Las Vegas',d:'2026-11-22',sprint:false},
+  {r:21,n:'Qatar GP',circuit:'Losail International Circuit',city:'Losail',d:'2026-11-29',sprint:true},
+  {r:22,n:'Abu Dhabi GP',circuit:'Yas Marina Circuit',city:'Yas Marina',d:'2026-12-06',sprint:false},
+];
+function buildFromHardcoded(){
+  const today=new Date();let nextFound=false;
+  allRaces=SCHED_HARD.map(s=>{
+    const ex=RE[s.r]||{},cKey=CK[s.r-1]||'',cInfo=CI[cKey]||{},rr=REAL_RESULTS[s.r];
+    const rDate=new Date(s.d+'T13:00:00Z');
+    const status=rr?'done':(rDate<=new Date(today.getTime()+3*864e5)?'current':'upcoming');
+    let isNext=false;if(!rr&&status==='upcoming'&&!nextFound){isNext=true;nextFound=true;}
+    return{round:s.r,raceName:s.n,circuit:s.circuit,city:s.city,date:s.d,sprint:s.sprint,
+      status,isNext,flag:ex.flag||'🏁',lat:ex.lat||0,lng:ex.lng||0,
+      p1:rr?rr.p1:null,p2:rr?rr.p2:null,p3:rr?rr.p3:null,cInfo};
+  });
+  races=allRaces;
+  STANDINGS=KNOWN_STANDINGS.slice();
+  CONSTRUCTORS=KNOWN_CONSTRUCTORS.slice();
+  dataSource='local';
+  rebuildEvolution();
+}
+
+function renderEverything(){
+  races=allRaces;
+  const hy=document.getElementById('hdr-year');if(hy)hy.textContent=SEASON;
+  document.title='F1 '+SEASON;
+  const next=allRaces.find(r=>r.isNext);
+  if(next){
+    const s=next.raceName.replace(' Grand Prix','').replace(' GP','').trim();
+    const hr=document.getElementById('hround');
+    if(hr)hr.textContent='R'+next.round+' \u00b7 '+s;
+  }
+  updateTicker();renderAll();
+  if(typeof activeTab!=='undefined'&&activeTab==='chart')setTimeout(drawChart,50);
+  if(next&&next.lat)setTimeout(()=>globeGoTo(next.lat,next.lng),1200);
+}
+
+const API_BASE='https://api.jolpi.ca/ergast/f1';
+
+// Helper de fetch robusto con timeout y manejo de errores
+function fetchJSON(url){
+  return new Promise((resolve,reject)=>{
+    const ctrl=new AbortController();
+    const to=setTimeout(()=>ctrl.abort(),8000);
+    fetch(url,{signal:ctrl.signal,headers:{'Accept':'application/json'}})
+      .then(r=>{clearTimeout(to);if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+      .then(resolve)
+      .catch(err=>{clearTimeout(to);reject(err);});
+  });
+}
+
+async function fetchLiveData(){
+  setSync('live-loading');
+  try{
+    const [racesS,driversS,consS]=await Promise.allSettled([
+      fetchJSON(API_BASE+'/'+SEASON+'/races.json?limit=40'),
+      fetchJSON(API_BASE+'/'+SEASON+'/driverstandings.json?limit=40'),
+      fetchJSON(API_BASE+'/'+SEASON+'/constructorstandings.json?limit=40'),
+    ]);
+    const racesR=racesS.status==='fulfilled'?racesS.value:null;
+    const driversR=driversS.status==='fulfilled'?driversS.value:null;
+    const consR=consS.status==='fulfilled'?consS.value:null;
+
+    const apiRaces=racesR?.MRData?.RaceTable?.Races||[];
+    const dStand=driversR?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings||[];
+    const cStand=consR?.MRData?.StandingsTable?.StandingsLists?.[0]?.ConstructorStandings||[];
+
+    if(!apiRaces.length&&!dStand.length){setSync('local');return;}
+
+    if(dStand.length){
+      STANDINGS=dStand.map(ds=>{
+        const d=ds.Driver,c=ds.Constructors[ds.Constructors.length-1]||{};
+        const id=d.driverId;
+        const teamKey=mapTeam(c.constructorId);
+        return{
+          id,given:d.givenName,family:d.familyName,
+          nat:mapNat(d.nationality),num:d.permanentNumber||d.code||'',
+          team:teamKey,tname:c.name||mapTeamName(teamKey),
+          pts:parseInt(ds.points)||0,
+          wins:parseInt(ds.wins)||0,pos:parseInt(ds.position)||0
+        };
+      });
+    }
+
+    if(cStand.length){
+      CONSTRUCTORS=cStand.map(cs=>({
+        id:mapTeam(cs.Constructor.constructorId),
+        name:cs.Constructor.name,
+        pts:parseInt(cs.points)||0
+      }));
+    }
+
+    if(apiRaces.length){
+      const today=new Date();let nextFound=false;
+      let apiResults={};
+      try{
+        const resR=await fetchJSON(API_BASE+'/'+SEASON+'/results.json?limit=500');
+        const rr=resR?.MRData?.RaceTable?.Races||[];
+        rr.forEach(race=>{apiResults[parseInt(race.round)]=race.Results||[];});
+      }catch(e){}
+
+      allRaces=apiRaces.map(r=>{
+        const rnd=parseInt(r.round),ex=RE[rnd]||{},cKey=CK[rnd-1]||'',cInfo=CI[cKey]||{};
+        const apiRes=apiResults[rnd];
+        const rDate=new Date(r.date+'T'+(r.time||'12:00:00Z'));
+        const done=apiRes&&apiRes.length>0;
+        let status=done?'done':(rDate<=new Date(today.getTime()+3*864e5)?'current':'upcoming');
+        let isNext=false;if(!done&&status==='upcoming'&&!nextFound){isNext=true;nextFound=true;}
+        let p1=null,p2=null,p3=null,resArr=null;
+        if(done){
+          resArr=apiRes.map(x=>{
+            const fin=x.positionText, pos=(/^\d+$/.test(fin))?parseInt(fin):null;
+            return[x.Driver.driverId,pos,parseInt(x.points)||0];
+          });
+          const podium=apiRes.slice(0,3).map(x=>x.Driver.familyName);
+          p1=podium[0]||null;p2=podium[1]||null;p3=podium[2]||null;
+        }else if(REAL_RESULTS[rnd]){
+          const rr2=REAL_RESULTS[rnd];p1=rr2.p1;p2=rr2.p2;p3=rr2.p3;resArr=rr2.res;status='done';
+        }
+        return{round:rnd,raceName:r.raceName,circuit:r.Circuit.circuitName,
+          city:r.Circuit.Location.locality,date:r.date,sprint:!!r.Sprint,
+          status,isNext,flag:ex.flag||'🏁',lat:ex.lat||0,lng:ex.lng||0,
+          p1,p2,p3,apiRes:resArr,cInfo};
+      });
+      LIVE_RESULTS={};
+      allRaces.forEach(r=>{if(r.apiRes)LIVE_RESULTS[r.round]=r.apiRes;});
+    }
+
+    dataSource='live';
+    rebuildEvolution();
+    renderEverything();
+    setSync('live');
+  }catch(e){
+    console.error('API fallo, usando datos locales:',e);
+    setSync('local');
+  }
+}
+
+function mapTeam(cid){
+  const m={mercedes:'mercedes',ferrari:'ferrari',mclaren:'mclaren',red_bull:'red_bull',
+    rb:'racing_bulls',racing_bulls:'racing_bulls',alpine:'alpine',aston_martin:'aston_martin',
+    williams:'williams',haas:'haas',sauber:'audi',audi:'audi',kick_sauber:'audi',
+    cadillac:'cadillac'};
+  return m[cid]||cid;
+}
+function mapTeamName(k){
+  const m={mercedes:'Mercedes',ferrari:'Ferrari',mclaren:'McLaren',red_bull:'Red Bull',
+    racing_bulls:'Racing Bulls',alpine:'Alpine',aston_martin:'Aston Martin',williams:'Williams',
+    haas:'Haas',audi:'Audi',cadillac:'Cadillac'};
+  return m[k]||k;
+}
+function mapNat(n){
+  const m={Italian:'Italian',British:'British',Monegasque:'Monegasque',Australian:'Australian',
+    Dutch:'Dutch',French:'French','New Zealander':'New Zealander',Spanish:'Spanish',German:'German',
+    Finnish:'Finnish',Thai:'Thai',Mexican:'Mexican',Canadian:'Canadian',Brazilian:'Brazilian',
+    Argentinian:'Argentine',Argentine:'Argentine',American:'American',Chinese:'Chinese',
+    Japanese:'Japanese',Danish:'Danish',Swedish:'Swedish',Austrian:'Austrian',Belgian:'Belgian'};
+  return m[n]||n;
+}
+
+function setSync(state){
+  const ldot=document.querySelector('.ldot');
+  if(!ldot)return;
+  if(state==='live'){ldot.style.background='#00D26A';ldot.title='Datos en vivo';}
+  else if(state==='live-loading'){ldot.style.background='#FFD500';ldot.title='Cargando...';}
+  else{ldot.style.background='#888';ldot.title='Datos locales';}
+}
+
+function updateTicker(){
+  const l=STANDINGS[0],p2=STANDINGS[1],p3=STANDINGS[2];
+  const next=allRaces.find(r=>r.isNext);
+  let t=`🏆 ${l.family} LIDERA · ${l.pts} PTS &nbsp;·&nbsp; ${p2.family} P2 (${p2.pts}) &nbsp;·&nbsp; ${p3.family} P3 (${p3.pts}) &nbsp;·&nbsp; `;
+  t+=`🏁 BARCELONA R7: HAMILTON · RUSSELL · NORRIS &nbsp;·&nbsp; `;
+  const col=STANDINGS.find(d=>d.id==='colapinto');
+  if(col){const pos=STANDINGS.indexOf(col)+1;t+=`🇦🇷 COLAPINTO P${pos} · ${col.pts} PTS &nbsp;·&nbsp; `;}
+  if(next){const d=new Date(next.date);const mo=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    t+=`📅 ${next.flag} ${next.raceName.replace('Formula 1 ','').replace(' Grand Prix','').trim()} · ${d.getDate()} ${mo[d.getMonth()]} &nbsp;·&nbsp; `;}
+  document.getElementById('tktxt').innerHTML=t;
+}
+
+let popupRace=null;
+function showPopup(race){
+  popupRace=race;
+  document.getElementById('pflag').textContent=race.flag||'🏁';
+  document.getElementById('pname').textContent=race.raceName.replace(' Grand Prix','').trim();
+  const sm={done:'Finalizado',current:'En Curso',upcoming:'Próximo'};
+  const sc={done:'st-d',current:'st-c',upcoming:'st-u'};
+  const ps=document.getElementById('pst');ps.textContent=sm[race.status];ps.className='pst '+sc[race.status];
+  const d=new Date(race.date);const mo=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  document.getElementById('pmeta').textContent=`R${race.round} · ${d.getDate()} ${mo[d.getMonth()]} · ${race.city||''}`;
+  const pod=document.getElementById('ppodium');
+  if(race.status==='done'&&race.p1){
+    pod.innerHTML=`<div style="display:flex;gap:6px;margin-top:8px">
+      <div style="flex:1;background:rgba(255,215,0,0.12);border-radius:5px;padding:5px 7px"><div style="font-size:9px;color:#FFD700;font-weight:700">🥇 P1</div><div style="font-size:12px;font-weight:700;color:#fff">${race.p1}</div></div>
+      <div style="flex:1;background:rgba(192,192,192,0.1);border-radius:5px;padding:5px 7px"><div style="font-size:9px;color:#C0C0C0;font-weight:700">🥈 P2</div><div style="font-size:12px;font-weight:700;color:#fff">${race.p2||'—'}</div></div>
+      <div style="flex:1;background:rgba(205,127,50,0.12);border-radius:5px;padding:5px 7px"><div style="font-size:9px;color:#CD7F32;font-weight:700">🥉 P3</div><div style="font-size:12px;font-weight:700;color:#fff">${race.p3||'—'}</div></div>
+    </div>`;
+  }else{pod.innerHTML='';}
+  document.getElementById('pcard').style.display='none';
+  document.getElementById('pcard').innerHTML='';
+  document.getElementById('pmore').textContent='Ver ficha completa ▾';
+  document.getElementById('cpopup').classList.add('show');
+}
+function togglePopupCard(){
+  const card=document.getElementById('pcard'),btn=document.getElementById('pmore');
+  if(card.style.display==='none'){
+    const key=CK[popupRace.round-1];
+    card.innerHTML=key&&CI[key]?circuitCard(key):'<div style="color:var(--mu);font-size:12px;padding:8px">Sin datos de circuito</div>';
+    card.style.display='block';btn.textContent='Ocultar ficha ▴';
+  }else{card.style.display='none';btn.textContent='Ver ficha completa ▾';}
+}
+function closePopup(){document.getElementById('cpopup').classList.remove('show');}
+let activeTab='cal';
+function switchTab(btn,tab){
+  activeTab=tab;
+  document.querySelectorAll('.tb').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');document.getElementById('panel-'+tab).classList.add('active');
+  if(tab==='chart')drawChart();
+}
+
+function renderAll(){
+  try{renderRaces();}catch(e){console.error('renderRaces',e);}
+  try{renderDrivers();}catch(e){console.error('renderDrivers',e);}
+  try{renderTeams();}catch(e){console.error('renderTeams',e);}
+  try{renderChart();}catch(e){console.error('renderChart',e);}
+  try{renderCompare();}catch(e){console.error('renderCompare',e);}
+  try{renderStats();}catch(e){console.error('renderStats',e);}
+  try{renderCircuits();}catch(e){console.error('renderCircuits',e);}
+}
+
+let expandedRound=null;
+function renderRaces(){
+  const c=document.getElementById('panel-cal');
+  c.innerHTML=`<div class="stitle">Temporada ${SEASON} · ${allRaces.length} GPs</div><div class="apib" id="cal-src">${dataSource==='live'?'🟢 Datos en vivo (Jolpica API)':'📋 Datos locales'} · toca una carrera para el top 10</div>`;
+  const MO=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  allRaces.forEach(r=>{
+    const d=new Date(r.date);
+    const res=r.p1?`<div class="rres"><span class="win">🏆 ${r.p1}</span> · P2: ${r.p2||'—'} · P3: ${r.p3||'—'}</div>`:'';
+    const sp=r.sprint?'<span class="sbadge">SPRINT</span>':'';
+    const dc=r.status==='current'||r.isNext?'var(--gold)':r.status==='done'?'var(--mu)':'var(--tx)';
+    const sn=r.raceName.replace('Formula 1 ','').replace(' Grand Prix','').replace('Grand Prix','').trim();
+    const div=document.createElement('div');
+    div.className=`rc ${r.status}${r.isNext?' upcoming-next':''}`;
+    div.innerHTML=`<div class="rd2"><div class="rdy" style="color:${dc}">${d.getDate()}</div><div class="rmn">${MO[d.getMonth()]}</div></div><div class="ri"><div class="rr">R${r.round}${sp}</div><div class="rn">${sn}</div><div class="rci">${r.circuit}${r.city?' · '+r.city:''}</div>${res}</div><div class="rfl">${r.flag}</div>`;
+    div.addEventListener('click',()=>{
+      showPopup(r);globeGoTo(r.lat,r.lng);
+      const existing=div.querySelector('.race-detail');
+      if(existing){existing.remove();return;}
+      document.querySelectorAll('.race-detail').forEach(el=>el.remove());
+      const rr=(r.apiRes?{res:r.apiRes}:REAL_RESULTS[r.round]);
+      const detail=document.createElement('div');detail.className='race-detail';
+      if(rr){
+        rr.res.slice(0,10).forEach(([did,pos,pts])=>{
+          const s=STANDINGS.find(x=>x.id===did);
+          const nm=s?s.family:did.replace('_',' ');
+          const fl=s?gf(s.nat):'🏁';
+          const pc=pos===1?'p1':pos===2?'p2':pos===3?'p3':'';
+          const row=document.createElement('div');row.className='race-detail-row';
+          row.innerHTML=`<div class="rd-pos ${pc}">${pos?'P'+pos:'—'}</div><div class="rd-flag">${fl}</div><div class="rd-name">${nm}</div><div class="rd-pts">${pts>0?'+'+pts:'—'}</div>`;
+          detail.appendChild(row);
+        });
+      }else{
+        const calBtn=document.createElement('button');calBtn.className='cal-btn';
+        calBtn.style.margin='8px';calBtn.style.width='calc(100% - 16px)';
+        calBtn.innerHTML=`📅 Agregar ${sn} GP a mi calendario`;
+        calBtn.addEventListener('click',(ev)=>{ev.stopPropagation();addToCalendar(r);});
+        detail.appendChild(calBtn);
+      }
+      div.appendChild(detail);
+    });
+    c.appendChild(div);
+  });
+}
+
+function addToCalendar(race){
+  const d=new Date(RACE_DATES[race.round]||race.date+'T13:00:00Z');
+  const end=new Date(d.getTime()+7200000);
+  const fmt=dt=>dt.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  const name=race.raceName.replace('Formula 1 ','');
+  const url=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('🏎 '+name)}&dates=${fmt(d)}/${fmt(end)}&details=${encodeURIComponent('F1 2026 - '+race.circuit)}&location=${encodeURIComponent(race.city||'')}`;
+  window.open(url,'_blank');
+  showToast('📅 Abriendo Google Calendar...');
+}
+
+function renderDrivers(){
+  const c=document.getElementById('panel-drv');
+  c.innerHTML=`<div class="stitle">Pilotos · Post-Barcelona R7</div>`;
+  const max=(STANDINGS[0]||{pts:1}).pts||1;
+  STANDINGS.forEach((s,i)=>{
+    const pos=i+1,color=gc2(s.team),flag=gf(s.nat);
+    const pct=Math.round(s.pts/max*100),pc=pos===1?'p1':pos===2?'p2':pos===3?'p3':'';
+    const div=document.createElement('div');div.className='drow';div.style.borderLeftColor=color;
+    div.innerHTML=`<div class="pos ${pc}">${pos}</div><div style="font-size:16px">${flag}</div><div style="flex:1"><div class="dn">${s.given} ${s.family}${s.nat==='Argentine'?' ⭐':''}</div><div class="dt" style="color:${color}">${s.tname}</div></div><div style="text-align:right"><div class="dpts" style="color:${pos<=3?'var(--gold)':'var(--tx)'}">${s.pts}</div><div class="ptsl">PTS</div><div class="pb"><div class="pbf" style="width:${pct}%;background:${color}"></div></div></div>`;
+    div.addEventListener('click',()=>openDriver(s,color,flag,pos));c.appendChild(div);
+  });
+}
+
+function openDriver(s,color,flag,pos){
+  const res=(DRIVER_HISTORY[s.id]||[]).sort((a,b)=>a.round-b.round);
+  const wins=res.filter(r=>r.pos===1).length,pods=res.filter(r=>r.pos!==null&&r.pos<=3).length;
+  const points=res.reduce((a,r)=>a+r.pts,0);
+  const best=res.filter(r=>r.pos).reduce((b,r)=>r.pos<b?r.pos:b,99);
+  let h='';
+  res.forEach(r=>{
+    let ps,pc;
+    if(!r.pos){ps=r.status||'NC';pc='var(--mu)';}
+    else if(r.pos===1){ps='P1 🏆';pc='var(--gold)';}
+    else if(r.pos===2){ps='P2';pc='var(--si)';}
+    else if(r.pos===3){ps='P3';pc='var(--bz)';}
+    else{ps='P'+r.pos;pc='var(--tx)';}
+    h+=`<div class="rh"><div class="rhr">R${r.round}</div><div style="font-size:15px">${r.raceFlag}</div><div class="rhn">${r.raceName}</div><div class="rhp" style="color:${pc}">${ps}</div><div class="rhpts">${r.pts>0?'+'+r.pts+' pts':'—'}</div></div>`;
+  });
+  document.getElementById('dmi').innerHTML=`
+    <div class="mh"><div class="mfl">${flag}</div><div style="flex:1">
+    <div class="mdn" style="color:${color}">${s.given} ${s.family}</div>
+    <div class="mtm" style="color:${color}">${s.tname} · #${s.num} · ${s.nat}</div>
+    </div><button class="mcl" onclick="closeModal()">✕</button></div>
+    <div class="ms">
+      <div class="msb"><div class="msv" style="color:var(--gold)">${s.pts}</div><div class="msl">Puntos</div></div>
+      <div class="msb"><div class="msv" style="color:var(--red)">${wins}</div><div class="msl">Victorias</div></div>
+      <div class="msb"><div class="msv">${pods}</div><div class="msl">Podios</div></div>
+      <div class="msb"><div class="msv">${best===99?'—':'P'+best}</div><div class="msl">Mejor</div></div>
+    </div>
+    <div class="ht">Historial 2026 · R1–R7</div>${h}
+    <button class="share-btn" style="margin-top:10px" onclick="shareDriver('${s.family}',${pos},${s.pts})">📤 Compartir resultados</button>`;
+  document.getElementById('dmodal').classList.add('show');
+}
+function closeModal(e){if(!e||e.target===document.getElementById('dmodal'))document.getElementById('dmodal').classList.remove('show');}
+
+function shareDriver(name,pos,pts){
+  const text=`🏎 F1 2026 — ${name}\nP${pos} en el campeonato · ${pts} puntos\n\n📊 Datos via gauto-sys.github.io`;
+  if(navigator.share){navigator.share({title:'F1 2026',text});}
+  else{navigator.clipboard.writeText(text).then(()=>showToast('📋 Copiado al portapapeles'));}
+}
+
+function renderChart(){
+  const c=document.getElementById('panel-chart');
+  c.innerHTML=`<div class="stitle">Evolución del Campeonato</div>
+  <div style="display:flex;gap:6px;margin-bottom:10px">
+    <button id="cm-team" onclick="setChartMode('team')" class="cmode-btn">🏎️ Por equipo</button>
+    <button id="cm-driver" onclick="setChartMode('driver')" class="cmode-btn">👤 Por piloto</button>
+  </div>
+  <div class="chart-wrap">
+    <div class="chart-title" id="chart-title">PUNTOS ACUMULADOS · POR EQUIPO</div>
+    <canvas id="championship-chart" height="200"></canvas>
+    <div class="chart-legend" id="chart-legend"></div>
+  </div>`;
+  updateChartModeBtns();
+  setTimeout(drawChart,30);
+}
+
+function setChartMode(m){
+  chartMode=m;
+  rebuildEvolution();
+  updateChartModeBtns();
+  const t=document.getElementById('chart-title');
+  if(t)t.textContent='PUNTOS ACUMULADOS · '+(m==='team'?'POR EQUIPO':'POR PILOTO');
+  drawChart();
+}
+function updateChartModeBtns(){
+  const bt=document.getElementById('cm-team'),bd=document.getElementById('cm-driver');
+  if(bt)bt.classList.toggle('active',chartMode==='team');
+  if(bd)bd.classList.toggle('active',chartMode==='driver');
+}
+
+function drawChart(){
+  const canvas=document.getElementById('championship-chart');if(!canvas)return;
+  const W2=canvas.offsetWidth||320,H2=200;
+  canvas.width=W2*devicePixelRatio;canvas.height=H2*devicePixelRatio;
+  canvas.style.width=W2+'px';canvas.style.height=H2+'px';
+  const ctx=canvas.getContext('2d');ctx.setTransform(1,0,0,1,0,0);ctx.scale(devicePixelRatio,devicePixelRatio);
+  const PAD={l:34,r:14,t:12,b:26},CW=W2-PAD.l-PAD.r,CH=H2-PAD.t-PAD.b;
+  let realMax=0;Object.values(POINTS_EVOLUTION).forEach(d=>{const m=Math.max.apply(null,d.pts);if(m>realMax)realMax=m;});
+  const maxPts=Math.ceil(realMax/40)*40||160;
+  ctx.fillStyle='#1E1E1E';ctx.fillRect(0,0,W2,H2);
+  ctx.font='10px "Barlow Condensed",sans-serif';ctx.textAlign='right';
+  for(let i=0;i<=4;i++){const y=PAD.t+CH-(i/4)*CH;
+    ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=.8;
+    ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(PAD.l+CW,y);ctx.stroke();
+    ctx.fillStyle='#888';ctx.fillText(String(Math.round(i/4*maxPts)),PAD.l-5,y+3);}
+  ctx.textAlign='center';ctx.fillStyle='#888';
+  const nR=Object.values(POINTS_EVOLUTION)[0]?Object.values(POINTS_EVOLUTION)[0].pts.length-1:7;
+  const step=nR>10?Math.ceil(nR/8):1;
+  for(let r=0;r<=nR;r+=step){const x=PAD.l+r/nR*CW;ctx.fillText(r===0?'Pre':('R'+r),x,H2-8);}
+  Object.values(POINTS_EVOLUTION).forEach(data=>{
+    const N=data.pts.length-1||1;
+    ctx.beginPath();ctx.strokeStyle=data.color;ctx.lineWidth=2.5;ctx.lineJoin='round';
+    data.pts.forEach((p,i)=>{const x=PAD.l+i/N*CW,y=PAD.t+CH-(p/maxPts)*CH;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+    ctx.stroke();
+    const lp=data.pts[data.pts.length-1],lx=PAD.l+CW,ly=PAD.t+CH-(lp/maxPts)*CH;
+    ctx.beginPath();ctx.arc(lx,ly,3.5,0,Math.PI*2);ctx.fillStyle=data.color;ctx.fill();});
+  const leg=document.getElementById('chart-legend');
+  if(leg){leg.innerHTML='';
+    Object.values(POINTS_EVOLUTION).forEach(data=>{
+      const item=document.createElement('div');item.className='legend-item';
+      const dot=document.createElement('div');dot.className='legend-dot';dot.style.background=data.color;
+      const txt=document.createElement('span');txt.textContent=data.name+' ('+data.pts[data.pts.length-1]+')';
+      item.appendChild(dot);item.appendChild(txt);leg.appendChild(item);});}
+}
+
+let cmpA=null,cmpB=null;
+let pickingFor=null;
+
+function renderCompare(){
+  const c=document.getElementById('panel-cmp');
+  c.innerHTML=`<div class="stitle">Comparar Pilotos</div>`;
+
+  const selWrap=document.createElement('div');selWrap.className='cmp-sel';
+  const btnA=document.createElement('button');btnA.className='cmp-btn';
+  const btnB=document.createElement('button');btnB.className='cmp-btn';
+  btnA.id='cmpA-btn';btnB.id='cmpB-btn';
+  updateCmpBtns();
+  btnA.addEventListener('click',()=>openPicker('A'));
+  btnB.addEventListener('click',()=>openPicker('B'));
+  selWrap.appendChild(btnA);
+  const vs=document.createElement('div');vs.style.cssText='font-family:"Barlow Condensed",sans-serif;font-weight:900;font-size:16px;color:var(--mu);align-self:center;flex-shrink:0';vs.textContent='VS';
+  selWrap.appendChild(vs);selWrap.appendChild(btnB);
+  c.appendChild(selWrap);
+
+  const table=document.createElement('div');table.id='cmp-table';table.style.background='var(--sf)';table.style.borderRadius='8px';table.style.padding='12px';
+  c.appendChild(table);
+  updateCmpTable();
+
+  const picker=document.createElement('div');picker.id='cmp-picker';picker.style.display='none';
+  picker.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:50;overflow-y:auto;padding:16px';
+  picker.innerHTML='<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:900;letter-spacing:1px;color:#fff;margin-bottom:12px;text-transform:uppercase">Seleccionar piloto <button onclick="closePicker()" style="float:right;background:none;border:none;color:var(--mu);font-size:20px;cursor:pointer">✕</button></div>';
+  STANDINGS.forEach(s=>{
+    const btn=document.createElement('button');
+    btn.style.cssText='display:flex;align-items:center;gap:10px;width:100%;background:var(--sf);border:1px solid var(--br);color:var(--tx);padding:10px;border-radius:6px;margin-bottom:6px;cursor:pointer;-webkit-tap-highlight-color:transparent';
+    btn.innerHTML=`<span style="font-size:20px">${gf(s.nat)}</span><span style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:900;text-transform:uppercase">${s.given} ${s.family}</span><span style="margin-left:auto;font-family:\'Barlow Condensed\',sans-serif;font-size:14px;color:var(--mu)">${s.pts} pts</span>`;
+    btn.addEventListener('click',()=>{
+      if(pickingFor==='A')cmpA=s;else cmpB=s;
+      closePicker();updateCmpBtns();updateCmpTable();
+    });
+    picker.appendChild(btn);
+  });
+  document.body.appendChild(picker);
+}
+
+function openPicker(side){pickingFor=side;document.getElementById('cmp-picker').style.display='block';}
+function closePicker(){document.getElementById('cmp-picker').style.display='none';}
+function updateCmpBtns(){
+  const bA=document.getElementById('cmpA-btn'),bB=document.getElementById('cmpB-btn');
+  if(bA)bA.innerHTML=cmpA?`${gf(cmpA.nat)} ${cmpA.family}`:'+ Elegir piloto';
+  if(bB)bB.innerHTML=cmpB?`${gf(cmpB.nat)} ${cmpB.family}`:'+ Elegir piloto';
+}
+function updateCmpTable(){
+  const t=document.getElementById('cmp-table');if(!t)return;
+  if(!cmpA||!cmpB){t.innerHTML='<div style="text-align:center;color:var(--mu);font-size:13px;padding:24px 12px">Elegí dos pilotos para compararlos 👆</div>';return;}
+  const rA=DRIVER_HISTORY[cmpA.id]||[],rB=DRIVER_HISTORY[cmpB.id]||[];
+  const winsA=rA.filter(r=>r.pos===1).length,winsB=rB.filter(r=>r.pos===1).length;
+  const podsA=rA.filter(r=>r.pos&&r.pos<=3).length,podsB=rB.filter(r=>r.pos&&r.pos<=3).length;
+  const bestA=rA.filter(r=>r.pos).reduce((b,r)=>r.pos<b?r.pos:b,99);
+  const bestB=rB.filter(r=>r.pos).reduce((b,r)=>r.pos<b?r.pos:b,99);
+  const finA=rA.filter(r=>r.pos).length,finB=rB.filter(r=>r.pos).length;
+  const cA=gc2(cmpA.team),cB=gc2(cmpB.team);
+  const maxP=Math.max(cmpA.pts,cmpB.pts)||1;
+
+  function row(label,vA,vB,higherWins=true){
+    const aWins=higherWins?(vA>vB):(vA<vB&&vA>0);
+    const bWins=higherWins?(vB>vA):(vB<vA&&vB>0);
+    const pA=Math.round((typeof vA==='number'?vA:0)/Math.max(typeof vA==='number'?vA:0,typeof vB==='number'?vB:0,1)*100);
+    const pB=Math.round((typeof vB==='number'?vB:0)/Math.max(typeof vA==='number'?vA:0,typeof vB==='number'?vB:0,1)*100);
+    return `<div class="cmp-row">
+      <div class="cmp-val ${aWins?'cmp-win':''}" style="color:${aWins?cA:'var(--tx)'}">${vA}</div>
+      <div class="cmp-bar-wrap">
+        <div class="cmp-bar" style="direction:rtl"><div class="cmp-barfill" style="width:${pA}%;background:${cA};right:0"></div></div>
+        <div class="cmp-lbl" style="min-width:70px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase">${label}</div>
+        <div class="cmp-bar"><div class="cmp-barfill" style="width:${pB}%;background:${cB}"></div></div>
+      </div>
+      <div class="cmp-val ${bWins?'cmp-win':''}" style="color:${bWins?cB:'var(--tx)'}">${vB}</div>
+    </div>`;
+  }
+
+  t.innerHTML=`
+    <div style="display:flex;margin-bottom:12px">
+      <div style="flex:1;text-align:center"><div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;text-transform:uppercase;color:${cA}">${cmpA.family}</div><div style="font-size:11px;color:var(--mu)">${cmpA.tname}</div></div>
+      <div style="flex:1;text-align:center"><div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;text-transform:uppercase;color:${cB}">${cmpB.family}</div><div style="font-size:11px;color:var(--mu)">${cmpB.tname}</div></div>
+    </div>
+    ${row('Puntos',cmpA.pts,cmpB.pts)}
+    ${row('Victorias',winsA,winsB)}
+    ${row('Podios',podsA,podsB)}
+    ${row('Mejor result.',bestA===99?'—':'P'+bestA,bestB===99?'—':'P'+bestB,false)}
+    ${row('Finalizaciones',finA,finB)}`;
+}
+
+function renderTeams(){
+  const c=document.getElementById('panel-con');
+  c.innerHTML=`<div class="stitle">Constructores · Post-Barcelona R7</div>`;
+  const max=(CONSTRUCTORS[0]||{pts:1}).pts||1;
+  CONSTRUCTORS.forEach((team,i)=>{
+    const pos=i+1,color=gc2(team.id),pts=team.pts;
+    const pct=Math.round(pts/max*100),pc=pos===1?'p1':pos===2?'p2':pos===3?'p3':'';
+    const chips=STANDINGS.filter(d=>d.team===team.id)
+      .map(d=>`<div class="dch"><div class="dcf">${gf(d.nat)}</div><div class="dcn">${d.family}</div><div class="dcp">${d.pts} pts · P${STANDINGS.indexOf(d)+1}</div></div>`).join('');
+    const div=document.createElement('div');div.className='tc';div.style.borderLeftColor=color;
+    div.innerHTML=`<div class="th"><div class="tp ${pc}">${pos}</div><div class="tdot" style="background:${color}"></div><div style="flex:1"><div class="tn">${team.name}</div></div><div style="text-align:right"><div class="tpb" style="color:${pos<=3?'var(--gold)':'var(--tx)'}">${pts}</div><div class="tpl">PTS</div></div></div><div class="pb2"><div class="pb2f" style="width:${pct}%;background:${color}"></div></div><div class="tdr">${chips}</div>`;
+    c.appendChild(div);
+  });
+}
+
+function statResults(){
+  const src=activeResults();
+  return Object.entries(src).map(([rnd,data])=>{
+    if(Array.isArray(data))return{res:data,name:RNAMES[rnd]||('R'+rnd)};
+    return{res:data.res,name:data.name||RNAMES[rnd]||('R'+rnd)};
+  });
+}
+
+function renderStats(){
+  const c=document.getElementById('panel-stats');
+  c.innerHTML=`<div class="stitle">Estadísticas de Temporada</div>`;
+
+  const wins={};
+  statResults().forEach(rr=>{const w=rr.res.find(([,p])=>p===1);if(w)wins[w[0]]=(wins[w[0]]||0)+1;});
+  const winsArr=Object.entries(wins).sort((a,b)=>b[1]-a[1]);
+  const wCard=makeStatCard('Victorias 🏆',winsArr.map(([id,v])=>{const s=STANDINGS.find(x=>x.id===id);return[s?s.family:id,v,s?gc2(s.team):'#666'];}));
+  c.appendChild(wCard);
+
+  const pods={};
+  statResults().forEach(rr=>{rr.res.forEach(([id,p])=>{if(p&&p<=3)pods[id]=(pods[id]||0)+1;});});
+  const podsArr=Object.entries(pods).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const pCard=makeStatCard('Podios 🥇🥈🥉',podsArr.map(([id,v])=>{const s=STANDINGS.find(x=>x.id===id);return[s?s.family:id,v,s?gc2(s.team):'#666'];}));
+  c.appendChild(pCard);
+
+  const dnfs={};
+  statResults().forEach(rr=>{rr.res.forEach(([id,p])=>{if(!p)dnfs[id]=(dnfs[id]||0)+1;});});
+  const dnfArr=Object.entries(dnfs).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const dCard=makeStatCard('DNF / Fuera de puntos 💥',dnfArr.map(([id,v])=>{const s=STANDINGS.find(x=>x.id===id);return[s?s.family:id,v,s?gc2(s.team):'#666'];}));
+  c.appendChild(dCard);
+
+  const bestSingle=[];
+  statResults().forEach(rr=>{rr.res.forEach(([id,,pts])=>{if(pts>0)bestSingle.push([id,pts,rr.name]);});});
+  bestSingle.sort((a,b)=>b[1]-a[1]);
+  const bsCard=makeStatCard('Mayor puntaje en una carrera ⚡',bestSingle.slice(0,5).map(([id,v,rn])=>{const s=STANDINGS.find(x=>x.id===id);return[`${s?s.family:id} (${rn.replace(' GP','')})`,v,s?gc2(s.team):'#666'];}));
+  c.appendChild(bsCard);
+}
+
+function makeStatCard(title,rows){
+  const card=document.createElement('div');card.className='stat-card';
+  card.innerHTML=`<div class="stat-card-title">${title}</div>`;
+  rows.forEach(([name,val,color],i)=>{
+    const row=document.createElement('div');row.className='stat-row';
+    row.innerHTML=`<div class="stat-rank" style="color:${i===0?'var(--gold)':i===1?'var(--si)':i===2?'var(--bz)':'var(--mu)'}">${i+1}</div><div class="stat-name" style="color:${color}">${name}</div><div class="stat-val" style="color:${i===0?'var(--gold)':'var(--tx)'}">${val}</div>`;
+    card.appendChild(row);
+  });
+  return card;
+}
+
+function circuitTrackSVG(key,color){
+  const path=TRACKS[key];
+  if(!path)return '';
+  color=color||'#E10600';
+  return `<svg viewBox="0 0 100 100" style="width:100%;height:140px;display:block">
+    <path d="${path}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${path}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+function circuitCard(key){
+  const ci=CI[key];if(!ci)return '';
+  const x=CXTRA[key]||{};
+  const col=TC[ (CK.indexOf(key)>=0?'':'') ] || '#E10600';
+  const icon=ci.icon||'🏁';
+  return `<div class="cd">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div style="font-size:30px">${icon}</div>
+      <div style="font-size:26px">${ci.flag}</div>
+      <div style="flex:1">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;text-transform:uppercase;line-height:1">${ci.name}</div>
+        <div style="font-size:12px;color:var(--mu)">${ci.city}</div>
+      </div>
+    </div>
+    <div style="background:var(--sf2);border-radius:8px;padding:6px;margin-bottom:10px">${circuitTrackSVG(key,'#E10600')}</div>
+    <div class="sg">
+      <div class="sb2"><div class="sl">Vueltas</div><div class="sv">${ci.laps}</div></div>
+      <div class="sb2"><div class="sl">Longitud</div><div class="sv" style="font-size:13px">${ci.len}</div></div>
+      <div class="sb2"><div class="sl">Curvas</div><div class="sv">${ci.curvas}</div></div>
+      <div class="sb2"><div class="sl">Sentido</div><div class="sv" style="font-size:11px">${x.sentido||ci.tipo}</div></div>
+      <div class="sb2"><div class="sl">Tipo</div><div class="sv" style="font-size:11px">${ci.tipo}</div></div>
+      <div class="sb2"><div class="sl">Primer GP</div><div class="sv">${x.primer||'—'}</div></div>
+    </div>
+    <div class="sb2" style="margin-top:8px"><div class="sl">Vuelta récord</div><div class="sv" style="font-size:12px">${ci.record}</div></div>
+    <div class="sb2" style="margin-top:8px"><div class="sl">Ganadores recientes</div><div class="sv" style="font-size:11px;line-height:1.5">${x.winners||'—'}</div></div>
+    <div style="margin-top:8px;padding:8px 10px;background:var(--sf2);border-radius:6px;font-size:11px;color:var(--mu)">💡 ${ci.nota}</div>
+  </div>`;
+}
+
+function renderCircuits(){
+  const c=document.getElementById('panel-cir');c.innerHTML='<div class="stitle">Circuitos</div>';
+  const sel=document.createElement('select');sel.className='csel';
+  sel.innerHTML='<option value="">— Seleccionar circuito —</option>';
+  Object.entries(CI).forEach(([k,v])=>{const o=document.createElement('option');o.value=k;o.textContent=v.name;sel.appendChild(o);});
+  const det=document.createElement('div');
+  sel.addEventListener('change',()=>{
+    if(!sel.value){det.innerHTML='';return;}
+    const ckIdx=CK.indexOf(sel.value);
+    if(ckIdx>=0){const ex=RE[ckIdx+1];if(ex&&ex.lat)globeGoTo(ex.lat,ex.lng);}
+    det.innerHTML=circuitCard(sel.value);
+  });
+  c.appendChild(sel);c.appendChild(det);
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.remove('show');
+  void t.offsetWidth;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+loadAll();
+</script>
+</body>
+</html>
